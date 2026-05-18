@@ -351,41 +351,57 @@ def add_turn(
     """
     logger.debug(f"[FLOW] Adding {role} turn to {thread_id} ({tool_name})")
 
-    context = get_thread(thread_id)
-    if not context:
-        logger.debug(f"[FLOW] Thread {thread_id} not found for turn addition")
-        return False
+    storage = get_storage()
+    key = f"thread:{thread_id}"
+    # Sentinel so the caller can distinguish abort reasons from inside the callback.
+    outcome: dict[str, str] = {"status": "ok"}
 
-    # Check turn limit to prevent runaway conversations
-    if len(context.turns) >= MAX_CONVERSATION_TURNS:
-        logger.debug(f"[FLOW] Thread {thread_id} at max turns ({MAX_CONVERSATION_TURNS})")
-        return False
+    def modify_fn(current_json: Optional[str]) -> Optional[str]:
+        if current_json is None:
+            outcome["status"] = "not_found"
+            return None
+        try:
+            context = ThreadContext.model_validate_json(current_json)
+        except Exception:
+            outcome["status"] = "corrupt"
+            return None
 
-    # Create new turn with complete metadata
-    turn = ConversationTurn(
-        role=role,
-        content=content,
-        timestamp=datetime.now(timezone.utc).isoformat(),
-        files=files,  # Preserved for cross-tool file context
-        images=images,  # Preserved for cross-tool visual context
-        tool_name=tool_name,  # Track which tool generated this turn
-        model_provider=model_provider,  # Track model provider
-        model_name=model_name,  # Track specific model
-        model_metadata=model_metadata,  # Additional model info
-    )
+        if len(context.turns) >= MAX_CONVERSATION_TURNS:
+            outcome["status"] = "max_turns"
+            return None
 
-    context.turns.append(turn)
-    context.last_updated_at = datetime.now(timezone.utc).isoformat()
+        turn = ConversationTurn(
+            role=role,
+            content=content,
+            timestamp=datetime.now(timezone.utc).isoformat(),
+            files=files,  # Preserved for cross-tool file context
+            images=images,  # Preserved for cross-tool visual context
+            tool_name=tool_name,  # Track which tool generated this turn
+            model_provider=model_provider,  # Track model provider
+            model_name=model_name,  # Track specific model
+            model_metadata=model_metadata,  # Additional model info
+        )
 
-    # Save back to storage and refresh TTL
+        context.turns.append(turn)
+        context.last_updated_at = datetime.now(timezone.utc).isoformat()
+        return context.model_dump_json()
+
     try:
-        storage = get_storage()
-        key = f"thread:{thread_id}"
-        storage.setex(key, CONVERSATION_TIMEOUT_SECONDS, context.model_dump_json())  # Refresh TTL to configured timeout
-        return True
+        result = storage.atomic_update(key, CONVERSATION_TIMEOUT_SECONDS, modify_fn)
     except Exception as e:
         logger.debug(f"[FLOW] Failed to save turn to storage: {type(e).__name__}")
         return False
+
+    if result is None:
+        if outcome["status"] == "not_found":
+            logger.debug(f"[FLOW] Thread {thread_id} not found for turn addition")
+        elif outcome["status"] == "max_turns":
+            logger.debug(f"[FLOW] Thread {thread_id} at max turns ({MAX_CONVERSATION_TURNS})")
+        elif outcome["status"] == "corrupt":
+            logger.debug(f"[FLOW] Thread {thread_id} context corrupted, could not parse")
+        return False
+
+    return True
 
 
 def get_thread_chain(thread_id: str, max_depth: int = 20) -> list[ThreadContext]:

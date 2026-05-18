@@ -31,6 +31,7 @@ class TestConversationMemory:
         """Test creating a new thread"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         thread_id = create_thread("chat", {"prompt": "Hello", "absolute_file_paths": ["/test.py"]})
 
@@ -48,6 +49,7 @@ class TestConversationMemory:
         """Test retrieving an existing thread"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         test_uuid = "12345678-1234-1234-1234-123456789012"
 
@@ -80,6 +82,7 @@ class TestConversationMemory:
         """Test handling thread not found"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
         mock_client.get.return_value = None
 
         context = get_thread("12345678-1234-1234-1234-123456789012")
@@ -90,6 +93,7 @@ class TestConversationMemory:
         """Test adding a turn to existing thread"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         test_uuid = "12345678-1234-1234-1234-123456789012"
 
@@ -102,20 +106,20 @@ class TestConversationMemory:
             turns=[],
             initial_context={"prompt": "test"},
         )
-        mock_client.get.return_value = context_obj.model_dump_json()
+        stored_json = context_obj.model_dump_json()
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(stored_json)
 
         success = add_turn(test_uuid, "user", "Hello there")
 
         assert success is True
-        # Verify Redis get and setex were called
-        mock_client.get.assert_called_once()
-        mock_client.setex.assert_called_once()
+        mock_client.atomic_update.assert_called_once()
 
     @patch("utils.conversation_memory.get_storage")
     def test_add_turn_max_limit(self, mock_storage):
         """Test turn limit enforcement"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         test_uuid = "12345678-1234-1234-1234-123456789012"
 
@@ -132,7 +136,8 @@ class TestConversationMemory:
             turns=turns,
             initial_context={"prompt": "test"},
         )
-        mock_client.get.return_value = context_obj.model_dump_json()
+        stored_json = context_obj.model_dump_json()
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(stored_json)
 
         success = add_turn(test_uuid, "user", "This should fail")
 
@@ -244,6 +249,7 @@ class TestConversationFlow:
         """Test a complete 5-turn conversation until limit reached"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         # Simulate independent MCP request cycles
 
@@ -350,6 +356,7 @@ class TestConversationFlow:
 
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
         mock_client.get.return_value = None  # Thread not found
 
         arguments = {"continuation_id": "invalid-uuid-12345", "prompt": "Continue conversation"}
@@ -446,6 +453,7 @@ class TestConversationFlow:
         """Test complete conversation respecting MAX_CONVERSATION_TURNS dynamically"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         thread_id = create_thread("chat", {"prompt": "Start conversation"})
 
@@ -507,6 +515,7 @@ class TestConversationFlow:
 
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         # Start conversation with files using a simple tool
         thread_id = create_thread("chat", {"prompt": "Analyze this codebase", "absolute_file_paths": ["/project/src/"]})
@@ -668,6 +677,7 @@ class TestConversationFlow:
         """Test that each request cycle is independent but shares context via Redis"""
         mock_client = Mock()
         mock_storage.return_value = mock_client
+        mock_client.atomic_update.side_effect = lambda key, ttl, modify_fn: modify_fn(mock_client.get.return_value)
 
         # Simulate two different "processes" accessing same thread
         thread_id = "12345678-1234-1234-1234-123456789012"

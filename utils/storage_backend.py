@@ -21,7 +21,7 @@ Key Features:
 import logging
 import threading
 import time
-from typing import Optional
+from typing import Callable, Optional
 
 from utils.env import get_env
 
@@ -73,6 +73,60 @@ class InMemoryStorage:
     def setex(self, key: str, ttl_seconds: int, value: str) -> None:
         """Redis-compatible setex method"""
         self.set_with_ttl(key, ttl_seconds, value)
+
+    def atomic_update(
+        self,
+        key: str,
+        ttl_seconds: int,
+        modify_fn: Callable[[Optional[str]], Optional[str]],
+    ) -> Optional[str]:
+        """Atomic read-modify-write under a single lock acquisition.
+
+        Prevents lost-update races when multiple threads need to update the
+        same key based on its current value (e.g. appending to a conversation
+        thread). The entire read → modify → write sequence executes while
+        holding ``self._lock``.
+
+        Args:
+            key: Storage key to update.
+            ttl_seconds: TTL applied to the new value (refreshed on every
+                successful write).
+            modify_fn: Callback receiving the current value (or ``None`` if
+                the key is missing/expired) and returning the new value.
+                Returning ``None`` signals *abort* — the stored value is
+                left untouched, no write happens. To actively delete a key,
+                the caller has to use a separate API (not provided yet).
+
+        Returns:
+            The new value written, or ``None`` when the callback aborted.
+
+        Notes:
+            - ``modify_fn`` **must not** call back into any storage method —
+              that would deadlock on ``self._lock``. The callback should be
+              pure (parse input, compute output).
+            - Exceptions raised inside ``modify_fn`` propagate to the caller
+              after the lock is released; no partial write occurs.
+            - Expired entries are surfaced as ``None`` to the callback and
+              cleaned up atomically on successful write.
+        """
+        with self._lock:
+            current_value: Optional[str] = None
+            if key in self._store:
+                value, expires_at = self._store[key]
+                if time.time() < expires_at:
+                    current_value = value
+                else:
+                    del self._store[key]
+
+            new_value = modify_fn(current_value)
+            if new_value is None:
+                logger.debug(f"atomic_update on {key}: callback aborted, no write")
+                return None
+
+            expires_at = time.time() + ttl_seconds
+            self._store[key] = (new_value, expires_at)
+            logger.debug(f"atomic_update on {key}: updated with TTL {ttl_seconds}s")
+            return new_value
 
     def _cleanup_worker(self):
         """Background thread that periodically cleans up expired entries"""

@@ -3,23 +3,25 @@
   "command": "claude",
   "additional_args": [
     "--permission-mode",
-    "acceptEdits",
-    "--model",
-    "sonnet"
+    "acceptEdits"
   ],
   "env": {},
   "roles": {
     "default": {
       "prompt_path": "systemprompts/clink/default.txt",
-      "role_args": []
+      "role_args": ["--model", "sonnet"]
     },
     "planner": {
       "prompt_path": "systemprompts/clink/default_planner.txt",
-      "role_args": []
+      "role_args": ["--model", "sonnet"]
     },
     "codereviewer": {
       "prompt_path": "systemprompts/clink/default_codereviewer.txt",
-      "role_args": []
+      "role_args": ["--model", "sonnet"]
+    },
+    "opus": {
+      "prompt_path": "systemprompts/clink/default.txt",
+      "role_args": ["--model", "opus"]
     }
   }
 }

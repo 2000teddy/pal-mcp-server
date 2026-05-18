@@ -115,9 +115,10 @@ class OpenAIModelProvider(RegistryBackedProviderMixin, OpenAICompatibleProvider)
 
         if category == ToolModelCategory.EXTENDED_REASONING:
             # Prefer models with extended thinking support
-            # GPT-5.1 Codex first for coding tasks
+            # GPT-5.3 Codex first (newest, combines coding + reasoning)
             preferred = find_first(
                 [
+                    "gpt-5.3-codex",
                     "gpt-5.1-codex",
                     "gpt-5.2",
                     "gpt-5-codex",
@@ -147,9 +148,10 @@ class OpenAIModelProvider(RegistryBackedProviderMixin, OpenAICompatibleProvider)
 
         else:  # BALANCED or default
             # Prefer balanced performance/cost models
-            # Include GPT-5.2 family for latest capabilities
+            # Include GPT-5.3 Codex (newest) and GPT-5.2 family
             preferred = find_first(
                 [
+                    "gpt-5.3-codex",
                     "gpt-5.2",
                     "gpt-5.1-codex",
                     "gpt-5",

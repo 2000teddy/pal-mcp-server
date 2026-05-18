@@ -175,6 +175,18 @@ FEATURE_*.md
 # Local user instructions
 CLAUDE.local.md
 
+# Persönliche Projekt-Notizen (nicht ins Repo)
+HISTORY.md
+HISTORY_*.md
+MEMORY.md
+MEMORY_*.md
+TODO.md
+TODO_*.md
+PAL.md
+AVAILABLE_MODELS.md
+DEVELOPMENT-WORKFLOW.md
+README_2*.md
+
 # Claude Code personal settings
 .claude/settings.local.json
 

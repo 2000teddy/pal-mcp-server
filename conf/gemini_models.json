@@ -26,15 +26,18 @@
   },
   "models": [
     {
-      "model_name": "gemini-3-pro-preview",
-      "friendly_name": "Gemini Pro 3.0 Preview",
+      "model_name": "gemini-3.1-pro-preview",
+      "friendly_name": "Gemini 3.1 Pro Preview",
       "aliases": [
         "pro",
         "gemini3",
-        "gemini-pro"
+        "gemini3.1",
+        "gemini-pro",
+        "gemini-3-pro",
+        "gemini-3.1-pro"
       ],
-      "intelligence_score": 18,
-      "description": "Deep reasoning + thinking mode (1M context) - Complex problems, architecture, deep analysis",
+      "intelligence_score": 19,
+      "description": "Gemini 3.1 Pro Preview (1M context) - Top reasoning + thinking. Strong coding & architecture. Replaces deprecated gemini-3-pro-preview.",
       "context_window": 1048576,
       "max_output_tokens": 65536,
       "max_thinking_tokens": 32768,
@@ -110,10 +113,33 @@
       "supports_temperature": true
     },
     {
+      "model_name": "gemini-3.5-flash",
+      "friendly_name": "Gemini 3.5 Flash",
+      "aliases": [
+        "flash",
+        "flash3.5",
+        "gemini-flash",
+        "gemini-3.5-flash"
+      ],
+      "intelligence_score": 14,
+      "description": "Gemini 3.5 Flash (1M context) - Fast model, strong coding & reasoning. New default flash since 2026-05.",
+      "context_window": 1048576,
+      "max_output_tokens": 65536,
+      "max_thinking_tokens": 24576,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": true,
+      "supports_images": true,
+      "supports_temperature": true,
+      "allow_code_generation": true,
+      "max_image_size_mb": 20.0
+    },
+    {
       "model_name": "gemini-2.5-flash",
       "friendly_name": "Gemini (Flash 2.5)",
       "aliases": [
-        "flash",
         "flash2.5"
       ],
       "intelligence_score": 10,

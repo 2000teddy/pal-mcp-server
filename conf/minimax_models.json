@@ -7,10 +7,32 @@
   },
   "models": [
     {
+      "model_name": "MiniMax-M3",
+      "friendly_name": "MiniMax (M3)",
+      "aliases": [
+        "minimax",
+        "minimax-m3",
+        "m3",
+        "minimax3"
+      ],
+      "intelligence_score": 19,
+      "description": "MiniMax-M3 (1M context, 128K output) - Released 2026-06-01. MiniMax Sparse Attention (MSA), ~1/20 Compute-Kosten bei 1M Kontext. Multimodal (Text/Bild/Video-Input → Text). SWE-Bench Pro 59% (über GPT-5.5 und Gemini 3.1 Pro). Frontier coding, tool use, long-horizon agentic.",
+      "context_window": 1048576,
+      "max_output_tokens": 131072,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": false,
+      "supports_images": true,
+      "supports_temperature": true,
+      "max_image_size_mb": 20.0,
+      "allow_code_generation": true
+    },
+    {
       "model_name": "MiniMax-M2.7",
       "friendly_name": "MiniMax (M2.7)",
       "aliases": [
-        "minimax",
         "minimax-m2.7",
         "m2.7",
         "minimax2.7"

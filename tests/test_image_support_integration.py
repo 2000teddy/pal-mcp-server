@@ -238,6 +238,10 @@ class TestImageSupportIntegration:
             if large_image_path and os.path.exists(large_image_path):
                 os.unlink(large_image_path)
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat generates over subscription-CLI backends, which are text-only — "
+        "images are dropped with a warning, so provider-side image handling no longer applies."
+    )
     @pytest.mark.asyncio
     async def test_chat_tool_execution_with_images(self):
         """Test that ChatTool can execute with images parameter using real provider resolution."""

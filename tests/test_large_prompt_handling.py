@@ -187,14 +187,15 @@ class TestLargePromptHandling:
                     assert len(result) == 1
                     output = json.loads(result[0].text)
 
-                # The large focus_on may trigger the resend_prompt guard before provider access.
-                # When the guard does not trigger, auto-mode falls back to provider selection and
-                # returns an error about the unavailable model. Both behaviors are acceptable for this test.
+                # The large focus_on may trigger the resend_prompt guard before generation.
+                # When the guard does not trigger, codereview (ADR-002: CLI-backed) runs the
+                # expert analysis over the subscription-CLI backend, which surfaces a graceful
+                # error if the CLI is unavailable in the test env. Both behaviors are acceptable.
                 if output.get("status") == "resend_prompt":
                     assert output["metadata"]["prompt_size"] == len(large_prompt)
                 else:
-                    assert output.get("status") == "error"
-                    assert "Model" in output.get("content", "")
+                    assert output.get("status") in ("error", "analysis_error", "calling_expert_analysis")
+                    assert output.get("content") or output.get("expert_analysis")
 
             except Exception as e:
                 # If we get an unexpected exception, ensure it's not a mock artifact
@@ -202,10 +203,21 @@ class TestLargePromptHandling:
                 assert "MagicMock" not in error_msg
                 assert "'<' not supported between instances" not in error_msg
 
-                # Should be a real provider error (API, authentication, etc.)
+                # Should be a real, graceful error — provider API or CLI-backend (ADR-002).
                 assert any(
                     phrase in error_msg
-                    for phrase in ["API", "key", "authentication", "provider", "network", "connection"]
+                    for phrase in [
+                        "API",
+                        "key",
+                        "authentication",
+                        "provider",
+                        "network",
+                        "connection",
+                        "backend",
+                        "not found",
+                        "PATH",
+                        "Model",
+                    ]
                 )
 
         finally:

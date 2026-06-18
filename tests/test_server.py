@@ -17,6 +17,11 @@ class TestServerTools:
         assert len(result) == 1
         assert "Unknown tool: unknown_tool" in result[0].text
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False) and boundary-exempt; it no "
+        "longer makes a provider API call, so the provider-error expectation no longer applies. "
+        "Key-free chat over the CLI backend is covered by test_keyfree_cli_operation."
+    )
     @pytest.mark.asyncio
     async def test_handle_chat(self):
         """Test chat functionality using real integration testing"""

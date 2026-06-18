@@ -318,10 +318,11 @@ class SimpleTool(BaseTool):
                 self._model_context = arguments["_model_context"]
                 logger.debug(f"{self.get_name()}: Using model context from arguments")
             else:
-                # Create model context if not provided
+                # Create model context if not provided. Key-free CLI tools
+                # (requires_model()==False, ADR-002) tolerate a missing provider.
                 from utils.model_context import ModelContext
 
-                self._model_context = ModelContext(model_name)
+                self._model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
                 logger.debug(f"{self.get_name()}: Created model context for {model_name}")
 
             # Get images if present

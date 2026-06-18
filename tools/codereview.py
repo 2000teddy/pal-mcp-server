@@ -303,6 +303,11 @@ class CodeReviewTool(WorkflowTool):
                 "Focus on areas that haven't been thoroughly examined yet",
             ]
 
+    def requires_model(self) -> bool:
+        """ADR-002: expert analysis runs over subscription-CLI backends, not a provider
+        API, so no model/provider resolution is needed at the MCP boundary (key-free)."""
+        return False
+
     def should_call_expert_analysis(self, consolidated_findings, request=None) -> bool:
         """
         Decide when to call external model based on investigation completeness.

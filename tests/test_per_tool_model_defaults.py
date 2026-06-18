@@ -281,6 +281,10 @@ class TestAutoModeErrorMessages:
         # Clear provider registry singleton
         ModelProviderRegistry._instance = None
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False); no model-availability "
+        "error fires in auto mode."
+    )
     @pytest.mark.asyncio
     async def test_chat_auto_error_message(self):
         """Test Chat tool suggests appropriate model in auto mode."""
@@ -401,6 +405,10 @@ class TestRuntimeModelSelection:
         # Clear provider registry singleton
         ModelProviderRegistry._instance = None
 
+    @pytest.mark.skip(
+        reason="ADR-002: thinkdeep is CLI-backed (requires_model()==False); model='auto' no "
+        "longer errors — it runs over the CLI backend."
+    )
     @pytest.mark.asyncio
     async def test_explicit_auto_in_request(self):
         """Test when Claude explicitly passes model='auto'."""
@@ -421,6 +429,10 @@ class TestRuntimeModelSelection:
                 assert len(result) == 1
                 assert "Model 'auto' is not available" in result[0].text
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False); an unavailable provider "
+        "model no longer errors — generation goes to the CLI backend."
+    )
     @pytest.mark.asyncio
     async def test_unavailable_model_in_request(self):
         """Test when Claude passes an unavailable model."""
@@ -490,6 +502,10 @@ class TestSchemaGeneration:
 class TestUnavailableModelFallback:
     """Test fallback behavior when DEFAULT_MODEL is not available."""
 
+    @pytest.mark.skip(
+        reason="ADR-002: thinkdeep is CLI-backed (requires_model()==False); an unavailable "
+        "DEFAULT_MODEL no longer triggers a model-required error — it runs over the CLI backend."
+    )
     @pytest.mark.asyncio
     async def test_unavailable_default_model_fallback(self):
         """Test that unavailable DEFAULT_MODEL triggers auto mode behavior."""

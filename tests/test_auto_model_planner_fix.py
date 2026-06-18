@@ -23,10 +23,11 @@ class TestAutoModelPlannerFix:
         planner = PlannerTool()
         assert planner.requires_model() is False
 
-    def test_chat_requires_model_true(self):
-        """Test that chat tool returns True for requires_model (default behavior)."""
+    def test_chat_requires_model_false(self):
+        """ADR-002: chat generates over subscription-CLI backends, so it is now
+        boundary-exempt (requires_model() == False), like planner/consensus."""
         chat = ChatTool()
-        assert chat.requires_model() is True
+        assert chat.requires_model() is False
 
     def test_base_tool_requires_model_default(self):
         """Test that BaseTool default implementation returns True."""
@@ -128,9 +129,9 @@ class TestAutoModelPlannerFix:
         result = simulate_server_model_resolution(planner, "auto")
         assert result == "SKIP_MODEL_RESOLUTION"
 
-        # Test chat (should attempt model resolution)
+        # ADR-002: chat is now CLI-backed -> also skips boundary model resolution.
         result = simulate_server_model_resolution(chat, "auto")
-        assert result == "RESOLVE_MODEL_auto"
+        assert result == "SKIP_MODEL_RESOLUTION"
 
     def test_provider_registry_auto_handling(self):
         """
@@ -193,22 +194,18 @@ class TestAutoModelPlannerFix:
         assert response2["status"] == "pause_for_planning"
         assert response2["step_number"] == 2
 
-    def test_other_tools_still_require_models(self):
+    def test_migrated_tools_are_boundary_exempt(self):
         """
-        Verify that other tools still properly require model resolution.
-
-        This ensures our fix doesn't break existing functionality.
-        Note: Debug tool requires model resolution for expert analysis phase.
+        ADR-002: the migrated AI tools (chat + workflow tools) generate over
+        subscription-CLI backends, so they no longer require provider/model
+        resolution at the MCP boundary — like planner, they are key-free.
         """
         from tools.analyze import AnalyzeTool
         from tools.chat import ChatTool
         from tools.debug import DebugIssueTool
 
-        # Test various tools still require models
-        tools_requiring_models = [ChatTool(), AnalyzeTool(), DebugIssueTool()]
+        # Previously required a provider; now CLI-backed and boundary-exempt.
+        cli_backed_tools = [ChatTool(), AnalyzeTool(), DebugIssueTool()]
 
-        for tool in tools_requiring_models:
-            assert tool.requires_model() is True, f"{tool.get_name()} should require model resolution"
-
-        # Note: Debug tool requires model resolution for expert analysis phase
-        # Only planner truly manages its own model calls and doesn't need resolution
+        for tool in cli_backed_tools:
+            assert tool.requires_model() is False, f"{tool.get_name()} should be CLI-backed (key-free)"

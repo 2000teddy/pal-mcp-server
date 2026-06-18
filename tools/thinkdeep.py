@@ -407,6 +407,11 @@ but also acknowledge strong insights and valid conclusions.
 
         return actions
 
+    def requires_model(self) -> bool:
+        """ADR-002: expert analysis runs over subscription-CLI backends, not a provider
+        API, so no model/provider resolution is needed at the MCP boundary (key-free)."""
+        return False
+
     def should_call_expert_analysis(self, consolidated_findings, request=None) -> bool:
         """
         Determine if expert analysis should be called based on confidence and completion.

@@ -56,6 +56,10 @@ def _register_core_providers(*, include_xai: bool = False):
         ModelProviderRegistry.register_provider(ProviderType.XAI, XAIModelProvider)
 
 
+@pytest.mark.skip(
+    reason="ADR-002: the migrated AI tools are CLI-backed (requires_model()==False); the "
+    "auto-mode model-required error listing no longer fires for them."
+)
 @pytest.mark.no_mock_provider
 def test_error_listing_respects_env_restrictions(monkeypatch, reset_registry):
     """Error payload should surface only the allowed models for each provider."""
@@ -142,6 +146,10 @@ def test_error_listing_respects_env_restrictions(monkeypatch, reset_registry):
     assert set(available_models) == {"gemini-2.5-pro", "gpt-5.2", "gpt5nano", "openai/gpt-5-nano"}
 
 
+@pytest.mark.skip(
+    reason="ADR-002: the migrated AI tools are CLI-backed (requires_model()==False); the "
+    "auto-mode model-required error listing no longer fires for them."
+)
 @pytest.mark.no_mock_provider
 def test_error_listing_without_restrictions_shows_full_catalog(monkeypatch, reset_registry):
     """When no restrictions are set, the full high-capability catalogue should appear."""

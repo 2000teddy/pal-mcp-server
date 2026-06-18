@@ -534,7 +534,7 @@ class BaseWorkflowMixin(ABC):
                     from utils.model_context import ModelContext
 
                     model_name = self.get_request_model_name(request)
-                    self._model_context = ModelContext(model_name)
+                    self._model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
                     self._current_model_name = model_name
 
             # Use the same file preparation logic as BaseTool with token budgeting
@@ -1450,7 +1450,7 @@ class BaseWorkflowMixin(ABC):
                     model_name = self.get_request_model_name(request)
                     from utils.model_context import ModelContext
 
-                    model_context = ModelContext(model_name)
+                    model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
                     self._model_context = model_context
                     self._current_model_name = model_name
             else:

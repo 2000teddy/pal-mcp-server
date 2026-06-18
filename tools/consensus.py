@@ -582,8 +582,10 @@ of the evidence, even when it strongly points in one direction.""",
             model_name = model_config["model"]
             backend = backend_for_model(model_name)
 
-            # Create model context (used for blinded file processing below).
-            model_context = ModelContext(model_name=model_name)
+            # Create model context (used for blinded file processing + temperature
+            # validation below). consensus is key-free (requires_model()==False) — a
+            # missing provider falls back to conservative CLI defaults (ADR-002).
+            model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
 
             # Prepare the prompt with any relevant files
             # Use continuation_id=None for blinded consensus - each model should only see

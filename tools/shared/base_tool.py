@@ -1395,8 +1395,12 @@ When recommending searches, be specific about what information you need and why 
                 model_name = DEFAULT_MODEL
             logger.debug(f"Using fallback model resolution for '{model_name}' (test mode)")
 
-            # For tests: Check if we should require model selection (auto mode)
-            if self._should_require_model_selection(model_name):
+            # Key-free CLI tools (requires_model()==False, ADR-002) delegate generation to
+            # subscription-CLI backends and must NOT require a provider/auto-selection here.
+            allow_keyfree = not self.requires_model()
+
+            # For tests/real API tools: require model selection (auto mode) — fail-fast.
+            if not allow_keyfree and self._should_require_model_selection(model_name):
                 # Build error message based on why selection is required
                 if model_name.lower() == "auto":
                     error_message = self._build_auto_mode_required_message()
@@ -1404,10 +1408,10 @@ When recommending searches, be specific about what information you need and why 
                     error_message = self._build_model_unavailable_message(model_name)
                 raise ValueError(error_message)
 
-            # Create model context for tests
+            # Create model context (key-free tools tolerate a missing provider).
             from utils.model_context import ModelContext
 
-            model_context = ModelContext(model_name)
+            model_context = ModelContext.resolve(model_name, allow_keyfree=allow_keyfree)
 
         return model_name, model_context
 

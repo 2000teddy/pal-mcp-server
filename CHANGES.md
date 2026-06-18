@@ -6,6 +6,15 @@
 ## [Unreleased]
 
 ### Changed
+- **Key-freier Betrieb der CLI-Tools** (ADR-002 Phase E / Option B-plus, Build 7): `chat` + die 9
+  Workflow-Tools setzen `requires_model() == False` (boundary-exempt wie consensus/planner), und ein
+  geteilter Helper (`utils/model_context.py`: `ModelContext.resolve(allow_keyfree=...)` +
+  `default_no_provider_capabilities()`, `context_window=200k`) liefert konservative Capabilities, wenn
+  kein Provider/API-Key registriert ist. Defaults greifen NUR auf dem no-provider-Pfad der CLI-Tools;
+  echte API-Tools failen weiter fail-fast, der Normalweg mit Provider bleibt unverändert. Modell-
+  Kontinuität (`reconstruct_thread_context`) von `requires_model` entkoppelt. Neuer Test
+  `tests/test_keyfree_cli_operation.py` (key-frei + Provider-Regression); 10 obsolete model-required-
+  Enforcement-/Provider-API-Tests mit ADR-002-Grund `@pytest.mark.skip`.
 - **`chat` + `consensus` laufen über Subscription-CLI-Backends statt Provider-API** (ADR-002 Phase B,
   Build 5). `tools/simple/base.py` (chat/simple-Tools) nutzt den neuen Helfer `_run_cli_backend`
   (faltet System-Prompt, verwirft Bilder, speist via Shim `backend_result_to_model_response()` in die

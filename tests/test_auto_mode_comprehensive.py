@@ -344,6 +344,10 @@ class TestAutoModeComprehensive:
             # With multiple providers configured, the listmodels tool
             # would show models from all providers when called
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False) and runs key-free; "
+        "it no longer raises a model-required error in auto mode."
+    )
     @pytest.mark.asyncio
     async def test_auto_mode_model_parameter_required_error(self, tmp_path):
         """Test that auto mode properly requires model parameter and suggests correct model."""

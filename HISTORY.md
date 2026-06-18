@@ -3,6 +3,40 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-06-19 — Phase E: key-freier Betrieb der CLI-Tools (Build 7)
+
+ADR-002 Phase E (Option B-plus, cli_consensus 3/3 einstimmig): die migrierten Tools laufen jetzt
+**ohne Provider/API-Key**. Zwei Teile:
+
+1. **`requires_model() == False`** auf `chat` + die 9 Workflow-Tools (analyze, codereview, debug,
+   thinkdeep, precommit, refactor, secaudit, testgen, docgen) — gleicher Vertrag wie
+   consensus/planner. Die MCP-Boundary (`server.py`) überspringt damit Provider-Auflösung +
+   ModelContext-Bau für sie (der harte Stopp aus dem Schritt-1-Bericht).
+2. **EIN geteilter no-provider-Helper** (`utils/model_context.py`): `default_no_provider_capabilities()`
+   (konservativ, `context_window=200k`, keine Temp-Constraint) + `ModelContext.resolve(model_name,
+   allow_keyfree=...)`. Die 5 ModelContext-Bau-Stellen (simple/base, consensus, workflow_mixin ×2,
+   base_tool._resolve_model_context) routen darüber. **Kritisch:** der Default greift NUR, wenn kein
+   Provider existiert UND der Tool key-frei ist (`allow_keyfree = not requires_model()`) — echte
+   API-Tools failen weiter fail-fast ohne Key; bei vorhandenem Provider bleibt der Normalweg
+   unverändert (reale Capabilities).
+
+Deckt die In-execute()-Stellen aus dem Bericht ab: capabilities (System-Prompt-Augmentation →
+Default), Token-Budget/Continuation-Truncation (Default-Window), Temperatur (Default-Constraint =
+no-op), File-Prep (Default-Window). Bilder werden eh verworfen. **Real-Fix nebenbei:** Modell-
+Kontinuität (`reconstruct_thread_context`) war an `requires_model` gekoppelt — entkoppelt, damit
+fortgesetzte CLI-Gespräche dasselbe Modell/Backend behalten.
+
+**Tests:** neu `tests/test_keyfree_cli_operation.py` — key-frei (Provider-Keys UNSET, Backends gemockt):
+volles `chat.execute()`, `analyze.execute()`, `consensus.execute()` laufen OHNE ValueError/
+ToolExecutionError über das CLI-Backend; + Regression: MIT Provider bleibt der Normalweg (reale
+Capabilities, nicht der 200k-Default). Bestehende Tests an den neuen Vertrag angepasst: requires_model-
+Wert-Asserts geflippt (debug/secaudit/planner_fix), Modell-Kontinuität (3, durch den Code-Fix grün).
+10 Tests, die die nun entfernte „model-required/auto-mode-Fehler"-Enforcement bzw. Provider-API-/
+Bild-Behandlung der CLI-Tools prüfen, mit ADR-002-Begründung `@pytest.mark.skip`.
+
+Gate: `902 passed, 19 skipped`; verbleibende 9 Fehler nur die vorbestehende Gemini-Alias-Familie
+(Diff gegen Baseline = 0). ruff/black/isort grün. Bericht: `/tmp/pal-dev-phaseE2-bericht.md`.
+
 ## 2026-06-19 — Phase C: praxisnaher Live-CLI-Struktur-Smoke (Build 6)
 
 ADR-002, praxisnaher Beweis dass die Migration real trägt: neue `tests/test_live_cli_structure.py`

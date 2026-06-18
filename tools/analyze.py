@@ -285,6 +285,11 @@ class AnalyzeTool(WorkflowTool):
                 "Confirm the analysis provides clear guidance for strategic decisions",
             ]
 
+    def requires_model(self) -> bool:
+        """ADR-002: expert analysis runs over subscription-CLI backends, not a provider
+        API, so no model/provider resolution is needed at the MCP boundary (key-free)."""
+        return False
+
     def should_call_expert_analysis(self, consolidated_findings, request=None) -> bool:
         """
         Always call expert analysis for comprehensive validation.

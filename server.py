@@ -1126,9 +1126,12 @@ async def reconstruct_thread_context(arguments: dict[str, Any]) -> dict[str, Any
     tool = TOOLS.get(context.tool_name)
     requires_model = tool.requires_model() if tool else True
 
-    # Check if we should use the model from the previous conversation turn
+    # Check if we should use the model from the previous conversation turn.
+    # Restored regardless of requires_model: key-free CLI tools (ADR-002) still use
+    # the model name to pick their subscription-CLI backend, so conversation
+    # continuity (same model/backend across turns) must be preserved for them too.
     model_from_args = arguments.get("model")
-    if requires_model and not model_from_args and context.turns:
+    if not model_from_args and context.turns:
         # Find the last assistant turn to get the model used
         for turn in reversed(context.turns):
             if turn.role == "assistant" and turn.model_name:

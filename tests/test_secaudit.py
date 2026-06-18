@@ -19,7 +19,7 @@ class TestSecauditTool:
         assert "security audit" in tool.get_description()
         assert tool.get_default_temperature() == 1.0  # TEMPERATURE_ANALYTICAL
         assert tool.get_model_category() == ToolModelCategory.EXTENDED_REASONING
-        assert tool.requires_model() is True
+        assert tool.requires_model() is False  # ADR-002: CLI-backed, boundary-exempt (key-free)
 
     def test_request_validation(self):
         """Test Pydantic request model validation."""

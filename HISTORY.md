@@ -3,6 +3,30 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-06-19 — Phase C: praxisnaher Live-CLI-Struktur-Smoke (Build 6)
+
+ADR-002, praxisnaher Beweis dass die Migration real trägt: neue `tests/test_live_cli_structure.py`
+mit echten (NICHT gemockten) Calls über die Abo-CLIs claude/codex, `@pytest.mark.integration`
+(läuft NICHT im normalen Gate — Quota + Zeit). Maschinen-unabhängig: keine TH01-Pfade, jeder Teil
+`skip`t, wenn seine CLI fehlt (`shutil.which`) oder bei rate_limited/Quota (kein Hartfehler).
+
+Vier Teile, je ein kurzer echter Call: **a)** `cli_consensus` über claude+codex (geblendet, beide
+antworten), **b)** Workflow-`expert_analysis`-Pfad (analyze → `_call_expert_analysis`, bestätigt
+`backend.run` liefert), **c)** `chat` über `_run_cli_backend`, **d)** migrierte `consensus`
+(`_consult_model`) über claude+codex. Jeder Teil: nicht-leere plausible Antwort + success; Output
+selbst-dokumentierend (PASS/SKIP/FAIL + Dauer + Backend + Antwortlänge), **keine Secrets**.
+
+**Key-frei by design:** der Test treibt die migrierten **Seams** direkt, nicht das volle
+`tool.execute()` — `ModelContext.provider` wirft ohne registrierten Provider (= ohne API-Key), was
+in der Ziel-Umgebung (CLIs per OAuth, keine API-Keys) sonst vor dem CLI-Call scheitern würde.
+**Residual-Befund (für Hub-Deploy geflaggt):** `consensus._consult_model` baut weiterhin einen
+ModelContext für die Temperatur-Validierung — im Live-Test gepatcht; sollte beim Deploy beachtet
+oder später key-frei gemacht werden.
+
+Normales Gate unverändert grün (4 Live-Tests deselektiert): `907 passed, 9 skipped, 20 deselected`,
+9 Fehler weiterhin nur die vorbestehende Gemini-Alias-Familie. ruff/black/isort grün.
+Startkommando + Abdeckung: `/tmp/pal-dev-phaseC-bericht.md`.
+
 ## 2026-06-18 — Phase B: chat + consensus über Subscription-CLI-Backend (Build 5)
 
 ADR-002 Entscheidung 1, Phase B — die zwei Sonderfälle mit eigenem Generierungspfad (nicht über

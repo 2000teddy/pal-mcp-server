@@ -27,6 +27,11 @@
   `chat` + `consensus` folgen in Phase B.
 
 ### Added
+- **Live-CLI-Struktur-Smoke** (`tests/test_live_cli_structure.py`, ADR-002 Phase C, Build 6):
+  maschinen-unabhängiger `@pytest.mark.integration`-Test mit echten claude/codex-Calls über die vier
+  migrierten Pfade (cli_consensus, Workflow-expert_analysis, chat, consensus). Skip bei fehlender CLI
+  oder Quota; self-dokumentierend (PASS/SKIP/FAIL + Dauer + Backend), keine Secrets. Läuft NICHT im
+  normalen Gate. Start: `.pal_venv/bin/python -m pytest tests/test_live_cli_structure.py -v -s -m integration`.
 - **ADR-002** (`docs/architecture/ADR-002-api-cli-migration.md`, Build 3): Entscheidung, den
   gemeinsamen synchronen `expert_analysis`-Pfad der Workflow-Tools auf die async CLI-Backend-Schicht
   (`clink/consensus_backends.py`) zu migrieren — Subscription-CLIs statt kostenpflichtiger Provider-APIs.

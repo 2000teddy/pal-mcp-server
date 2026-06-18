@@ -20,6 +20,7 @@ failure, timeout, or rate-limit yields a :class:`BackendResult` with
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import re
 import shutil
@@ -28,6 +29,8 @@ import time
 from dataclasses import dataclass, field
 
 from clink.parsers import ParsedCLIResponse, get_parser
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_TIMEOUT_SECONDS = 300
 _STREAM_LIMIT = 10 * 1024 * 1024  # 10 MB per stream
@@ -251,6 +254,58 @@ def default_backends(timeout: int = DEFAULT_TIMEOUT_SECONDS) -> list[CliBackend]
             timeout=timeout,
         ),
     ]
+
+
+# --- Single-backend selection for the workflow expert_analysis path ---------
+#
+# The consensus panel (default_backends / run_backends) fans one prompt out to
+# *all* CLIs. The workflow expert_analysis step needs exactly ONE model, so it
+# maps the requested model name to a single subscription-CLI backend.
+#
+# Rules are (keyword-substrings, backend-name); first match wins. The keywords
+# are matched case-insensitively against the requested model name. Unknown
+# models fall through to DEFAULT_EXPERT_BACKEND. Override the default per
+# deployment via the PAL_EXPERT_CLI_DEFAULT_BACKEND env var.
+DEFAULT_EXPERT_BACKEND = "claude"
+
+EXPERT_BACKEND_RULES: list[tuple[tuple[str, ...], str]] = [
+    (("claude", "sonnet", "opus", "haiku"), "claude"),
+    (("gpt", "openai", "o1", "o3", "codex"), "codex"),
+    (("gemini", "flash"), "agy"),
+]
+
+
+def _default_expert_backend() -> str:
+    return os.getenv("PAL_EXPERT_CLI_DEFAULT_BACKEND", DEFAULT_EXPERT_BACKEND)
+
+
+def select_expert_backend_name(model_name: str | None) -> tuple[str, bool]:
+    """Map a model name to a backend name.
+
+    Returns ``(backend_name, matched)`` where ``matched`` is False when no rule
+    applied and the default backend was chosen as fallback.
+    """
+    name = (model_name or "").lower()
+    for keywords, backend in EXPERT_BACKEND_RULES:
+        if any(keyword in name for keyword in keywords):
+            return backend, True
+    return _default_expert_backend(), False
+
+
+def backend_for_model(model_name: str | None, timeout: int = DEFAULT_TIMEOUT_SECONDS) -> CliBackend:
+    """Pick the single subscription-CLI backend that serves ``model_name``.
+
+    Used by the workflow expert_analysis path (one model, not the consensus
+    panel). Unknown models fall back to the default backend with a log line.
+    """
+    backends = {b.name: b for b in default_backends(timeout)}
+    chosen, matched = select_expert_backend_name(model_name)
+    if chosen not in backends:
+        logger.warning("expert backend %r unknown; falling back to %r", chosen, DEFAULT_EXPERT_BACKEND)
+        chosen = DEFAULT_EXPERT_BACKEND
+    if not matched:
+        logger.info("no CLI backend rule matched model %r; using default backend %r", model_name, chosen)
+    return backends[chosen]
 
 
 async def run_backends(backends: list[CliBackend], prompt: str) -> list[BackendResult]:

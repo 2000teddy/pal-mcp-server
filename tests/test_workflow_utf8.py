@@ -8,9 +8,18 @@ import os
 import unittest
 from unittest.mock import AsyncMock, Mock, patch
 
+from clink.consensus_backends import BackendResult
 from tools.analyze import AnalyzeTool
 from tools.codereview import CodeReviewTool
 from tools.debug import DebugIssueTool
+
+
+def _fake_backend(content: str, name: str = "claude", status: str = "success"):
+    """Build a mock subscription-CLI backend whose run() yields a BackendResult."""
+    backend = Mock()
+    backend.name = name
+    backend.run = AsyncMock(return_value=BackendResult(name=name, model="sonnet", status=status, content=content))
+    return backend
 
 
 class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
@@ -58,9 +67,10 @@ class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(parsed["findings"], test_response["findings"])
         self.assertEqual(len(parsed["issues_found"]), 1)
 
+    @patch("clink.consensus_backends.backend_for_model")
     @patch("tools.shared.base_tool.BaseTool.get_model_provider")
     @patch("utils.model_context.ModelContext")
-    async def test_analyze_tool_utf8_response(self, mock_model_context, mock_get_provider):
+    async def test_analyze_tool_utf8_response(self, mock_model_context, mock_get_provider, mock_backend_for_model):
         """Test that the analyze tool returns correct UTF-8 responses."""
 
         # Mock ModelContext to bypass model validation
@@ -72,29 +82,26 @@ class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
         mock_token_allocation.total_tokens = 2000
         mock_context_instance.calculate_token_allocation.return_value = mock_token_allocation
 
-        # Mock provider with more complete setup (same as codereview test)
+        # Provider is still used for model-context resolution (not for the expert call).
         mock_provider = Mock()
         mock_provider.get_provider_type.return_value = Mock(value="test")
         mock_provider.get_capabilities.return_value = Mock(supports_extended_thinking=False)
-        mock_provider.generate_content = AsyncMock(
-            return_value=Mock(
-                content=json.dumps(
-                    {
-                        "status": "analysis_complete",
-                        "raw_analysis": "Analysis completed successfully",
-                    },
-                    ensure_ascii=False,
-                ),
-                usage={},
-                model_name="flash",
-                metadata={},
-            )
-        )
-        # Use the same provider for both contexts
         mock_get_provider.return_value = mock_provider
         mock_context_instance.provider = mock_provider
         mock_context_instance.capabilities = Mock(supports_extended_thinking=False)
         mock_model_context.return_value = mock_context_instance
+
+        # Expert analysis now runs over a subscription-CLI backend.
+        fake_backend = _fake_backend(
+            json.dumps(
+                {
+                    "status": "analysis_complete",
+                    "raw_analysis": "Analysis completed successfully",
+                },
+                ensure_ascii=False,
+            )
+        )
+        mock_backend_for_model.return_value = fake_backend
 
         # Test the tool
         analyze_tool = AnalyzeTool()
@@ -121,24 +128,25 @@ class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
         # Structure checks
         self.assertIn("status", response_data)
 
-        # Check that the French instruction was added
-        # The mock provider's generate_content should be called
-        mock_provider.generate_content.assert_called()
-        # The call was successful, which means our fix worked
+        # The expert analysis backend should have been invoked.
+        fake_backend.run.assert_awaited()
 
+    @patch("clink.consensus_backends.backend_for_model")
     @patch("tools.shared.base_tool.BaseTool.get_model_provider")
-    async def test_codereview_tool_french_findings(self, mock_get_provider):
+    async def test_codereview_tool_french_findings(self, mock_get_provider, mock_backend_for_model):
         """Test that the codereview tool produces findings in French."""
-        # Mock with analysis in French
+        # Provider still used for model-context resolution.
         mock_provider = Mock()
         mock_provider.get_provider_type.return_value = Mock(value="test")
         mock_provider.get_capabilities.return_value = Mock(supports_extended_thinking=False)
-        mock_provider.generate_content = AsyncMock(
-            return_value=Mock(
-                content=json.dumps(
-                    {
-                        "status": "analysis_complete",
-                        "raw_analysis": """
+        mock_get_provider.return_value = mock_provider
+
+        # Expert analysis (in French) now comes from the CLI backend.
+        mock_backend_for_model.return_value = _fake_backend(
+            json.dumps(
+                {
+                    "status": "analysis_complete",
+                    "raw_analysis": """
 🔴 CRITIQUE: Aucun problème critique trouvé.
 
 🟠 ÉLEVÉ: Fichier example.py:42 - Fonction trop complexe
@@ -154,15 +162,10 @@ class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
 • Nomenclature cohérente
 • Tests unitaires présents
 """,
-                    },
-                    ensure_ascii=False,
-                ),
-                usage={},
-                model_name="test-model",
-                metadata={},
+                },
+                ensure_ascii=False,
             )
         )
-        mock_get_provider.return_value = mock_provider
 
         # Test the tool
         codereview_tool = CodeReviewTool()
@@ -199,39 +202,37 @@ class TestWorkflowToolsUTF8(unittest.IsolatedAsyncioTestCase):
             self.assertIn("🟡", analysis)
             self.assertIn("✅", analysis)
 
+    @patch("clink.consensus_backends.backend_for_model")
     @patch("tools.shared.base_tool.BaseTool.get_model_provider")
-    async def test_debug_tool_french_error_analysis(self, mock_get_provider):
+    async def test_debug_tool_french_error_analysis(self, mock_get_provider, mock_backend_for_model):
         """Test that the debug tool analyzes errors in French."""
-        # Mock provider
+        # Provider still used for model-context resolution.
         mock_provider = Mock()
         mock_provider.get_provider_type.return_value = Mock(value="test")
         mock_provider.get_capabilities.return_value = Mock(supports_extended_thinking=False)
-        mock_provider.generate_content = AsyncMock(
-            return_value=Mock(
-                content=json.dumps(
-                    {
-                        "status": "pause_for_investigation",
-                        "step_number": 1,
-                        "total_steps": 2,
-                        "next_step_required": True,
-                        "findings": (
-                            "Erreur analysée: variable 'données' non définie. " "Cause probable: import manquant."
-                        ),
-                        "files_checked": ["/src/data_processor.py"],
-                        "relevant_files": ["/src/data_processor.py"],
-                        "hypothesis": ("Variable 'données' not defined - missing import"),
-                        "confidence": "medium",
-                        "investigation_status": "in_progress",
-                        "error_analysis": ("L'erreur concerne la variable 'données' qui " "n'est pas définie."),
-                    },
-                    ensure_ascii=False,
-                ),
-                usage={},
-                model_name="test-model",
-                metadata={},
+        mock_get_provider.return_value = mock_provider
+
+        # Expert analysis now comes from the CLI backend.
+        mock_backend_for_model.return_value = _fake_backend(
+            json.dumps(
+                {
+                    "status": "pause_for_investigation",
+                    "step_number": 1,
+                    "total_steps": 2,
+                    "next_step_required": True,
+                    "findings": (
+                        "Erreur analysée: variable 'données' non définie. " "Cause probable: import manquant."
+                    ),
+                    "files_checked": ["/src/data_processor.py"],
+                    "relevant_files": ["/src/data_processor.py"],
+                    "hypothesis": ("Variable 'données' not defined - missing import"),
+                    "confidence": "medium",
+                    "investigation_status": "in_progress",
+                    "error_analysis": ("L'erreur concerne la variable 'données' qui " "n'est pas définie."),
+                },
+                ensure_ascii=False,
             )
         )
-        mock_get_provider.return_value = mock_provider
 
         # Test the debug tool
         debug_tool = DebugIssueTool()

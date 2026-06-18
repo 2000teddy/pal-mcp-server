@@ -5,6 +5,18 @@
 
 ## [Unreleased]
 
+### Changed
+- **`expert_analysis` läuft über Subscription-CLI-Backends statt Provider-API** (ADR-002 Phase A,
+  Build 4). `tools/workflow/workflow_mixin.py:_call_expert_analysis` awaitet jetzt
+  `clink/consensus_backends.py` (`backend.run`) statt sync `provider.generate_content` — ein
+  zentraler Hebel für alle 9 Workflow-Tools (analyze, codereview, debug, thinkdeep, precommit,
+  refactor, secaudit, testgen, docgen), 0 API-Kosten. Neues schlankes Modell→Backend-Mapping
+  (`select_expert_backend_name`, `backend_for_model`; claude/codex/agy, Default per
+  `PAL_EXPERT_CLI_DEFAULT_BACKEND`). Graceful Degradation bei rate_limited/error/empty bleibt
+  erhalten; natives CLI-Timeout deckt den bisher fehlenden expert-Timeout. Tests:
+  `tests/test_expert_cli_backend.py` (neu), `tests/test_workflow_utf8.py` (auf Backend-Seam umgestellt).
+  `chat` + `consensus` folgen in Phase B.
+
 ### Added
 - **ADR-002** (`docs/architecture/ADR-002-api-cli-migration.md`, Build 3): Entscheidung, den
   gemeinsamen synchronen `expert_analysis`-Pfad der Workflow-Tools auf die async CLI-Backend-Schicht

@@ -3,6 +3,40 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-06-18 — Phase A: expert_analysis über Subscription-CLI-Backend (Build 4)
+
+ADR-002 Entscheidung 1, Phase A umgesetzt — der **zentrale Workflow-Hebel**. In
+`tools/workflow/workflow_mixin.py:_call_expert_analysis` ersetzt jetzt ein einzelner
+`await backend.run(prompt)` den synchronen `provider.generate_content(...)`-Call (Blatt der
+ohnehin durchgängig async Kette, siehe Schritt-1-Bericht). Deckt **alle 9 Workflow-Tools**
+(analyze, codereview, debug, thinkdeep, precommit, refactor, secaudit, testgen, docgen) auf
+einen Schlag — sie erben `_call_expert_analysis`, keiner überschreibt es.
+
+**Modell→Backend-Mapping** (neu in `clink/consensus_backends.py`, schlank + per Keyword,
+erste Regel gewinnt): `claude/sonnet/opus/haiku → claude` · `gpt/openai/o1/o3/codex → codex` ·
+`gemini/flash → agy` · sonst Default `claude` (+Log, „matched=False"). Default per
+`PAL_EXPERT_CLI_DEFAULT_BACKEND` überschreibbar. Neue Helfer: `select_expert_backend_name()`,
+`backend_for_model()`. **Einzel-Backend** (`backend.run`), bewusst NICHT `run_backends` — der
+expert-Schritt ist ein Modell, kein Konsens.
+
+**Adapter `BackendResult → dict`:** `success` → JSON-Parse wie bisher bzw. `raw_analysis`/
+`format:text` bei Nicht-JSON; `rate_limited`/`error` → bestehender `analysis_error`-Pfad
+(graceful); leerer Erfolg → `empty_response`. Äußeres `try/except` bleibt als Sicherheitsnetz.
+Natives `CliBackend`-Timeout deckt den bisher fehlenden expert-Timeout ab (nichts doppelt).
+CLI-Backends sind textbasiert: System-Prompt wird in den einen Prompt gefaltet, Bilder
+werden mit Warn-Log verworfen (Temperatur/thinking_mode entfallen).
+
+**Tests:** neu `tests/test_expert_cli_backend.py` (14: Mapping je Familie + unknown/None/Env-Override
++ Adapter success-JSON/fenced-JSON/plain-text/rate_limited/error/empty + System-Prompt-Folding);
+`tests/test_workflow_utf8.py` auf den Backend-Seam (`_resolve_expert_backend`/`backend_for_model`)
+umgestellt statt `provider.generate_content`. Beide Dateien grün (19/19). ruff/black/isort grün.
+Gesamt-Unit-Suite: 9 Fehler — **alle** in der **vorbestehenden** Gemini-Alias-/Fallback-Familie
+(`test_auto_mode_*`, `test_intelligent_fallback`, `test_per_tool_model_defaults`; `gemini-flash`
+vs `gemini-2.5-flash`), NICHT von dieser Migration (vom Orchestrator bestätigt, vgl. commit 03cb50e).
+
+**Offen:** Phase B = die zwei Sonderfälle `chat` (`tools/simple/base.py`) und `consensus`
+(`tools/consensus.py`) — separat, auf OK des Orchestrators.
+
 ## 2026-06-18 — ADR-002 aufgenommen: API→CLI-Migration (Build 3)
 
 ADR-002 (`docs/architecture/ADR-002-api-cli-migration.md`) ins Repo aufgenommen — vom

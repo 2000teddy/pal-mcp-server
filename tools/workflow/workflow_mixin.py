@@ -1456,8 +1456,6 @@ class BaseWorkflowMixin(ABC):
             else:
                 model_name = self._current_model_name
 
-            provider = self._model_context.provider
-
             # Prepare expert analysis context
             expert_context = self.prepare_expert_analysis_context(self.consolidated_findings)
 
@@ -1482,57 +1480,89 @@ class BaseWorkflowMixin(ABC):
             else:
                 prompt = expert_context
 
-            # Validate temperature against model constraints
-            validated_temperature, temp_warnings = self.get_validated_temperature(request, self._model_context)
+            # Subscription-CLI backends take a single prompt string — no separate
+            # system/temperature/thinking params and no image input. Fold the system
+            # prompt into the user prompt; warn if images would be silently dropped.
+            cli_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+            if self.consolidated_findings.images:
+                logger.warning(
+                    "[%s] expert_analysis: %d image(s) dropped — subscription-CLI backends are text-only",
+                    self.get_name(),
+                    len(set(self.consolidated_findings.images)),
+                )
 
-            # Log any temperature corrections
-            for warning in temp_warnings:
-                logger.warning(warning)
-
-            # Generate AI response - use request parameters if available
-            model_response = provider.generate_content(
-                prompt=prompt,
-                model_name=model_name,
-                system_prompt=system_prompt,
-                temperature=validated_temperature,
-                thinking_mode=self.get_request_thinking_mode(request),
-                images=list(set(self.consolidated_findings.images)) if self.consolidated_findings.images else None,
+            # Run expert analysis over the subscription-CLI backend (async, and by
+            # contract never raises — it degrades to a non-success BackendResult).
+            # The native CliBackend timeout covers the call; the outer try/except
+            # below stays as a defence-in-depth safety net.
+            backend = self._resolve_expert_backend(model_name)
+            logger.info(
+                "[%s] expert_analysis via CLI backend '%s' (requested model '%s')",
+                self.get_name(),
+                backend.name,
+                model_name,
             )
+            backend_result = await backend.run(cli_prompt)
 
-            if model_response.content:
-                content = model_response.content.strip()
+            if backend_result.status != "success" or not backend_result.content:
+                if backend_result.status == "success":
+                    # Succeeded but empty — preserve the legacy empty_response shape.
+                    return {"error": "No response from model", "status": "empty_response"}
+                # rate_limited / error -> graceful degradation via the existing
+                # analysis_error path (same shape the provider path used).
+                logger.warning(
+                    "[%s] expert_analysis backend '%s' returned status=%s: %s",
+                    self.get_name(),
+                    backend_result.name,
+                    backend_result.status,
+                    backend_result.error,
+                )
+                return {
+                    "error": backend_result.error or f"backend {backend_result.status}",
+                    "status": "analysis_error",
+                }
 
-                # Try to extract JSON from markdown code blocks if present
-                if "```json" in content or "```" in content:
-                    json_match = re.search(r"```(?:json)?\s*(.*?)\s*```", content, re.DOTALL)
-                    if json_match:
-                        content = json_match.group(1).strip()
+            content = backend_result.content.strip()
 
-                try:
-                    # Try to parse as JSON
-                    analysis_result = json.loads(content)
-                    return analysis_result
-                except json.JSONDecodeError as e:
-                    # Log the parse error with more details but don't fail
-                    logger.info(
-                        f"[{self.get_name()}] Expert analysis returned non-JSON response (this is OK for smaller models). "
-                        f"Parse error: {str(e)}. Response length: {len(model_response.content)} chars."
-                    )
-                    logger.debug(f"First 500 chars of response: {model_response.content[:500]!r}")
+            # Try to extract JSON from markdown code blocks if present
+            if "```json" in content or "```" in content:
+                json_match = re.search(r"```(?:json)?\s*(.*?)\s*```", content, re.DOTALL)
+                if json_match:
+                    content = json_match.group(1).strip()
 
-                    # Still return the analysis as plain text - this is valid
-                    return {
-                        "status": "analysis_complete",
-                        "raw_analysis": model_response.content,
-                        "format": "text",  # Indicate it's plain text, not an error
-                        "note": "Analysis provided in plain text format",
-                    }
-            else:
-                return {"error": "No response from model", "status": "empty_response"}
+            try:
+                # Try to parse as JSON
+                analysis_result = json.loads(content)
+                return analysis_result
+            except json.JSONDecodeError as e:
+                # Log the parse error with more details but don't fail
+                logger.info(
+                    f"[{self.get_name()}] Expert analysis returned non-JSON response (this is OK for smaller models). "
+                    f"Parse error: {str(e)}. Response length: {len(backend_result.content)} chars."
+                )
+                logger.debug(f"First 500 chars of response: {backend_result.content[:500]!r}")
+
+                # Still return the analysis as plain text - this is valid
+                return {
+                    "status": "analysis_complete",
+                    "raw_analysis": backend_result.content,
+                    "format": "text",  # Indicate it's plain text, not an error
+                    "note": "Analysis provided in plain text format",
+                }
 
         except Exception as e:
             logger.error(f"Error calling expert analysis: {e}", exc_info=True)
             return {"error": str(e), "status": "analysis_error"}
+
+    def _resolve_expert_backend(self, model_name: str):
+        """Return the subscription-CLI backend for the expert model.
+
+        Isolated as a small method so it is a clean seam for testing (patch this
+        to inject a mock backend) and so the import stays lazy.
+        """
+        from clink.consensus_backends import backend_for_model
+
+        return backend_for_model(model_name)
 
     def _process_work_step(self, step_data: dict):
         """

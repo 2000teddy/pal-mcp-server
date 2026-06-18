@@ -308,6 +308,32 @@ def backend_for_model(model_name: str | None, timeout: int = DEFAULT_TIMEOUT_SEC
     return backends[chosen]
 
 
+def backend_result_to_model_response(result: BackendResult, model_name: str | None):
+    """Adapt a :class:`BackendResult` into a providers ``ModelResponse`` shim.
+
+    The chat (``tools/simple/base.py``) and consensus (``tools/consensus.py``)
+    paths expect the provider ``ModelResponse`` shape, so this lets them consume
+    CLI backends unchanged. A non-success result yields empty content plus a
+    non-``"STOP"`` ``finish_reason`` so the consumer's existing empty/error
+    handling degrades gracefully (turns it into an error response).
+    """
+    from providers.shared import ModelResponse  # lazy: avoid clink->providers import at module load
+
+    metadata: dict = {"backend": result.name, "cli_status": result.status}
+    if result.status == "success":
+        metadata["finish_reason"] = "STOP"
+    else:
+        metadata["finish_reason"] = result.status  # "error" / "rate_limited" -> non-STOP
+        if result.error:
+            metadata["cli_error"] = result.error
+    return ModelResponse(
+        content=result.content or "",
+        usage={},
+        model_name=model_name or result.model or "",
+        metadata=metadata,
+    )
+
+
 async def run_backends(backends: list[CliBackend], prompt: str) -> list[BackendResult]:
     """Run all backends concurrently with the same prompt. Partial-failure safe.
 

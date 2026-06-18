@@ -55,6 +55,11 @@ class TestO3ProOutputTextFix:
         # Use the new public API for registry cleanup
         ModelProviderRegistry.reset_for_testing()
 
+    @pytest.mark.skip(
+        reason="ADR-002: ChatTool generates via subscription-CLI backends, not the OpenAI "
+        "provider API; o3-pro response-parsing (output_text) is now exercised only by the "
+        "OpenAI provider unit tests, not through ChatTool."
+    )
     @pytest.mark.no_mock_provider  # Disable provider mocking for this test
     @patch.dict(os.environ, {"OPENAI_ALLOWED_MODELS": "o3-pro", "LOCALE": ""})
     async def test_o3_pro_uses_output_text_field(self, monkeypatch):

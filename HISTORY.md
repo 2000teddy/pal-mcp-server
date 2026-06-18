@@ -3,6 +3,46 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-06-18 — Phase B: chat + consensus über Subscription-CLI-Backend (Build 5)
+
+ADR-002 Entscheidung 1, Phase B — die zwei Sonderfälle mit eigenem Generierungspfad (nicht über
+`expert_analysis`), gleiche Linie wie Phase A, Helfer wiederverwendet:
+
+- **`chat` / Simple-Tools** (`tools/simple/base.py`): der synchrone `provider.generate_content(...)`
+  (Haupt- + Retry-Pfad) läuft jetzt über `await self._run_cli_backend(prompt, system_prompt)` —
+  ein neuer Helfer, der `backend_for_model()` wählt, den System-Prompt in den einen CLI-Prompt
+  faltet, Bilder mit Warn-Log verwirft und das `BackendResult` über den neuen Shim
+  `backend_result_to_model_response()` in die bestehende `ModelResponse`-Verarbeitung einspeist
+  (Safety/empty/Retry-Logik unverändert; non-success → non-„STOP" finish_reason → graceful error).
+  `model_info["provider"]` ist jetzt das Label `cli:<backend>`.
+- **`consensus`** (`tools/consensus.py:_consult_model`): die per-Modell-`generate_content`-Calls
+  mappen via `backend_for_model(model_name)` → `await backend.run(prompt)`; Stance-System-Prompt
+  wird gefaltet, Bilder verworfen. success → `verdict`; non-success → per-Modell-`error` (Konsens
+  bleibt partial-failure-safe + geblendet). Nur API→CLI, keine Deprecation/Umleitung auf
+  `cli_consensus` (separate Aufräumfrage).
+- **Geteilter Helfer (kein Duplikat):** `backend_result_to_model_response()` neu in
+  `clink/consensus_backends.py`, von chat genutzt; `backend_for_model()` von beiden.
+
+**Tests:** neu `tests/test_phase_b_cli_backends.py` (Shim-Adapter, chat `_run_cli_backend`, consensus
+`_consult_model` success/error/rate_limited). Bestehende `provider.generate_content`-Mocks auf den
+`backend.run`-Seam umgestellt: `test_large_prompt_handling` (4), `test_directory_expansion_tracking`
+(3), `test_chat_codegen_integration`, `test_auto_mode_comprehensive::test_actual_model_name_resolution`,
+`test_per_tool_model_defaults::test_available_default_model_no_fallback`,
+`test_model_resolution_bug::…consensus…` (Alias→Backend-Selektor) + shared `tests/mock_helpers.py`
+(`create_mock_cli_backend`).
+
+**Harte Inkompatibilität (transparent geflaggt, 5 Tests `@pytest.mark.skip` mit ADR-002-Grund):**
+Provider-Replay-/Routing-Integrationstests, die genau das Provider-API-Routing prüfen, das die
+Migration für diese Tools ersetzt — `test_chat_cross_model_continuation`, `test_chat_openai_integration`
+(2), `test_o3_pro_output_text_fix::test_o3_pro_uses_output_text_field`,
+`test_consensus_integration::test_consensus_auto_mode_with_openrouter_and_gemini`. Sie asserten
+`provider_used == google/openai` bzw. Provider-spezifisches Response-Parsing; eine CLI-Umschreibung
+würde ihren Zweck zerstören. Provider-Routing/Parsing bleibt durch die Provider-Unit-Tests gedeckt,
+Multi-CLI-Konsens durch `cli_consensus`. → Falls stattdessen Löschen/Re-Homing gewünscht: dein Wort.
+
+**Suite:** voller Unit-Lauf `907 passed, 9 skipped`; verbleibende 9 Fehler sind ausschließlich die
+vorbestehende Gemini-Alias-/Fallback-Familie (Diff gegen Baseline = 0 neue Fehler). ruff/black/isort grün.
+
 ## 2026-06-18 — Phase A: expert_analysis über Subscription-CLI-Backend (Build 4)
 
 ADR-002 Entscheidung 1, Phase A umgesetzt — der **zentrale Workflow-Hebel**. In

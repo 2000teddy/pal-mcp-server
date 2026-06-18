@@ -6,6 +6,15 @@
 ## [Unreleased]
 
 ### Changed
+- **`chat` + `consensus` laufen über Subscription-CLI-Backends statt Provider-API** (ADR-002 Phase B,
+  Build 5). `tools/simple/base.py` (chat/simple-Tools) nutzt den neuen Helfer `_run_cli_backend`
+  (faltet System-Prompt, verwirft Bilder, speist via Shim `backend_result_to_model_response()` in die
+  bestehende Response-Verarbeitung); `tools/consensus.py:_consult_model` mappt jedes Modell via
+  `backend_for_model()` und awaitet `backend.run` (Konsens bleibt geblendet + partial-failure-safe).
+  Geteilter Shim/Selektor in `clink/consensus_backends.py` — kein Duplikat. Tests:
+  `tests/test_phase_b_cli_backends.py` (neu), bestehende `generate_content`-Mocks auf den Backend-Seam
+  umgestellt (`tests/mock_helpers.create_mock_cli_backend`). 5 Provider-Replay-/Routing-Integrationstests,
+  die das ersetzte Provider-Routing prüfen, sind mit ADR-002-Begründung `@pytest.mark.skip` markiert.
 - **`expert_analysis` läuft über Subscription-CLI-Backends statt Provider-API** (ADR-002 Phase A,
   Build 4). `tools/workflow/workflow_mixin.py:_call_expert_analysis` awaitet jetzt
   `clink/consensus_backends.py` (`backend.run`) statt sync `provider.generate_content` — ein

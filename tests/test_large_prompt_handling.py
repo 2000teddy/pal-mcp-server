@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from config import MCP_PROMPT_SIZE_LIMIT
+from tests.mock_helpers import create_mock_cli_backend
 from tools.chat import ChatTool
 from tools.codereview import CodeReviewTool
 from tools.shared.exceptions import ToolExecutionError
@@ -262,15 +263,12 @@ class TestLargePromptHandling:
             patch("utils.model_context.ModelContext") as mock_model_context_cls,
             patch.object(tool, "handle_prompt_file") as mock_handle_prompt,
             patch.object(tool, "_prepare_file_content_for_prompt") as mock_prepare_files,
+            patch(
+                "clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend(content="Success")
+            ),
         ):
             mock_provider = MagicMock()
             mock_provider.get_provider_type.return_value = MagicMock(value="google")
-            mock_provider.generate_content.return_value = MagicMock(
-                content="Success",
-                usage={"input_tokens": 10, "output_tokens": 20, "total_tokens": 30},
-                model_name="gemini-2.5-flash",
-                metadata={"finish_reason": "STOP"},
-            )
 
             from utils.model_context import TokenAllocation
 
@@ -475,7 +473,10 @@ class TestLargePromptHandling:
 
         dummy_context = DummyModelContext(mock_provider)
 
-        with patch.object(tool, "get_model_provider", return_value=mock_provider):
+        with (
+            patch.object(tool, "get_model_provider", return_value=mock_provider),
+            patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend(content="Done")),
+        ):
             result = await tool.execute(
                 {
                     "prompt": "Summarize the design decisions",
@@ -511,9 +512,11 @@ class TestLargePromptHandling:
         original_prepare_prompt = tool.prepare_prompt
 
         try:
+            fake_backend = create_mock_cli_backend(content="ok")
             with (
                 patch.object(tool, "get_model_provider") as mock_get_provider,
                 patch("utils.model_context.ModelContext") as mock_model_context_class,
+                patch("clink.consensus_backends.backend_for_model", return_value=fake_backend),
             ):
                 from tests.mock_helpers import create_mock_provider
                 from utils.model_context import TokenAllocation
@@ -548,9 +551,10 @@ class TestLargePromptHandling:
 
                 assert output["status"] != "resend_prompt"
 
-                mock_provider.generate_content.assert_called_once()
-                call_kwargs = mock_provider.generate_content.call_args[1]
-                actual_prompt = call_kwargs.get("prompt")
+                # The assembled prompt (huge internal context) reaches the CLI backend
+                # as the single positional prompt argument.
+                fake_backend.run.assert_awaited_once()
+                actual_prompt = fake_backend.run.await_args.args[0]
 
                 assert len(actual_prompt) > MCP_PROMPT_SIZE_LIMIT
                 assert huge_history in actual_prompt
@@ -634,14 +638,15 @@ class TestLargePromptHandling:
 
         temp_dir = tempfile.mkdtemp()
 
+        fake_backend = create_mock_cli_backend(content="Continuing our conversation...")
         with (
             patch.object(tool, "get_model_provider") as mock_get_provider,
             patch("utils.model_context.ModelContext") as mock_model_context_class,
+            patch("clink.consensus_backends.backend_for_model", return_value=fake_backend),
         ):
             from tests.mock_helpers import create_mock_provider
 
             mock_provider = create_mock_provider(model_name="flash")
-            mock_provider.generate_content.return_value.content = "Continuing our conversation..."
             mock_get_provider.return_value = mock_provider
 
             # Mock ModelContext to avoid the comparison issue
@@ -702,9 +707,8 @@ class TestLargePromptHandling:
                 assert "Continuing our conversation" in output["content"]
 
                 # Verify the model was called with the complete prompt (including huge history)
-                mock_provider.generate_content.assert_called_once()
-                call_kwargs = mock_provider.generate_content.call_args[1]
-                final_prompt = call_kwargs.get("prompt")
+                fake_backend.run.assert_awaited_once()
+                final_prompt = fake_backend.run.await_args.args[0]
 
                 # The final prompt should contain both history and user input
                 assert huge_conversation_history in final_prompt

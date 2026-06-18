@@ -533,7 +533,12 @@ class TestAutoModeComprehensive:
             mock_provider._resolve_model_name = lambda alias: ("gemini-2.5-flash" if alias == "flash" else alias)
             mock_provider.generate_content.return_value = mock_response
 
-            with patch.object(ModelProviderRegistry, "get_provider_for_model", return_value=mock_provider):
+            from tests.mock_helpers import create_mock_cli_backend
+
+            with (
+                patch.object(ModelProviderRegistry, "get_provider_for_model", return_value=mock_provider),
+                patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend()),
+            ):
                 chat_tool = ChatTool()
                 workdir = tmp_path / "chat_artifacts"
                 workdir.mkdir(parents=True, exist_ok=True)

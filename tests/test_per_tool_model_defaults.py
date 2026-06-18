@@ -529,7 +529,15 @@ class TestUnavailableModelFallback:
                     mock_get_provider.return_value = mock_provider
 
                     # Mock the provider lookup in BaseTool.get_model_provider
-                    with patch.object(BaseTool, "get_model_provider") as mock_get_model_provider:
+                    from tests.mock_helpers import create_mock_cli_backend
+
+                    with (
+                        patch.object(BaseTool, "get_model_provider") as mock_get_model_provider,
+                        patch(
+                            "clink.consensus_backends.backend_for_model",
+                            return_value=create_mock_cli_backend(content="Test response"),
+                        ),
+                    ):
                         mock_get_model_provider.return_value = mock_provider
 
                         tool = ChatTool()

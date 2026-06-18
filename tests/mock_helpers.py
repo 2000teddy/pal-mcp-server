@@ -1,8 +1,27 @@
 """Helper functions for test mocking."""
 
-from unittest.mock import Mock
+from unittest.mock import AsyncMock, Mock
 
 from providers.shared import ModelCapabilities, ProviderType, RangeTemperatureConstraint
+
+
+def create_mock_cli_backend(content="Test response", name="claude", status="success", error=None):
+    """Create a mock subscription-CLI backend (ADR-002).
+
+    Workflow/chat/consensus generation now goes through
+    ``clink.consensus_backends.backend_for_model(...).run(prompt)`` instead of
+    ``provider.generate_content(...)``. Patch ``backend_for_model`` to return this.
+    ``backend.run`` is an AsyncMock yielding a ``BackendResult``; ``run.await_args``
+    captures the single CLI prompt string for assertions.
+    """
+    from clink.consensus_backends import BackendResult
+
+    backend = Mock()
+    backend.name = name
+    backend.run = AsyncMock(
+        return_value=BackendResult(name=name, model="sonnet", status=status, content=content, error=error)
+    )
+    return backend
 
 
 def create_mock_provider(model_name="gemini-2.5-flash", context_window=1_048_576):

@@ -53,6 +53,11 @@ def _extract_number(text: str) -> str:
     return ""
 
 
+@pytest.mark.skip(
+    reason="ADR-002: ChatTool generates via subscription-CLI backends; cross-provider "
+    "(Gemini/OpenAI) replay routing and provider_used assertions no longer apply. "
+    "Provider routing is covered by provider unit tests; cross-CLI consensus by cli_consensus."
+)
 @pytest.mark.asyncio
 @pytest.mark.no_mock_provider
 async def test_chat_cross_model_continuation(monkeypatch, tmp_path):

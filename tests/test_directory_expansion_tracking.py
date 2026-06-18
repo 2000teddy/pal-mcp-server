@@ -208,8 +208,15 @@ def helper_function():
             redis_storage[key] = value
             return True
 
+        def mock_atomic_update(key, ttl, modify_fn):
+            new_value = modify_fn(redis_storage.get(key))
+            if new_value is not None:
+                redis_storage[key] = new_value
+            return new_value
+
         mock_client.get.side_effect = mock_get
         mock_client.setex.side_effect = mock_setex
+        mock_client.atomic_update.side_effect = mock_atomic_update
         mock_storage.return_value = mock_client
 
         directory = temp_directory_with_files["directory"]

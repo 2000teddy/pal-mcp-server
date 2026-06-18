@@ -190,6 +190,14 @@ def clear_model_restriction_env(monkeypatch):
     for var in restriction_vars:
         monkeypatch.delenv(var, raising=False)
 
+    # Clearing the env vars above is not enough on its own: ModelRestrictionService caches the
+    # parsed restrictions in a module-level singleton on first use. Without resetting it, a
+    # restriction configured by an earlier test (e.g. GOOGLE_ALLOWED_MODELS in a cassette or
+    # restriction test) leaks into later tests and makes the default model appear disallowed.
+    import utils.model_restrictions
+
+    utils.model_restrictions._restriction_service = None
+
 
 @pytest.fixture(autouse=True)
 def disable_force_env_override(monkeypatch):
@@ -199,6 +207,11 @@ def disable_force_env_override(monkeypatch):
     env_config.reload_env({"PAL_MCP_FORCE_ENV_OVERRIDE": "false"})
     monkeypatch.setenv("DEFAULT_MODEL", "gemini-2.5-flash")
     monkeypatch.setenv("MAX_CONVERSATION_TURNS", "50")
+    # Neutralize the developer's LOCALE (.env may set e.g. de-DE). base_tool prepends
+    # "Always respond in <locale>." to system prompts, which perturbs prompt-sensitive tests and
+    # breaks recorded HTTP cassettes (recorded with a neutral locale). Localization tests set
+    # LOCALE explicitly in their own body and therefore still override this default.
+    monkeypatch.delenv("LOCALE", raising=False)
 
     import importlib
     import sys

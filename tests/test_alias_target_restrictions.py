@@ -99,7 +99,7 @@ class TestAliasTargetRestrictions:
 
         # Both target and alias should be allowed
         assert provider.validate_model_name("gemini-2.5-flash")
-        assert provider.validate_model_name("flash")
+        assert provider.validate_model_name("flash2.5")
 
     @patch.dict(os.environ, {"GOOGLE_ALLOWED_MODELS": "flash"})  # Allow alias only
     def test_gemini_restriction_policy_alias_allows_canonical(self):
@@ -111,7 +111,7 @@ class TestAliasTargetRestrictions:
         provider = GeminiModelProvider(api_key="test-key")
 
         assert provider.validate_model_name("flash")
-        assert provider.validate_model_name("gemini-2.5-flash")
+        assert provider.validate_model_name("gemini-3.5-flash")
 
     def test_restriction_service_validation_includes_all_targets(self):
         """Test that restriction service validation knows about all aliases and targets."""
@@ -174,8 +174,8 @@ class TestAliasTargetRestrictions:
         provider = GeminiModelProvider(api_key="test-key")
         service = ModelRestrictionService()
 
-        assert service.is_allowed(ProviderType.GOOGLE, "gemini-2.5-flash")
-        assert provider.validate_model_name("gemini-2.5-flash")
+        assert service.is_allowed(ProviderType.GOOGLE, "gemini-3.5-flash")
+        assert provider.validate_model_name("gemini-3.5-flash")
 
     def test_alias_target_policy_regression_prevention(self):
         """Regression test to ensure aliases and targets are both validated properly.

@@ -3,6 +3,22 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-06-18 — ADR-002 aufgenommen: API→CLI-Migration (Build 3)
+
+ADR-002 (`docs/architecture/ADR-002-api-cli-migration.md`) ins Repo aufgenommen — vom
+Orchestrator (Minimac) geliefert, konsens-gehärtet via `cli_consensus` (claude 8/10, agy 9/10,
+codex 8/10 — 3/3, $0 API-Kosten). **Entscheidung 1:** den gemeinsamen synchronen
+`expert_analysis`-Pfad der Workflow-Tools (analyze, codereview, debug, thinkdeep, precommit,
+refactor, secaudit, testgen, docgen) durchgängig async machen und direkt die
+`clink/consensus_backends.py`-Schicht awaiten — ein zentraler Hebel statt ~11 Einzelmigrationen,
+eliminiert ~800 €/Monat API-Kosten. `chat` + `consensus` als Sonderfälle separat. **Entscheidung 2**
+(Docker/Sidecar) ist verschoben — ThinkHub-Core-Sache, nicht dieses Repo.
+
+**Schritt 1 (laufend, reine Verifikation, KEIN Code):** Tiefe des synchronen `expert_analysis`-Pfads
+untersuchen — ist die Kette MCP-Handler → `generate_content()` durchgängig async oder gibt es eine
+echte sync-Grenze? Ergebnis entscheidet „async end-to-end" (bevorzugt) vs. codex-Fallback
+(dedizierter Background-Loop). Bericht → `/tmp/pal-dev-schritt1-bericht.md`, dann Stopp bis OK.
+
 ## 2026-06-17 — cli_consensus gebaut + selbst-reviewt (Build 2)
 
 `cli_consensus` implementiert (ADR-001, „Option 1.5"): neues Tool + `CliBackend`-Schicht

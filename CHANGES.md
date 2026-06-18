@@ -6,6 +6,11 @@
 ## [Unreleased]
 
 ### Added
+- **ADR-002** (`docs/architecture/ADR-002-api-cli-migration.md`, Build 3): Entscheidung, den
+  gemeinsamen synchronen `expert_analysis`-Pfad der Workflow-Tools auf die async CLI-Backend-Schicht
+  (`clink/consensus_backends.py`) zu migrieren — Subscription-CLIs statt kostenpflichtiger Provider-APIs.
+  Konsens-gehärtet via `cli_consensus` (3/3, $0 API). Deployment (Docker/Sidecar) als separate
+  ThinkHub-Core-Entscheidung ausgeklammert. Code-Änderung folgt erst nach Schritt-1-Verifikation.
 - **`cli_consensus`** tool (Build 2): blinded multi-model consensus over subscription CLIs
   (claude/codex/agy) — no provider API cost. New `clink/consensus_backends.py` (CliBackend layer:
   read-only flags, partial-failure, throttle-awareness, ARG_MAX guard, process-group cleanup),

@@ -168,7 +168,9 @@ class CliBackend:
         meta = dict(parsed.metadata)
         meta["returncode"] = returncode
 
-        if parsed.metadata.get("rate_limited") or _looks_rate_limited(stdout, stderr):
+        # Scan only stderr + the parser's flag here — NOT stdout: a successfully parsed answer
+        # that *discusses* rate limits/quota must not be misclassified (real bug from live demo).
+        if parsed.metadata.get("rate_limited") or _looks_rate_limited(stderr):
             return BackendResult(
                 self.name,
                 self.model,

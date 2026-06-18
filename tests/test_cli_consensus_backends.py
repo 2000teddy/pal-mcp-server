@@ -167,3 +167,16 @@ async def test_empty_content_after_strip_is_error(monkeypatch):
     result = await _backend("claude").run("Q?")
     assert result.status == "error"
     assert not result.ok
+
+
+@pytest.mark.asyncio
+async def test_answer_discussing_rate_limits_is_not_flagged(monkeypatch):
+    # A successfully parsed answer that *mentions* rate limits/quota must stay "success".
+    # (Regression for the false-positive found in the live pal:cli_consensus demo.)
+    payload = json.dumps(
+        {"type": "result", "result": "APIs have documented rate limits and quota caps; set spend caps."}
+    ).encode()
+    _patch_subprocess(monkeypatch, DummyProcess(stdout=payload, stderr=b""))
+    result = await _backend("claude").run("Q?")
+    assert result.status == "success"
+    assert result.ok

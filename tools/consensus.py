@@ -644,6 +644,10 @@ of the evidence, even when it strongly points in one direction.""",
                 "error": str(e),
             }
 
+    def get_stance_enhanced_prompt(self, stance: str, custom_stance_prompt: str | None = None) -> str:
+        """Public accessor for the stance-enhanced consensus system prompt (reused by cli_consensus)."""
+        return self._get_stance_enhanced_prompt(stance, custom_stance_prompt)
+
     def _get_stance_enhanced_prompt(self, stance: str, custom_stance_prompt: str | None = None) -> str:
         """Get the system prompt with stance injection."""
         base_prompt = CONSENSUS_PROMPT

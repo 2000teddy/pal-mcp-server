@@ -187,6 +187,15 @@ AVAILABLE_MODELS.md
 DEVELOPMENT-WORKFLOW.md
 README_2*.md
 
+# ThinkHub-Doku bewusst versionieren (hebt die Scratchpad-Ignores oben auf)
+!HISTORY.md
+!TODO.md
+!DEVELOPMENT-WORKFLOW.md
+
+# .env-Backups (enthalten alte Keys) nie committen
+.env.bak*
+.env.old
+
 # Claude Code personal settings
 .claude/settings.local.json
 

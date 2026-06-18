@@ -51,6 +51,7 @@ from tools import (  # noqa: E402
     AnalyzeTool,
     ChallengeTool,
     ChatTool,
+    CliConsensusTool,
     CLinkTool,
     CodeReviewTool,
     ConsensusTool,
@@ -264,6 +265,7 @@ TOOLS = {
     "thinkdeep": ThinkDeepTool(),  # Step-by-step deep thinking workflow with expert analysis
     "planner": PlannerTool(),  # Interactive sequential planner using workflow architecture
     "consensus": ConsensusTool(),  # Step-by-step consensus workflow with multi-model analysis
+    "cli_consensus": CliConsensusTool(),  # Blinded multi-model consensus over subscription CLIs (no API cost)
     "codereview": CodeReviewTool(),  # Comprehensive step-by-step code review workflow with expert analysis
     "precommit": PrecommitTool(),  # Step-by-step pre-commit validation workflow
     "debug": DebugIssueTool(),  # Root cause analysis and debugging assistance

@@ -6,6 +6,7 @@ from .analyze import AnalyzeTool
 from .apilookup import LookupTool
 from .challenge import ChallengeTool
 from .chat import ChatTool
+from .cli_consensus import CliConsensusTool
 from .clink import CLinkTool
 from .codereview import CodeReviewTool
 from .consensus import ConsensusTool
@@ -30,6 +31,7 @@ __all__ = [
     "LookupTool",
     "ChatTool",
     "CLinkTool",
+    "CliConsensusTool",
     "ConsensusTool",
     "ListModelsTool",
     "PlannerTool",

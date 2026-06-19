@@ -10,7 +10,6 @@ This test specifically targets the bug where:
 from unittest.mock import Mock, patch
 
 from providers.openrouter import OpenRouterProvider
-from providers.shared import ProviderType
 from tools.consensus import ConsensusTool
 
 
@@ -45,55 +44,43 @@ class TestModelResolutionBug:
 
     @patch.dict("os.environ", {"OPENROUTER_API_KEY": "test_key"}, clear=False)
     def test_consensus_tool_model_resolution_bug_reproduction(self):
-        """Test that the new consensus workflow tool properly handles OpenRouter model resolution."""
+        """Consensus passes the model alias to the CLI backend selector (ADR-002).
+
+        Pre-migration this asserted the alias reached ``provider.generate_content``.
+        Consensus now consults a subscription-CLI backend, so the alias must reach
+        ``backend_for_model`` instead; the verdict still flows through unchanged.
+        """
         import asyncio
 
-        # Create a mock OpenRouter provider that tracks what model names it receives
-        mock_provider = Mock(spec=OpenRouterProvider)
-        mock_provider.get_provider_type.return_value = ProviderType.OPENROUTER
+        from tests.mock_helpers import create_mock_cli_backend
 
-        # Mock response for successful generation
-        mock_response = Mock()
-        mock_response.content = "Test response"
-        mock_response.usage = None
-        mock_provider.generate_content.return_value = mock_response
+        backend = create_mock_cli_backend(content="Test response", name="agy")
 
-        # Track the model name passed to generate_content
+        # Track the model name passed to the backend selector.
         received_model_names = []
 
-        def track_generate_content(*args, **kwargs):
-            received_model_names.append(kwargs.get("model_name", args[1] if len(args) > 1 else "unknown"))
-            return mock_response
+        def track_backend_for_model(model_name, *args, **kwargs):
+            received_model_names.append(model_name)
+            return backend
 
-        mock_provider.generate_content.side_effect = track_generate_content
-
-        # Mock the get_model_provider to return our mock
-        with patch.object(self.consensus_tool, "get_model_provider", return_value=mock_provider):
-            # Set initial prompt
+        with patch("tools.consensus.backend_for_model", side_effect=track_backend_for_model):
             self.consensus_tool.initial_prompt = "Test prompt"
 
-            # Create a mock request
             request = Mock()
             request.relevant_files = []
             request.continuation_id = None
             request.images = None
 
-            # Test model consultation directly
             result = asyncio.run(self.consensus_tool._consult_model({"model": "gemini", "stance": "neutral"}, request))
 
-            # Verify that generate_content was called
+            # The original alias "gemini" must reach the backend selector.
             assert len(received_model_names) == 1
+            assert received_model_names[0] == "gemini"
 
-            # The consensus tool should pass the original alias "gemini"
-            # The OpenRouter provider should resolve it internally
-            received_model = received_model_names[0]
-            print(f"Model name passed to provider: {received_model}")
-
-            assert received_model == "gemini", f"Expected 'gemini' to be passed to provider, got '{received_model}'"
-
-            # Verify the result structure
+            # Verify the result structure.
             assert result["model"] == "gemini"
             assert result["status"] == "success"
+            assert result["verdict"] == "Test response"
 
     def test_bug_reproduction_with_malformed_model_name(self):
         """Test what happens when 'gemini-2.5-pro' (malformed) is passed to OpenRouter."""

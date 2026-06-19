@@ -318,10 +318,11 @@ class SimpleTool(BaseTool):
                 self._model_context = arguments["_model_context"]
                 logger.debug(f"{self.get_name()}: Using model context from arguments")
             else:
-                # Create model context if not provided
+                # Create model context if not provided. Key-free CLI tools
+                # (requires_model()==False, ADR-002) tolerate a missing provider.
                 from utils.model_context import ModelContext
 
-                self._model_context = ModelContext(model_name)
+                self._model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
                 logger.debug(f"{self.get_name()}: Created model context for {model_name}")
 
             # Get images if present
@@ -402,22 +403,13 @@ class SimpleTool(BaseTool):
                     logger.error("Image validation failed for %s: %s", self.get_name(), payload)
                     raise ToolExecutionError(payload)
 
-            # Get and validate temperature against model constraints
-            temperature, temp_warnings = self.get_validated_temperature(request, self._model_context)
-
-            # Log any temperature corrections
+            # Validate temperature for user-facing warnings (CLI backends ignore it).
+            _, temp_warnings = self.get_validated_temperature(request, self._model_context)
             for warning in temp_warnings:
-                # Get thinking mode with defaults
                 logger.warning(warning)
-            thinking_mode = self.get_request_thinking_mode(request)
-            if thinking_mode is None:
-                thinking_mode = self.get_default_thinking_mode()
 
-            # Get the provider from model context (clean OOP - no re-fetching)
-            provider = self._model_context.provider
+            # Build the system prompt for this tool.
             capabilities = self._model_context.capabilities
-
-            # Get system prompt for this tool
             base_system_prompt = self.get_system_prompt()
             capability_augmented_prompt = self._augment_system_prompt_with_capabilities(
                 base_system_prompt, capabilities
@@ -425,32 +417,23 @@ class SimpleTool(BaseTool):
             language_instruction = self.get_language_instruction()
             system_prompt = language_instruction + capability_augmented_prompt
 
-            # Generate AI response using the provider
-            logger.info(f"Sending request to {provider.get_provider_type().value} API for {self.get_name()}")
-            logger.info(
-                f"Using model: {self._model_context.model_name} via {provider.get_provider_type().value} provider"
-            )
-
             # Estimate tokens for logging
             from utils.token_utils import estimate_tokens
 
             estimated_tokens = estimate_tokens(prompt)
             logger.debug(f"Prompt length: {len(prompt)} characters (~{estimated_tokens:,} tokens)")
 
-            # Resolve model capabilities for feature gating
-            supports_thinking = capabilities.supports_extended_thinking
-
-            # Generate content with provider abstraction
-            model_response = provider.generate_content(
-                prompt=prompt,
-                model_name=self._current_model_name,
-                system_prompt=system_prompt,
-                temperature=temperature,
-                thinking_mode=thinking_mode if supports_thinking else None,
-                images=images if images else None,
-            )
-
-            logger.info(f"Received response from {provider.get_provider_type().value} API for {self.get_name()}")
+            # ADR-002: generate over a subscription-CLI backend instead of a paid
+            # provider API. CLI backends are text-only and take a single prompt, so
+            # the system prompt is folded in and images are dropped (with a warning).
+            if images:
+                logger.warning(
+                    "[%s] %d image(s) dropped — subscription-CLI backends are text-only",
+                    self.get_name(),
+                    len(images),
+                )
+            model_response, provider_label = await self._run_cli_backend(prompt, system_prompt)
+            logger.info(f"Received response from CLI backend '{provider_label}' for {self.get_name()}")
 
             # Process the model's response
             if model_response.content:
@@ -458,7 +441,7 @@ class SimpleTool(BaseTool):
 
                 # Create model info for conversation tracking
                 model_info = {
-                    "provider": provider,
+                    "provider": provider_label,
                     "model_name": self._current_model_name,
                     "model_response": model_response,
                 }
@@ -498,14 +481,7 @@ class SimpleTool(BaseTool):
                         retry_prompt = f"{original_prompt}\n\nIMPORTANT: Please provide a substantive response. If you cannot respond to the above request, please explain why and suggest alternatives."
 
                         try:
-                            retry_response = provider.generate_content(
-                                prompt=retry_prompt,
-                                model_name=self._current_model_name,
-                                system_prompt=system_prompt,
-                                temperature=temperature,
-                                thinking_mode=thinking_mode if supports_thinking else None,
-                                images=images if images else None,
-                            )
+                            retry_response, provider_label = await self._run_cli_backend(retry_prompt, system_prompt)
 
                             if retry_response.content:
                                 # Successful retry - use the retry response
@@ -514,7 +490,7 @@ class SimpleTool(BaseTool):
 
                                 # Update model info for the successful retry
                                 model_info = {
-                                    "provider": provider,
+                                    "provider": provider_label,
                                     "model_name": self._current_model_name,
                                     "model_response": retry_response,
                                 }
@@ -586,6 +562,31 @@ class SimpleTool(BaseTool):
                 content_type="text",
             )
             raise ToolExecutionError(error_output.model_dump_json()) from e
+
+    async def _run_cli_backend(self, prompt: str, system_prompt: str):
+        """Generate over a subscription-CLI backend (ADR-002 Phase B).
+
+        Returns ``(model_response, provider_label)`` where ``model_response`` is a
+        provider ``ModelResponse`` shim so the existing response handling works
+        unchanged. CLI backends are text-only and take a single prompt, so the
+        system prompt is folded in. ``backend.run`` never raises — a failure yields
+        a non-``"STOP"`` finish_reason that the caller degrades to an error.
+        """
+        import logging
+
+        from clink.consensus_backends import backend_for_model, backend_result_to_model_response
+
+        logger = logging.getLogger(f"tools.{self.get_name()}")
+        cli_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+        backend = backend_for_model(self._current_model_name)
+        logger.info(
+            "[%s] generation via CLI backend '%s' (requested model '%s')",
+            self.get_name(),
+            backend.name,
+            self._current_model_name,
+        )
+        result = await backend.run(cli_prompt)
+        return backend_result_to_model_response(result, self._current_model_name), f"cli:{backend.name}"
 
     def _parse_response(self, raw_text: str, request, model_info: Optional[dict] = None):
         """

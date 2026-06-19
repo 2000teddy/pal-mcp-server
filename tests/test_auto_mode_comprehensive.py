@@ -344,6 +344,10 @@ class TestAutoModeComprehensive:
             # With multiple providers configured, the listmodels tool
             # would show models from all providers when called
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False) and runs key-free; "
+        "it no longer raises a model-required error in auto mode."
+    )
     @pytest.mark.asyncio
     async def test_auto_mode_model_parameter_required_error(self, tmp_path):
         """Test that auto mode properly requires model parameter and suggests correct model."""
@@ -533,7 +537,12 @@ class TestAutoModeComprehensive:
             mock_provider._resolve_model_name = lambda alias: ("gemini-2.5-flash" if alias == "flash" else alias)
             mock_provider.generate_content.return_value = mock_response
 
-            with patch.object(ModelProviderRegistry, "get_provider_for_model", return_value=mock_provider):
+            from tests.mock_helpers import create_mock_cli_backend
+
+            with (
+                patch.object(ModelProviderRegistry, "get_provider_for_model", return_value=mock_provider),
+                patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend()),
+            ):
                 chat_tool = ChatTool()
                 workdir = tmp_path / "chat_artifacts"
                 workdir.mkdir(parents=True, exist_ok=True)

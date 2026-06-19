@@ -196,6 +196,11 @@ async def test_consensus_multi_model_consultations(monkeypatch, openai_model):
     ModelProviderRegistry.reset_for_testing()
 
 
+@pytest.mark.skip(
+    reason="ADR-002: ConsensusTool consults subscription-CLI backends, not provider APIs; "
+    "OpenRouter/Gemini auto-mode replay routing no longer applies. Blinded multi-CLI "
+    "consensus is covered by cli_consensus + test_phase_b_cli_backends."
+)
 @pytest.mark.asyncio
 @pytest.mark.no_mock_provider
 async def test_consensus_auto_mode_with_openrouter_and_gemini(monkeypatch):

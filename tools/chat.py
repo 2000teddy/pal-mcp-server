@@ -92,6 +92,11 @@ class ChatTool(SimpleTool):
             prompts.append(GENERATE_CODE_PROMPT)
         return prompts
 
+    def requires_model(self) -> bool:
+        """ADR-002: chat generates over subscription-CLI backends, not a provider API,
+        so no model/provider resolution is needed at the MCP boundary (key-free)."""
+        return False
+
     def get_default_temperature(self) -> float:
         return TEMPERATURE_BALANCED
 

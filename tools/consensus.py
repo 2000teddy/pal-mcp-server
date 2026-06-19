@@ -26,6 +26,7 @@ if TYPE_CHECKING:
 
 from mcp.types import TextContent
 
+from clink.consensus_backends import backend_for_model
 from config import TEMPERATURE_ANALYTICAL
 from systemprompts import CONSENSUS_PROMPT
 from tools.shared.base_models import ConsolidatedFindings, WorkflowRequest
@@ -577,12 +578,14 @@ of the evidence, even when it strongly points in one direction.""",
             # Import and create ModelContext once at the beginning
             from utils.model_context import ModelContext
 
-            # Get the provider for this model
+            # ADR-002: resolve which subscription-CLI backend serves this model.
             model_name = model_config["model"]
-            provider = self.get_model_provider(model_name)
+            backend = backend_for_model(model_name)
 
-            # Create model context once and reuse for both file processing and temperature validation
-            model_context = ModelContext(model_name=model_name)
+            # Create model context (used for blinded file processing + temperature
+            # validation below). consensus is key-free (requires_model()==False) — a
+            # missing provider falls back to conservative CLI defaults (ADR-002).
+            model_context = ModelContext.resolve(model_name, allow_keyfree=not self.requires_model())
 
             # Prepare the prompt with any relevant files
             # Use continuation_id=None for blinded consensus - each model should only see
@@ -605,32 +608,40 @@ of the evidence, even when it strongly points in one direction.""",
             stance_prompt = model_config.get("stance_prompt")
             system_prompt = self._get_stance_enhanced_prompt(stance, stance_prompt)
 
-            # Validate temperature against model constraints (respects supports_temperature)
-            validated_temperature, temp_warnings = self.validate_and_correct_temperature(
-                self.get_default_temperature(), model_context
-            )
-
-            # Log any temperature corrections
+            # Temperature warnings are still surfaced; CLI backends ignore the value.
+            _, temp_warnings = self.validate_and_correct_temperature(self.get_default_temperature(), model_context)
             for warning in temp_warnings:
                 logger.warning(warning)
 
-            # Call the model with validated temperature
-            response = provider.generate_content(
-                prompt=prompt,
-                model_name=model_name,
-                system_prompt=system_prompt,
-                temperature=validated_temperature,
-                thinking_mode="medium",
-                images=request.images if request.images else None,
-            )
+            # ADR-002: consult the model over its subscription-CLI backend instead of
+            # the paid provider API. Backends are text-only and take a single prompt,
+            # so the stance system prompt is folded in and images are dropped. The
+            # consensus stays blinded — each model still sees only prompt + files.
+            if request.images:
+                logger.warning(
+                    "[consensus] %d image(s) dropped — subscription-CLI backends are text-only",
+                    len(request.images),
+                )
+            cli_prompt = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+            backend_result = await backend.run(cli_prompt)
+
+            if backend_result.status != "success" or not backend_result.content:
+                # Graceful degradation: a failed/empty backend is a per-model error,
+                # the surviving models still produce a consensus.
+                return {
+                    "model": model_name,
+                    "stance": stance,
+                    "status": "error",
+                    "error": backend_result.error or f"backend {backend_result.status}",
+                }
 
             return {
                 "model": model_name,
                 "stance": stance,
                 "status": "success",
-                "verdict": response.content,
+                "verdict": backend_result.content,
                 "metadata": {
-                    "provider": provider.get_provider_type().value,
+                    "provider": f"cli:{backend.name}",
                     "model_name": model_name,
                 },
             }

@@ -52,6 +52,41 @@ class TokenAllocation:
         return self.content_tokens - self.file_tokens - self.history_tokens
 
 
+# Default context window used when a tool runs WITHOUT a registered provider
+# (ADR-002 key-free CLI operation). Conservative so token budgeting does not
+# overshoot a CLI's real context. Tunable.
+NO_PROVIDER_CONTEXT_WINDOW = 200_000
+
+
+def default_no_provider_capabilities(model_name: str) -> ModelCapabilities:
+    """Conservative, provider-free capabilities for key-free CLI tools (ADR-002).
+
+    Used ONLY when no provider/API key is registered for ``model_name`` AND the
+    tool declared it does not require a provider (``requires_model() == False``).
+    Generation runs over subscription-CLI backends, so these capabilities only
+    feed model-context consumers (system-prompt augmentation, token budgeting,
+    temperature validation) — never a real provider call.
+    """
+    from providers.shared import ProviderType, RangeTemperatureConstraint
+
+    return ModelCapabilities(
+        provider=ProviderType.CUSTOM,
+        model_name=model_name,
+        friendly_name=f"CLI:{model_name}",
+        context_window=NO_PROVIDER_CONTEXT_WINDOW,
+        max_output_tokens=64_000,
+        supports_extended_thinking=False,
+        supports_system_prompts=True,
+        supports_streaming=False,
+        supports_function_calling=False,
+        supports_images=False,
+        supports_json_mode=False,
+        supports_temperature=False,  # CLI backends take no temperature
+        allow_code_generation=False,  # conservative default (tunable)
+        temperature_constraint=RangeTemperatureConstraint(0.0, 2.0, 0.3),
+    )
+
+
 class ModelContext:
     """
     Encapsulates model-specific information and token calculations.
@@ -92,6 +127,33 @@ class ModelContext:
         if self._capabilities is None:
             self._capabilities = self.provider.get_capabilities(self.model_name)
         return self._capabilities
+
+    @classmethod
+    def resolve(cls, model_name: str, *, allow_keyfree: bool = False, model_option: Optional[str] = None):
+        """Build a ModelContext, tolerating a missing provider for key-free CLI tools.
+
+        Normal path (``allow_keyfree=False``): identical to ``ModelContext(model_name)`` —
+        the provider resolves lazily and raises if absent (fail-fast for real API tools
+        is preserved).
+
+        Key-free path (``allow_keyfree=True``, set by tools with ``requires_model()==False``):
+        if a provider IS registered the real capabilities are used unchanged; only when
+        no provider exists (no API key) do conservative CLI defaults kick in. Defaults
+        therefore NEVER mask a missing key for a tool that genuinely needs a provider.
+        """
+        ctx = cls(model_name, model_option)
+        if not allow_keyfree:
+            return ctx
+        try:
+            _ = ctx.capabilities  # force provider resolution now
+        except ValueError:
+            ctx._capabilities = default_no_provider_capabilities(model_name)
+            logger.info(
+                "No provider for model '%s' — using key-free CLI default capabilities (window=%d)",
+                model_name,
+                NO_PROVIDER_CONTEXT_WINDOW,
+            )
+        return ctx
 
     def calculate_token_allocation(self, reserved_for_response: Optional[int] = None) -> TokenAllocation:
         """

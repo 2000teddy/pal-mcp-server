@@ -12,7 +12,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from tests.mock_helpers import create_mock_provider
+from tests.mock_helpers import create_mock_cli_backend, create_mock_provider
 from tools.chat import ChatTool
 from tools.models import ToolOutput
 from utils.conversation_memory import add_turn, create_thread
@@ -91,7 +91,8 @@ def helper_function():
         }
 
         # Execute the tool
-        result = await tool.execute(request_args)
+        with patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend()):
+            result = await tool.execute(request_args)
 
         # Verify the tool executed successfully
         assert result is not None
@@ -177,7 +178,10 @@ def helper_function():
             filtered_files = original_filter_new_files(requested_files, continuation_id)
             return filtered_files
 
-        with patch.object(tool, "filter_new_files", side_effect=capture_filtering_mock):
+        with (
+            patch.object(tool, "filter_new_files", side_effect=capture_filtering_mock),
+            patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend()),
+        ):
             # Execute continuation - this should not re-embed the same files
             result = await tool.execute(continuation_args)
 
@@ -307,7 +311,8 @@ def helper_function():
             "working_directory_absolute_path": directory,
         }
 
-        result = await tool.execute(request_args)
+        with patch("clink.consensus_backends.backend_for_model", return_value=create_mock_cli_backend()):
+            result = await tool.execute(request_args)
 
         # Verify the tool executed successfully
         assert result is not None

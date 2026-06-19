@@ -137,6 +137,10 @@ class TestAutoMode:
                 os.environ.pop("DEFAULT_MODEL", None)
             importlib.reload(config)
 
+    @pytest.mark.skip(
+        reason="ADR-002: chat is CLI-backed (requires_model()==False) and runs key-free; "
+        "it no longer enforces a model parameter in auto mode."
+    )
     @pytest.mark.asyncio
     async def test_auto_mode_requires_model_parameter(self, tmp_path):
         """Test that auto mode enforces model parameter"""

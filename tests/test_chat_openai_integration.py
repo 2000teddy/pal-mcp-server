@@ -21,6 +21,10 @@ CASSETTE_PATH = CASSETTE_DIR / "chat_gpt5_moon_distance.json"
 CASSETTE_CONTINUATION_PATH = CASSETTE_DIR / "chat_gpt5_continuation.json"
 
 
+@pytest.mark.skip(
+    reason="ADR-002: ChatTool generates via subscription-CLI backends, not the OpenAI "
+    "provider API; OpenAI replay routing and provider_used=='openai' no longer apply."
+)
 @pytest.mark.asyncio
 @pytest.mark.no_mock_provider
 async def test_chat_auto_mode_with_openai(monkeypatch, tmp_path):
@@ -87,6 +91,10 @@ async def test_chat_auto_mode_with_openai(monkeypatch, tmp_path):
     assert CASSETTE_PATH.exists()
 
 
+@pytest.mark.skip(
+    reason="ADR-002: ChatTool generates via subscription-CLI backends, not the OpenAI "
+    "provider API; OpenAI replay continuation and provider_used=='openai' no longer apply."
+)
 @pytest.mark.asyncio
 @pytest.mark.no_mock_provider
 async def test_chat_openai_continuation(monkeypatch, tmp_path):

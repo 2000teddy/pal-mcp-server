@@ -17,12 +17,27 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from providers.gemini import GeminiModelProvider
 from providers.registry import ModelProviderRegistry, ProviderType
+from tests.mock_helpers import create_mock_cli_backend
 from tools.chat import ChatTool
+
+# ADR-002: chat now generates via subscription-CLI backends, not the Gemini provider
+# API. The Gemini replay cassette is therefore no longer exercised; we feed the
+# structured <GENERATED-CODE> payload through the CLI backend so this test still
+# validates the code-extraction + pal_generated.code file-saving behaviour.
+_CODEGEN_PAYLOAD = (
+    "Here is the module you requested.\n\n"
+    "<GENERATED-CODE>\n"
+    "<NEWFILE: calculator.py>\n"
+    "def add(a, b):\n    return a + b\n\n"
+    "def multiply(a, b):\n    return a * b\n"
+    "</GENERATED-CODE>\n"
+)
 
 REPLAYS_ROOT = Path(__file__).parent / "gemini_cassettes"
 CASSETTE_DIR = REPLAYS_ROOT / "chat_codegen"
@@ -75,13 +90,17 @@ async def test_chat_codegen_saves_file(monkeypatch, tmp_path):
             " <GENERATED-CODE> format so the assistant can apply the files directly."
         )
 
-        result = await chat_tool.execute(
-            {
-                "prompt": prompt,
-                "model": "gemini-2.5-pro",
-                "working_directory_absolute_path": str(working_dir),
-            }
-        )
+        with patch(
+            "clink.consensus_backends.backend_for_model",
+            return_value=create_mock_cli_backend(content=_CODEGEN_PAYLOAD),
+        ):
+            result = await chat_tool.execute(
+                {
+                    "prompt": prompt,
+                    "model": "gemini-2.5-pro",
+                    "working_directory_absolute_path": str(working_dir),
+                }
+            )
 
         provider = ModelProviderRegistry.get_provider_for_model("gemini-2.5-pro")
         if provider is not None:

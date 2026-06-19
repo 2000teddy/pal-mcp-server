@@ -389,7 +389,14 @@ def configure_providers():
     """
     # Log environment variable status for debugging
     logger.debug("Checking environment variables for API keys...")
-    api_keys_to_check = ["OPENAI_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "MINIMAX_API_KEY", "CUSTOM_API_URL"]
+    api_keys_to_check = [
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "GEMINI_API_KEY",
+        "XAI_API_KEY",
+        "MINIMAX_API_KEY",
+        "CUSTOM_API_URL",
+    ]
     for key in api_keys_to_check:
         value = get_env(key)
         logger.debug(f"  {key}: {'[PRESENT]' if value else '[MISSING]'}")
@@ -398,8 +405,8 @@ def configure_providers():
     from providers.custom import CustomProvider
     from providers.dial import DIALModelProvider
     from providers.gemini import GeminiModelProvider
-    from providers.openai import OpenAIModelProvider
     from providers.minimax import MiniMaxModelProvider
+    from providers.openai import OpenAIModelProvider
     from providers.openrouter import OpenRouterProvider
     from providers.shared import ProviderType
     from providers.xai import XAIModelProvider
@@ -615,7 +622,13 @@ def configure_providers():
 
         # Validate restrictions against known models
         provider_instances = {}
-        provider_types_to_validate = [ProviderType.GOOGLE, ProviderType.OPENAI, ProviderType.XAI, ProviderType.MINIMAX, ProviderType.DIAL]
+        provider_types_to_validate = [
+            ProviderType.GOOGLE,
+            ProviderType.OPENAI,
+            ProviderType.XAI,
+            ProviderType.MINIMAX,
+            ProviderType.DIAL,
+        ]
         for provider_type in provider_types_to_validate:
             provider = ModelProviderRegistry.get_provider(provider_type)
             if provider:
@@ -1113,9 +1126,12 @@ async def reconstruct_thread_context(arguments: dict[str, Any]) -> dict[str, Any
     tool = TOOLS.get(context.tool_name)
     requires_model = tool.requires_model() if tool else True
 
-    # Check if we should use the model from the previous conversation turn
+    # Check if we should use the model from the previous conversation turn.
+    # Restored regardless of requires_model: key-free CLI tools (ADR-002) still use
+    # the model name to pick their subscription-CLI backend, so conversation
+    # continuity (same model/backend across turns) must be preserved for them too.
     model_from_args = arguments.get("model")
-    if requires_model and not model_from_args and context.turns:
+    if not model_from_args and context.turns:
         # Find the last assistant turn to get the model used
         for turn in reversed(context.turns):
             if turn.role == "assistant" and turn.model_name:

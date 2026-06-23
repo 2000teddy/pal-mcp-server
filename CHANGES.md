@@ -5,6 +5,15 @@
 
 ## [Unreleased]
 
+### Added
+- **`agy` als vollwertiger `clink`-Client** (`clink/agents/agy.py`): die Antigravity-CLI
+  (Gemini-CLI-Nachfolger) ist jetzt im `clink`-Tool nutzbar. Da agy den Prompt als Argument
+  (`agy -p "<prompt>"`) statt über stdin nimmt, liefert ein neuer Hook
+  `BaseCLIAgent._prepare_invocation()` die Prompt-Zustellung pro CLI (Default: stdin, unverändert);
+  `AgyAgent` hängt `-p <prompt>` an und sendet leeren stdin. Registriert in `clink/agents/__init__.py`,
+  `clink/constants.py` (parser `agy_text`, runner `agy`) und `conf/cli_clients/agy.json`
+  (Rollen default/planner/codereviewer). Tests: `tests/test_clink_agy_agent.py`; live verifiziert.
+
 ### Changed
 - **Key-freier Betrieb der CLI-Tools** (ADR-002 Phase E / Option B-plus, Build 7): `chat` + die 9
   Workflow-Tools setzen `requires_model() == False` (boundary-exempt wie consensus/planner), und ein

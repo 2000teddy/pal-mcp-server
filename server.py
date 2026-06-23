@@ -561,8 +561,21 @@ def configure_providers():
     if registered_providers:
         logger.info(f"Registered providers: {', '.join(registered_providers)}")
 
-    # Require at least one valid provider
+    # Require at least one valid provider UNLESS the deployment explicitly opts into
+    # key-free CLI-only startup (ADR-003 / host-runner bridge).
     if not valid_providers:
+        allow_keyfree_startup = (get_env("PAL_MCP_ALLOW_KEYFREE_STARTUP", "") or "").strip().lower() in {
+            "1",
+            "true",
+            "yes",
+            "on",
+        }
+        if allow_keyfree_startup:
+            logger.warning(
+                "No API providers configured; PAL_MCP_ALLOW_KEYFREE_STARTUP enabled -> starting in key-free CLI-only mode. "
+                "Provider-backed tools will still fail at call time until a provider is configured."
+            )
+            return
         raise ValueError(
             "At least one API configuration is required. Please set either:\n"
             "- GEMINI_API_KEY for Gemini models\n"
@@ -571,7 +584,8 @@ def configure_providers():
             "- MINIMAX_API_KEY for MiniMax models\n"
             "- DIAL_API_KEY for DIAL models\n"
             "- OPENROUTER_API_KEY for OpenRouter (multiple models)\n"
-            "- CUSTOM_API_URL for local models (Ollama, vLLM, etc.)"
+            "- CUSTOM_API_URL for local models (Ollama, vLLM, etc.)\n\n"
+            "Or set PAL_MCP_ALLOW_KEYFREE_STARTUP=true for explicit CLI-only startup."
         )
 
     logger.info(f"Available providers: {', '.join(valid_providers)}")

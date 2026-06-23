@@ -164,21 +164,24 @@ class TestLargePromptHandling:
 
             ModelProviderRegistry._instance = None
 
-            # Test with real provider resolution
-            try:
-                args = {
-                    "step": "initial review setup",
-                    "step_number": 1,
-                    "total_steps": 1,
-                    "next_step_required": False,
-                    "findings": "Initial testing",
-                    "relevant_files": ["/some/file.py"],
-                    "files_checked": ["/some/file.py"],
-                    "focus_on": large_prompt,
-                    "prompt": "Test code review for validation purposes",
-                    "model": "o3-mini",
-                }
+            args = {
+                "step": "initial review setup",
+                "step_number": 1,
+                "total_steps": 1,
+                "next_step_required": False,
+                "findings": "Initial testing",
+                "relevant_files": ["/some/file.py"],
+                "files_checked": ["/some/file.py"],
+                "focus_on": large_prompt,
+                "prompt": "Test code review for validation purposes",
+                "model": "o3-mini",
+            }
 
+            # CLI-backed codereview (ADR-002): mock the reviewer backend so the test is
+            # deterministic regardless of whether a real CLI is installed on PATH. 'codex'
+            # is a valid reviewer backend (claude/codex/agy), so the reviewer guard passes.
+            fake_backend = create_mock_cli_backend(content="Review: no blocking issues found.", name="codex")
+            with patch("clink.consensus_backends.backend_for_model", return_value=fake_backend):
                 try:
                     result = await tool.execute(args)
                 except ToolExecutionError as exc:
@@ -187,38 +190,15 @@ class TestLargePromptHandling:
                     assert len(result) == 1
                     output = json.loads(result[0].text)
 
-                # The large focus_on may trigger the resend_prompt guard before generation.
-                # When the guard does not trigger, codereview (ADR-002: CLI-backed) runs the
-                # expert analysis over the subscription-CLI backend, which surfaces a graceful
-                # error if the CLI is unavailable in the test env. Both behaviors are acceptable.
-                if output.get("status") == "resend_prompt":
-                    assert output["metadata"]["prompt_size"] == len(large_prompt)
-                else:
-                    assert output.get("status") in ("error", "analysis_error", "calling_expert_analysis")
-                    assert output.get("content") or output.get("expert_analysis")
-
-            except Exception as e:
-                # If we get an unexpected exception, ensure it's not a mock artifact
-                error_msg = str(e)
-                assert "MagicMock" not in error_msg
-                assert "'<' not supported between instances" not in error_msg
-
-                # Should be a real, graceful error — provider API or CLI-backend (ADR-002).
-                assert any(
-                    phrase in error_msg
-                    for phrase in [
-                        "API",
-                        "key",
-                        "authentication",
-                        "provider",
-                        "network",
-                        "connection",
-                        "backend",
-                        "not found",
-                        "PATH",
-                        "Model",
-                    ]
-                )
+            assert "status" in output
+            if output.get("status") == "resend_prompt":
+                # Large focus_on tripped the MCP transport size guard.
+                assert output["metadata"]["prompt_size"] == len(large_prompt)
+            else:
+                # Otherwise the workflow proceeded over the mocked CLI backend — must be a
+                # well-formed, non-mock result (no MagicMock artifacts leaking through).
+                assert output.get("status")
+                assert "MagicMock" not in json.dumps(output)
 
         finally:
             # Restore environment

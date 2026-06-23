@@ -308,6 +308,18 @@ class CodeReviewTool(WorkflowTool):
         API, so no model/provider resolution is needed at the MCP boundary (key-free)."""
         return False
 
+    def _resolve_expert_backend(self, model_name: str):
+        """Resolve the reviewer backend and enforce the house rule (fail-fast).
+
+        A code review MUST run over a real subscription CLI (claude/codex/agy);
+        MiniMax and pal:chat are never permitted as reviewers. This guard ensures
+        codereview can never silently fall back to a non-CLI backend.
+        """
+        from clink.consensus_backends import assert_review_backend
+
+        backend = super()._resolve_expert_backend(model_name)
+        return assert_review_backend(backend, requested_model=model_name)
+
     def should_call_expert_analysis(self, consolidated_findings, request=None) -> bool:
         """
         Decide when to call external model based on investigation completeness.

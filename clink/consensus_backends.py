@@ -308,6 +308,54 @@ def backend_for_model(model_name: str | None, timeout: int = DEFAULT_TIMEOUT_SEC
     return backends[chosen]
 
 
+# --- Reviewer guard (house rule) --------------------------------------------
+#
+# Christian's rule: a code review MUST run over a real subscription CLI
+# (claude / codex / agy). MiniMax (a paid provider) and pal:chat must NEVER
+# stand in as the reviewer.
+#
+# The approved set + executables are HARD-CODED on purpose (NOT derived from
+# default_backends()): adding a backend there must never silently widen the
+# allow-list — a new reviewer CLI has to be approved here deliberately. A test
+# asserts default_backends() stays a subset of this set so the two can't drift.
+CLI_BACKEND_NAMES: frozenset[str] = frozenset({"claude", "codex", "agy"})
+
+# Canonical name -> executable. Guards against a backend that wears an approved
+# name but wraps a different (e.g. provider / MiniMax) executable.
+_CANONICAL_REVIEW_EXECUTABLES: dict[str, str] = {"claude": "claude", "codex": "codex", "agy": "agy"}
+
+
+def is_valid_review_backend(name: str | None) -> bool:
+    """True iff ``name`` is one of the approved subscription-CLI backends (claude/codex/agy)."""
+    return name in CLI_BACKEND_NAMES
+
+
+def assert_review_backend(backend: CliBackend, requested_model: str | None = None) -> CliBackend:
+    """Fail-fast guard: a reviewer backend must be a real, untampered subscription CLI.
+
+    Raises ``ValueError`` if the backend is not one of claude/codex/agy, or wears an
+    approved name but wraps an unexpected executable — so a code review can never
+    silently fall back to MiniMax or a pal:chat substitute. Returns the backend
+    unchanged when valid, for ergonomic chaining.
+    """
+    name = getattr(backend, "name", None)
+    if not is_valid_review_backend(name):
+        allowed = ", ".join(sorted(CLI_BACKEND_NAMES))
+        raise ValueError(
+            f"Reviewer backend must be a subscription CLI ({allowed}); got {name!r} "
+            f"for requested model {requested_model!r}. MiniMax and pal:chat are not permitted "
+            f"as reviewers (house rule)."
+        )
+    expected_executable = _CANONICAL_REVIEW_EXECUTABLES[name]
+    actual_executable = getattr(backend, "executable", None)
+    if actual_executable != expected_executable:
+        raise ValueError(
+            f"Reviewer backend {name!r} has an unexpected executable {actual_executable!r} "
+            f"(expected {expected_executable!r}); refusing a possibly-spoofed reviewer backend."
+        )
+    return backend
+
+
 def backend_result_to_model_response(result: BackendResult, model_name: str | None):
     """Adapt a :class:`BackendResult` into a providers ``ModelResponse`` shim.
 

@@ -13,7 +13,9 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `docs/tools/cli_consensus
 - [ ] `git pull` auf TH01 → `.env` der API-Provider leeren (Kostenregel) → Bridge-Neustart → Smoke
 - [ ] CLIs auf dem Hub (Linux) per OAuth anmelden (claude/codex/agy) — headless-Auth verifizieren
 - [ ] `.env`-Backups auf dem Mac löschen (`.env.bak-openai-…`, `.env.old`) — vom Classifier blockiert, dein Wort
-- [ ] Optional: `agy` als vollwertiger clink-Client (AgyAgent mit prompt-as-arg) fürs `clink`-Tool
+- [x] `agy` als vollwertiger clink-Client (AgyAgent mit prompt-as-arg) fürs `clink`-Tool — erledigt
+      (`clink/agents/agy.py`, registriert in `clink/agents/__init__.py` + `clink/constants.py`,
+      `conf/cli_clients/agy.json`; live über echtes agy verifiziert)
 
 ## 🟡 Doku-Feinschliff
 - [ ] `CLAUDE.md` um die ThinkHub-Lese-Reihenfolge (§7) ergänzen — Verweis auf `DEVELOPMENT-WORKFLOW.md`

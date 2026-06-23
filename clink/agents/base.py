@@ -103,13 +103,17 @@ class BaseCLIAgent:
             command_with_output_flag.extend(shlex.split(rendered_flag))
             sanitized_command = list(command_with_output_flag)
 
+        # How the prompt is delivered depends on the CLI. Most read it from stdin;
+        # arg-mode CLIs (e.g. agy: ``agy -p "<prompt>"``) take it on the command line.
+        exec_command, stdin_data = self._prepare_invocation(command_with_output_flag, prompt)
+
         self._logger.debug("Executing CLI command: %s", " ".join(sanitized_command))
         if cwd:
             self._logger.debug("Working directory: %s", cwd)
 
         try:
             process = await asyncio.create_subprocess_exec(
-                *command_with_output_flag,
+                *exec_command,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
@@ -122,7 +126,7 @@ class BaseCLIAgent:
 
         try:
             stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                process.communicate(prompt.encode("utf-8")),
+                process.communicate(stdin_data),
                 timeout=self.client.timeout_seconds,
             )
         except asyncio.TimeoutError as exc:
@@ -197,6 +201,15 @@ class BaseCLIAgent:
         base.extend(role.role_args)
 
         return base
+
+    def _prepare_invocation(self, command: list[str], prompt: str) -> tuple[list[str], bytes]:
+        """Return the exec command and the bytes to write to stdin.
+
+        Default: the prompt is delivered via stdin (the command is unchanged).
+        Arg-mode CLIs override this to append the prompt to the command line and
+        send no stdin (see :class:`AgyAgent`).
+        """
+        return list(command), prompt.encode("utf-8")
 
     def _build_environment(self) -> dict[str, str]:
         env = os.environ.copy()

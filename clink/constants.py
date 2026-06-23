@@ -45,4 +45,12 @@ INTERNAL_DEFAULTS: dict[str, CLIInternalDefaults] = {
         default_role_prompt="systemprompts/clink/default.txt",
         runner="claude",
     ),
+    "agy": CLIInternalDefaults(
+        # Antigravity CLI (Gemini-CLI successor). Plain-text output; the prompt is
+        # passed as a "-p <prompt>" argument by AgyAgent, not via stdin.
+        parser="agy_text",
+        additional_args=[],
+        default_role_prompt="systemprompts/clink/default.txt",
+        runner="agy",
+    ),
 }

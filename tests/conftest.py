@@ -230,3 +230,46 @@ def disable_force_env_override(monkeypatch):
         yield
     finally:
         env_config.reload_env()
+
+
+@pytest.fixture(autouse=True)
+def block_real_cli_subprocesses(request, monkeypatch):
+    """Keep the unit gate hermetic w.r.t. subscription CLIs (ADR-002).
+
+    Now that claude/codex/agy may be installed on PATH, any un-mocked code path that
+    reaches ``CliBackend._run`` would spawn a REAL CLI subprocess — making the unit
+    gate slow, network-dependent, quota-burning and non-deterministic.
+
+    This fixture makes the three subscription CLIs look absent to ``shutil.which`` so
+    ``_run`` short-circuits to the graceful "executable not found" path (the same
+    outcome as when no CLI is installed) WITHOUT spawning anything. Other executables
+    resolve normally. (Relies on ``CliBackend._run`` always resolving via ``shutil.which``
+    before ``create_subprocess_exec`` — which it does; there is no spawn-by-bare-name path.)
+
+    - Tests that mock the backend seam (``backend_for_model`` / ``CliBackend.run``)
+      never reach ``_run`` and are unaffected.
+    - ``CliBackend._run`` unit tests (``test_cli_consensus_backends``) re-patch
+      ``shutil.which`` themselves and therefore transparently override this.
+    - Integration tests opt out via the ``integration`` marker (they WANT real CLIs).
+    """
+    if request.node.get_closest_marker("integration"):
+        return
+
+    import os
+    import shutil
+
+    real_which = shutil.which
+    cli_executables = {"claude", "codex", "agy"}
+
+    def which_without_subscription_clis(cmd, *args, **kwargs):
+        # Normalize str / os.PathLike and strip any directory components so e.g.
+        # "/usr/bin/claude" or Path("claude") still resolve to the bare name.
+        try:
+            name = os.path.basename(os.fspath(cmd))
+        except TypeError:
+            name = cmd
+        if name in cli_executables:
+            return None
+        return real_which(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, "which", which_without_subscription_clis)

@@ -26,6 +26,11 @@ stdio-MCP-Server, kein DB-Backend).
 - **Agent ist Chefentwickler** — Implementierungsentscheidungen eigenständig.
 - **Multi-Modell** — Architektur-Fragen per Konsens (künftig `cli_consensus`); Code-Review durch ein
   *anderes* Modell als das implementierende.
+- **Reviewer-Regel (Hausregel, verbindlich)** — Code-Review läuft über `pal:codereview` mit einem
+  **echten Abo-CLI-Modell**: `claude`, `codex` ODER `agy`. **Niemals MiniMax** und **niemals `pal:chat`**
+  als Reviewer-Ersatz. Durchgesetzt per Guard (`clink.consensus_backends.assert_review_backend`,
+  `CodeReviewTool._resolve_expert_backend`) + `tests/test_reviewer_guard.py` — codereview kann nicht
+  still auf einen Nicht-CLI-Reviewer ausweichen, sonst fail-fast.
 - **Tests sind Pflicht** — explizit getrackt, nicht „selbstverständlich".
 - **Author once, deploy per Hub-pull** — Code/Doku an EINER Stelle erzeugen (Mac
   `/Users/chris/pal-mcp-server`), der Hub zieht per `git pull`. Nie dieselbe Datei auf zwei Maschinen
@@ -41,7 +46,7 @@ stdio-MCP-Server, kein DB-Backend).
 2.  DOC   — Design-Doku:  ADR (docs/architecture/ADR-NNN-*.md) VOR dem Code
 3.  CODE  — Implementierung
 4.  TS    — Tests:        ./code_quality_checks.sh (Ruff+Black+isort+pytest) muss grün sein
-5.  CR    — Code Review:  Externes Modell (nicht das implementierende)
+5.  CR    — Code Review:  Externes Modell via pal:codereview — NUR claude/codex/agy (nie MiniMax/pal:chat)
 6.  FIX   — Findings:     HIGH/CRITICAL sofort fixen, nie als TODO verschieben
 7.  TS    — Tests erneut: Nach Fixes nochmal grün
 8.  PP    — Pre-Push:     Secret-Scan + Remote-Sync-Check (§3)

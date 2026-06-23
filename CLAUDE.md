@@ -236,6 +236,11 @@ python -m pytest tests/ -v
 
 ### Development Workflow
 
+> **Reviewer-Hausregel (verbindlich):** Code-Review läuft über `pal:codereview` mit einem echten
+> Abo-CLI-Modell — `claude`, `codex` ODER `agy`. **Niemals MiniMax, niemals `pal:chat`** als
+> Reviewer-Ersatz. Erzwungen per Guard + `tests/test_reviewer_guard.py`; codereview fail-fastet, statt
+> still auf einen Nicht-CLI-Reviewer auszuweichen. Siehe `DEVELOPMENT-WORKFLOW.md` §1.
+
 #### Before Making Changes
 1. Ensure virtual environment is activated: `source .pal_venv/bin/activate`
 2. Run quality checks: `./code_quality_checks.sh`

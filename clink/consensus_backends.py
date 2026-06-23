@@ -308,6 +308,38 @@ def backend_for_model(model_name: str | None, timeout: int = DEFAULT_TIMEOUT_SEC
     return backends[chosen]
 
 
+# --- Reviewer guard (house rule) --------------------------------------------
+#
+# Christian's rule: a code review MUST run over a real subscription CLI
+# (claude / codex / agy). MiniMax (a paid provider) and pal:chat must NEVER
+# stand in as the reviewer. The set is derived from default_backends() so it
+# stays the single source of truth; a test asserts the two never drift apart.
+CLI_BACKEND_NAMES: frozenset[str] = frozenset(b.name for b in default_backends())
+
+
+def is_valid_review_backend(name: str | None) -> bool:
+    """True iff ``name`` is one of the subscription-CLI backends (claude/codex/agy)."""
+    return name in CLI_BACKEND_NAMES
+
+
+def assert_review_backend(backend: CliBackend, requested_model: str | None = None) -> CliBackend:
+    """Fail-fast guard: a reviewer backend must be a real subscription CLI.
+
+    Raises ``ValueError`` if ``backend`` is not one of claude/codex/agy — so a
+    code review can never silently fall back to MiniMax or a pal:chat substitute.
+    Returns the backend unchanged when valid, for ergonomic chaining.
+    """
+    name = getattr(backend, "name", None)
+    if not is_valid_review_backend(name):
+        allowed = ", ".join(sorted(CLI_BACKEND_NAMES))
+        raise ValueError(
+            f"Reviewer backend must be a subscription CLI ({allowed}); got {name!r} "
+            f"for requested model {requested_model!r}. MiniMax and pal:chat are not permitted "
+            f"as reviewers (house rule)."
+        )
+    return backend
+
+
 def backend_result_to_model_response(result: BackendResult, model_name: str | None):
     """Adapt a :class:`BackendResult` into a providers ``ModelResponse`` shim.
 

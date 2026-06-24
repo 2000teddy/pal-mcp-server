@@ -20,6 +20,12 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `docs/tools/cli_consensus
 ## 🟡 Doku-Feinschliff
 - [ ] `CLAUDE.md` um die ThinkHub-Lese-Reihenfolge (§7) ergänzen — Verweis auf `DEVELOPMENT-WORKFLOW.md`
 - [ ] `docs/tools/cli_consensus.md` (Nutzer-Doku) nach dem Bau
+- [ ] **Heimstatt-Frage (Doku-Nuance, kein Blocker):** Ein *vollständiges* Hub-Deploy-Runbook für
+      `thinkhub-pal` + `:8000`/healthz + den stdio→Port-Bridge-Layer beschreibt eine Topologie, die in
+      **thinkhub-core** (`/opt/thinkhub/core/docker-compose.yml`) lebt — nicht in diesem Repo. PR #5
+      (`docs/runbooks/pal-hub-deploy.md`, gemergt) deckt den **pal-seitigen** Deploy ab (stdio-MCP ohne
+      HTTP-Port) und referenziert die Hub-Integration nur. Klären, ob das Hub-Runbook nach thinkhub-core
+      (oder ein Runbooks-Repo) gehört → Folge-PR nach Entscheid. (GitHub-Issues sind im Repo deaktiviert.)
 
 ## 💡 Später / Phase 2
 - [ ] COMPLIANCE-TABLE.md aktivieren, CI-Gate

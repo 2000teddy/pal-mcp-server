@@ -47,9 +47,12 @@ Secrets ins Repo** — `.env`-Dateien mit Keys sind `.gitignore`-pflichtig.
 - **`PAL_MCP_FORCE_ENV_OVERRIDE`** (real, repo-eigen): steuert, ob `.env`-Werte die System-Env
   **überschreiben** (`true`) oder die System-Env Vorrang hat (`false`, Default in Tests). Für einen
   deterministischen Deploy bewusst setzen.
-- **Key-free (ADR-002, empfohlen am Hub):** pal kann **ohne Provider-Keys** starten, wenn
-  `PAL_MCP_ALLOW_KEYFREE_STARTUP=true` gesetzt ist (sonst Fail-fast „at least one API configuration
-  required"). Generierung läuft dann über die Abo-CLIs (claude/codex/agy), siehe §3.
+- **Key-free, empfohlen am Hub:** pal kann **ohne Provider-Keys** starten, wenn
+  `PAL_MCP_ALLOW_KEYFREE_STARTUP=true` gesetzt ist (sonst Fail-fast „At least one API configuration
+  is required"). Die **Generierung** über Abo-CLIs (claude/codex/agy) stammt aus **ADR-002**; das
+  **Startup-Flag** selbst ist im Code als **ADR-003 / host-runner bridge** gekennzeichnet
+  (`server.py`) — das ADR-Dokument liegt noch **nicht** im Repo (`docs/architecture/` hat aktuell
+  nur ADR-001/002). Generierung siehe §3.
 
 ## 3. OAuth / headless — hart ehrlich
 

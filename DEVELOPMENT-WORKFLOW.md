@@ -63,6 +63,7 @@ der Pre-Push-Checkpoint (§3) ist das Minimal-Gate.
 - **"Fertig" = erwiesen getestet.** Nicht ausreichend sind: deployt, Container Up, "müsste laufen", bloße Reachability oder ein host-lokaler Initialize-Handshake ohne Arbeitsbeleg.
 - Abschlussmeldungen müssen einen echten Testbeleg mit Ergebnis-Auszug nennen.
 - **Für MCP-Server gilt verschärft:** "fertig" erst mit mindestens **einem macOS-Peer und einem Linux-Peer**, die je einen **echten Tool-Call über die vorgesehene Strecke** ausführen und Ergebnis-Belege liefern (Peer-Quelle, Tool, kurzer Result-Excerpt).
+- Der Testbeleg soll möglichst lebensnah und nützlich sein: bevorzugt ein reales Monitoring-/Diff-/Report-Artefakt statt reiner Wegwerf-Synthetik.
 - Vor diesem Zwei-Peer-Beleg ist der ehrliche Status **"deployt/erreichbar, DoD offen"**.
 
 ---

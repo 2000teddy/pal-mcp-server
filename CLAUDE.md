@@ -2,6 +2,11 @@
 
 This file contains essential commands and workflows for developing and maintaining the PAL MCP Server when working with Claude. Use these instructions to efficiently run quality checks, manage the server, check logs, and run tests.
 
+> **Bei Session-Start zuerst die ThinkHub-Lese-Reihenfolge befolgen** (Quelle: `DEVELOPMENT-WORKFLOW.md` §7):
+> `AGENTS.md` / `CLAUDE.md` → `TODO.md` → `HISTORY.md` → `DEVELOPMENT-WORKFLOW.md` → `docs/architecture/` → task-spezifische Docs.
+> `DEVELOPMENT-WORKFLOW.md` ergänzt diese Datei um Phasen-Modell, Commit-/PR-Reihenfolge, Pre-Push-Checkpoint und die
+> Abnahme-/„fertig"-Regel (§2, Zwei-Peer-DoD für MCP) — bei Workflow-Fragen dort nachschlagen.
+
 ## Quick Reference Commands
 
 ### Code Quality Checks

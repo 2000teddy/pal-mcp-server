@@ -4,6 +4,10 @@ Blinded multi-model consensus over **local subscription CLIs** — `claude`, `co
 of paid provider APIs. No API cost: it runs over your existing subscriptions (Claude Max / ChatGPT /
 Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../architecture/ADR-001-cli-consensus.md).
 
+> Historical design notes also live in [`docs/cli_consensus_plan.md`](../cli_consensus_plan.md) —
+> note it predates the final panel and still mentions other backends (e.g. `minimax-m3`); the shipped
+> default panel is **claude / codex / agy** as described here and in ADR-001.
+
 ## How it works
 
 - Each backend answers the **same question blinded** — it sees only the question plus its stance,
@@ -47,11 +51,31 @@ Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../archit
 }
 ```
 
+## Limits & validation
+
+- **Max 8 backends** per call (concurrent-subprocess cap); more → error.
+- `backend` must be one of the default panel (`claude`, `codex`, `agy`); unknown → error.
+- `stance` must be `for` | `against` | `neutral`; invalid → error.
+- A `(backend, stance)` pair must be **unique** per call; duplicates → error (consult the same
+  backend twice only with *different* stances).
+- Omitting `backends` **or** passing an empty list → the **default panel** (claude + codex + agy,
+  neutral) is used.
+- Per-backend timeout **300 s**; on timeout, empty output, a parser failure or a detected rate-limit
+  the slot degrades to `error` (or `rate_limited`) and the remaining backends still produce a
+  consensus. (A non-zero CLI exit code with usable parsed output may still count as `success`.)
+
 ## Output
 
-Structured JSON: per backend `{backend, stance, model, status, verdict, error, duration_seconds}`,
-plus `successful`, `skipped_or_failed`, and a `next_steps` instruction to synthesise
-agreement / disagreement / recommendation / risks. `status` is `success` | `error` | `rate_limited`.
+A single structured JSON payload (in the tool result's `content`):
+
+- **Top level:** `status: "consensus_complete"`, `question`, `backends_consulted`,
+  `successful` (count of usable answers), `skipped_or_failed` (backend names), `responses[]`,
+  `next_steps`, `note`.
+- **Each `responses[]` entry:** `{backend, stance, model, status, verdict, error, duration_seconds}`,
+  where the per-backend `status` is `success` | `error` | `rate_limited`.
+
+The tool's overall result status is `success` when at least one backend answered, otherwise `error`.
+You then synthesise agreement / disagreement / recommendation / risks from `responses`.
 
 ## Cost rule
 

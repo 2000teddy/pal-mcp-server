@@ -2,7 +2,8 @@
 
 Blinded multi-model consensus over **local subscription CLIs** — `claude`, `codex`, `agy` — instead
 of paid provider APIs. No API cost: it runs over your existing subscriptions (Claude Max / ChatGPT /
-Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../architecture/ADR-001-cli-consensus.md).
+Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../architecture/ADR-001-cli-consensus.md);
+design notes: [`docs/cli_consensus_plan.md`](../cli_consensus_plan.md).
 
 ## How it works
 
@@ -47,11 +48,29 @@ Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../archit
 }
 ```
 
+## Limits & validation
+
+- **Max 8 backends** per call (concurrent-subprocess cap); more → error.
+- `backend` must be one of the default panel (`claude`, `codex`, `agy`); unknown → error.
+- `stance` must be `for` | `against` | `neutral`; invalid → error.
+- A `(backend, stance)` pair must be **unique** per call; duplicates → error (consult the same
+  backend twice only with *different* stances).
+- An empty backend list → error.
+- Per-backend timeout **300 s**; on timeout / non-zero exit / empty output the slot degrades to
+  `error` (or `rate_limited`) and the remaining backends still produce a consensus.
+
 ## Output
 
-Structured JSON: per backend `{backend, stance, model, status, verdict, error, duration_seconds}`,
-plus `successful`, `skipped_or_failed`, and a `next_steps` instruction to synthesise
-agreement / disagreement / recommendation / risks. `status` is `success` | `error` | `rate_limited`.
+A single structured JSON payload (in the tool result's `content`):
+
+- **Top level:** `status: "consensus_complete"`, `question`, `backends_consulted`,
+  `successful` (count of usable answers), `skipped_or_failed` (backend names), `responses[]`,
+  `next_steps`, `note`.
+- **Each `responses[]` entry:** `{backend, stance, model, status, verdict, error, duration_seconds}`,
+  where the per-backend `status` is `success` | `error` | `rate_limited`.
+
+The tool's overall result status is `success` when at least one backend answered, otherwise `error`.
+You then synthesise agreement / disagreement / recommendation / risks from `responses`.
 
 ## Cost rule
 

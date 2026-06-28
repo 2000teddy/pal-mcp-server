@@ -19,7 +19,7 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `docs/tools/cli_consensus
 
 ## 🟡 Doku-Feinschliff
 - [x] `CLAUDE.md` um die ThinkHub-Lese-Reihenfolge (§7) ergänzen — Verweis auf `DEVELOPMENT-WORKFLOW.md` — erledigt (Pointer-Block am Kopf von `CLAUDE.md`)
-- [ ] `docs/tools/cli_consensus.md` (Nutzer-Doku) nach dem Bau
+- [x] `docs/tools/cli_consensus.md` (Nutzer-Doku) — erledigt + Polish-Pass (Limits/Validation, Output-Felder, Plan-Verweis), gegen Impl/ADR-001/Tests verifiziert
 - [ ] **Heimstatt-Frage (Doku-Nuance, kein Blocker):** Ein *vollständiges* Hub-Deploy-Runbook für
       `thinkhub-pal` + `:8000`/healthz + den stdio→Port-Bridge-Layer beschreibt eine Topologie, die in
       **thinkhub-core** (`/opt/thinkhub/core/docker-compose.yml`) lebt — nicht in diesem Repo. PR #5

@@ -2,8 +2,11 @@
 
 Blinded multi-model consensus over **local subscription CLIs** — `claude`, `codex`, `agy` — instead
 of paid provider APIs. No API cost: it runs over your existing subscriptions (Claude Max / ChatGPT /
-Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../architecture/ADR-001-cli-consensus.md);
-design notes: [`docs/cli_consensus_plan.md`](../cli_consensus_plan.md).
+Google One). Rationale: [`docs/architecture/ADR-001-cli-consensus.md`](../architecture/ADR-001-cli-consensus.md).
+
+> Historical design notes also live in [`docs/cli_consensus_plan.md`](../cli_consensus_plan.md) —
+> note it predates the final panel and still mentions other backends (e.g. `minimax-m3`); the shipped
+> default panel is **claude / codex / agy** as described here and in ADR-001.
 
 ## How it works
 
@@ -55,9 +58,11 @@ design notes: [`docs/cli_consensus_plan.md`](../cli_consensus_plan.md).
 - `stance` must be `for` | `against` | `neutral`; invalid → error.
 - A `(backend, stance)` pair must be **unique** per call; duplicates → error (consult the same
   backend twice only with *different* stances).
-- An empty backend list → error.
-- Per-backend timeout **300 s**; on timeout / non-zero exit / empty output the slot degrades to
-  `error` (or `rate_limited`) and the remaining backends still produce a consensus.
+- Omitting `backends` **or** passing an empty list → the **default panel** (claude + codex + agy,
+  neutral) is used.
+- Per-backend timeout **300 s**; on timeout, empty output, a parser failure or a detected rate-limit
+  the slot degrades to `error` (or `rate_limited`) and the remaining backends still produce a
+  consensus. (A non-zero CLI exit code with usable parsed output may still count as `success`.)
 
 ## Output
 

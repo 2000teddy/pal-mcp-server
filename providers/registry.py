@@ -36,6 +36,7 @@ class ModelProviderRegistry:
     # Provider priority order for model selection
     # Native APIs first, then custom endpoints, then catch-all providers
     PROVIDER_PRIORITY_ORDER = [
+        ProviderType.CLI,  # Subscription CLIs (claude/codex/agy) — first when PAL_BACKEND=subscription
         ProviderType.GOOGLE,  # Direct Gemini access
         ProviderType.OPENAI,  # Direct OpenAI access
         ProviderType.AZURE,  # Azure-hosted OpenAI deployments
@@ -115,6 +116,9 @@ class ModelProviderRegistry:
                 api_key = api_key or ""
                 # Initialize custom provider with both API key and base URL
                 provider = provider_class(api_key=api_key, base_url=custom_url)
+        elif provider_type == ProviderType.CLI:
+            # Subscription-CLI provider needs no API key — auth lives in the CLIs' own sessions.
+            provider = provider_class(api_key="")
         elif provider_type == ProviderType.GOOGLE:
             # For Gemini, check if custom base URL is configured
             if not api_key:

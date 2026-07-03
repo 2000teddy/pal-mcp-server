@@ -16,3 +16,4 @@ class ProviderType(Enum):
     CUSTOM = "custom"
     DIAL = "dial"
     MINIMAX = "minimax"
+    CLI = "cli"

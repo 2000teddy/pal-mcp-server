@@ -377,19 +377,99 @@ PROMPT_TEMPLATES = {
 }
 
 
-def configure_providers():
-    """
-    Configure and validate AI providers based on available API keys.
+def _configure_subscription_backend():
+    """Register providers for PAL_BACKEND=subscription (the default mode).
 
-    This function checks for API keys and registers the appropriate providers.
-    At least one valid API key (Gemini or OpenAI) is required.
+    Registers the subscription-CLI provider (claude/codex/agy) first, plus
+    MiniMax when configured (capped/prepaid API — effectively subscription-like,
+    no open per-token cost). All open per-token API providers (Gemini, OpenAI,
+    Azure, X.AI, DIAL, OpenRouter, Custom) stay unregistered: no silent
+    fallback onto open token billing (cost rule, ADR-001/ADR-002).
 
     Raises:
-        ValueError: If no valid API keys are found or conflicting configurations detected
+        ValueError: If none of the subscription CLIs is available in PATH.
     """
+    import shutil
+
+    from providers import ModelProviderRegistry
+    from providers.cli_provider import CLIModelProvider
+    from providers.minimax import MiniMaxModelProvider
+    from providers.shared import ProviderType
+
+    available_clis = [name for name in ("claude", "codex", "agy") if shutil.which(name)]
+    if not available_clis:
+        raise ValueError(
+            "PAL_BACKEND=subscription, but none of the subscription CLIs (claude, codex, agy) was found "
+            "in PATH. Install and log in at least one subscription CLI, or set PAL_BACKEND=api in .env "
+            "as an emergency fallback to per-token provider APIs."
+        )
+
+    ModelProviderRegistry.register_provider(ProviderType.CLI, CLIModelProvider)
+    registered = [ProviderType.CLI.value]
+    valid_providers = [f"Subscription CLIs ({', '.join(available_clis)})"]
+
+    missing_clis = sorted({"claude", "codex", "agy"} - set(available_clis))
+    if missing_clis:
+        logger.warning(
+            "PAL_BACKEND=subscription: CLI(s) not found in PATH: %s — models mapped to them will fail",
+            ", ".join(missing_clis),
+        )
+
+    # MiniMax is the deliberate exception: capped/prepaid, no open per-token risk.
+    minimax_key = get_env("MINIMAX_API_KEY")
+    if minimax_key and minimax_key != "your_minimax_api_key_here":
+        ModelProviderRegistry.register_provider(ProviderType.MINIMAX, MiniMaxModelProvider)
+        registered.append(ProviderType.MINIMAX.value)
+        valid_providers.append("MiniMax (capped/prepaid)")
+        logger.info("MiniMax API key found - MiniMax models available (subscription-like, capped)")
+
+    logger.info(
+        "PAL_BACKEND=subscription (default) — tools run over subscription CLIs, "
+        "open per-token API providers are disabled"
+    )
+    logger.info(f"Registered providers: {', '.join(registered)}")
+    logger.info(f"Available providers: {', '.join(valid_providers)}")
+
+
+def configure_providers():
+    """
+    Configure and validate AI providers based on the PAL_BACKEND mode.
+
+    PAL_BACKEND selects the global backend (see docs/architecture/ADR-002):
+
+    * ``subscription`` (default) — all tools run over local subscription CLIs
+      (Claude Max ``claude``, ChatGPT ``codex``, Google One ``agy``) via the
+      CLI provider. No open per-token API providers are registered; MiniMax is
+      the deliberate exception (capped/prepaid, effectively subscription-like).
+    * ``api`` — emergency fallback: the full historical API-provider behaviour,
+      no CLI provider.
+
+    Raises:
+        ValueError: If the backend cannot be configured (unknown PAL_BACKEND,
+            no subscription CLI found, or no valid API keys in api mode)
+    """
+    backend_mode = (get_env("PAL_BACKEND") or "subscription").strip().lower()
+    if backend_mode not in ("subscription", "api"):
+        raise ValueError(
+            f"Invalid PAL_BACKEND value '{backend_mode}'. Use 'subscription' (default, subscription CLIs) "
+            "or 'api' (emergency fallback to per-token provider APIs)."
+        )
+
+    if backend_mode == "subscription":
+        _configure_subscription_backend()
+        return
+
+    logger.info("PAL_BACKEND=api — EMERGENCY FALLBACK: using per-token provider APIs (open token costs)")
     # Log environment variable status for debugging
     logger.debug("Checking environment variables for API keys...")
-    api_keys_to_check = ["OPENAI_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY", "XAI_API_KEY", "MINIMAX_API_KEY", "CUSTOM_API_URL"]
+    api_keys_to_check = [
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+        "GEMINI_API_KEY",
+        "XAI_API_KEY",
+        "MINIMAX_API_KEY",
+        "CUSTOM_API_URL",
+    ]
     for key in api_keys_to_check:
         value = get_env(key)
         logger.debug(f"  {key}: {'[PRESENT]' if value else '[MISSING]'}")
@@ -398,8 +478,8 @@ def configure_providers():
     from providers.custom import CustomProvider
     from providers.dial import DIALModelProvider
     from providers.gemini import GeminiModelProvider
-    from providers.openai import OpenAIModelProvider
     from providers.minimax import MiniMaxModelProvider
+    from providers.openai import OpenAIModelProvider
     from providers.openrouter import OpenRouterProvider
     from providers.shared import ProviderType
     from providers.xai import XAIModelProvider
@@ -615,7 +695,13 @@ def configure_providers():
 
         # Validate restrictions against known models
         provider_instances = {}
-        provider_types_to_validate = [ProviderType.GOOGLE, ProviderType.OPENAI, ProviderType.XAI, ProviderType.MINIMAX, ProviderType.DIAL]
+        provider_types_to_validate = [
+            ProviderType.GOOGLE,
+            ProviderType.OPENAI,
+            ProviderType.XAI,
+            ProviderType.MINIMAX,
+            ProviderType.DIAL,
+        ]
         for provider_type in provider_types_to_validate:
             provider = ModelProviderRegistry.get_provider(provider_type)
             if provider:

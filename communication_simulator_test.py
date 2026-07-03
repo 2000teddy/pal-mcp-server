@@ -128,8 +128,11 @@ class CommunicationSimulator:
             name: self._create_test_runner(test_class) for name, test_class in self.test_registry.items()
         }
 
-        # Test result tracking
-        self.test_results = dict.fromkeys(self.test_registry.keys(), False)
+        # Test result tracking — only the tests this run will actually execute.
+        # Seeding ALL registry keys made the summary count never-run tests as FAIL,
+        # so --quick/--tests runs always printed OVERALL FAILURE even when green.
+        tracked_tests = self.selected_tests if self.selected_tests else list(self.test_registry.keys())
+        self.test_results = dict.fromkeys(tracked_tests, False)
 
     def _get_python_path(self) -> str:
         """Get the Python path for the virtual environment"""

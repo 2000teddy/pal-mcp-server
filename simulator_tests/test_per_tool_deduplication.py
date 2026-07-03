@@ -62,7 +62,7 @@ def divide(x, y):
             precommit_params = {
                 "step": "Initial analysis of dummy_code.py for commit readiness. Please give me a quick one line reply.",
                 "step_number": 1,
-                "total_steps": 2,
+                "total_steps": 3,  # precommit schema requires >= 3
                 "next_step_required": True,
                 "findings": "Starting pre-commit validation of dummy_code.py",
                 "path": os.getcwd(),  # Use current working directory as the git repo path
@@ -125,7 +125,7 @@ def subtract(a, b):
                 "continuation_id": continuation_id,
                 "step": "Continue analysis with new_feature.py added. Please give me a quick one line reply about both files.",
                 "step_number": 2,
-                "total_steps": 2,
+                "total_steps": 3,  # precommit schema requires >= 3
                 "next_step_required": False,
                 "findings": "Continuing pre-commit validation with both dummy_code.py and new_feature.py",
                 "path": os.getcwd(),  # Use current working directory as the git repo path

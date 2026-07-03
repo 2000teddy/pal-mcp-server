@@ -1,6 +1,8 @@
 # ADR-001: cli_consensus — Multi-Modell-Konsens über Abo-CLIs
 
-**Status:** Implemented
+**Status:** Implemented — *superseded in part by [ADR-002](ADR-002-global-cli-backend.md)*
+(die hier verworfene „Option 2 — CLI-Provider" wurde mit ADR-002 unter geänderten
+Rahmenbedingungen bewusst umgesetzt; `cli_consensus` selbst bleibt unverändert bestehen)
 **Datum:** 2026-06-17 21:27 (implementiert + selbst-reviewt 22:15, Build 2)
 
 > Diese ADR ist zugleich die **Übergabe-Doku** für den Hub-Agenten: nach `git pull` zuerst lesen,

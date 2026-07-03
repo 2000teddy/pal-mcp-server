@@ -15,12 +15,36 @@ OPENAI_API_KEY=your-openai-key
 
 ## Complete Configuration Reference
 
+### Backend Mode (PAL_BACKEND)
+
+The global backend switch decides how model calls are served (see
+`docs/architecture/ADR-002-global-cli-backend.md`):
+
+```env
+# Default (also when unset): all tools run over local subscription CLIs
+# (Claude Max = claude, ChatGPT = codex, Google One = agy). No open
+# per-token API cost, no silent API fallback. MiniMax stays available
+# (capped/prepaid API). Model catalogue: conf/cli_models.json
+# (override path via CLI_MODELS_CONFIG_PATH).
+PAL_BACKEND=subscription
+
+# Emergency fallback only: full historical API-provider behaviour.
+# Requires the API keys below; open per-token billing.
+# PAL_BACKEND=api
+```
+
+In `subscription` mode the API keys below are ignored (exception:
+`MINIMAX_API_KEY`), and at least one of the CLIs `claude`/`codex`/`agy`
+must be installed and logged in — otherwise the server fails loudly at
+startup. The `cli_consensus` tool always uses subscription CLIs,
+regardless of this switch.
+
 ### Required Configuration
 
 **Workspace Root:**
 ```env
 
-### API Keys (At least one required)
+### API Keys (At least one required in `api` mode)
 
 **Important:** Use EITHER OpenRouter OR native APIs, not both! Having both creates ambiguity about which provider serves each model.
 

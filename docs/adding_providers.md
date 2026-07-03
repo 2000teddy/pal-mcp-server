@@ -219,6 +219,15 @@ if example_key:
     logger.info("Example API key found - Example models available")
 ```
 
+> **Note (PAL_BACKEND, ADR-002):** API providers are only registered in the
+> `api` backend mode. In the default `subscription` mode, model calls run over
+> the subscription-CLI provider (`providers/cli_provider.py`, catalogue
+> `conf/cli_models.json`) plus MiniMax; new open per-token providers belong in
+> the `api` branch of `configure_providers()`. If your new provider serves an
+> alias family that tools may request, mirror those aliases in
+> `conf/cli_models.json` so they stay resolvable in subscription mode
+> (enforced by `tests/test_cli_provider.py::test_all_api_catalogue_aliases_resolve`).
+
 3. **Add to provider priority** (edit `ModelProviderRegistry.PROVIDER_PRIORITY_ORDER` in `providers/registry.py`): insert your provider in the list at the appropriate point in the cascade of native → custom → catch-all providers.
 
 ### 4. Environment Configuration

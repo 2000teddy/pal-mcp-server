@@ -315,6 +315,9 @@ isort --check-only .
 
 - Python 3.9+ with virtual environment
 - All dependencies from `requirements.txt` installed
-- Proper API keys configured in `.env` file
+- `PAL_BACKEND` in `.env` selects the backend (ADR-002): `subscription` (default —
+  model calls run over the local subscription CLIs `claude`/`codex`/`agy`, plus MiniMax;
+  no open per-token cost) or `api` (emergency fallback — full API-provider behaviour,
+  requires API keys in `.env`)
 
 This guide provides everything needed to efficiently work with the PAL MCP Server codebase using Claude. Always run quality checks before and after making changes to ensure code integrity.

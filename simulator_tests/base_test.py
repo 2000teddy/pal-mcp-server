@@ -127,6 +127,13 @@ class Calculator:
     def call_mcp_tool(self, tool_name: str, params: dict) -> tuple[Optional[str], Optional[str]]:
         """Call an MCP tool via standalone server"""
         try:
+            # Param-drift shim: 'working_directory_absolute_path' became a required chat
+            # field (d2773f4, 2025-10-21) but the simulator scenarios predate it. Inject a
+            # sane default so all scenarios keep working; explicit values win.
+            if tool_name == "chat" and "working_directory_absolute_path" not in params:
+                import tempfile
+
+                params = {**params, "working_directory_absolute_path": tempfile.gettempdir()}
             # Prepare the MCP initialization and tool call sequence
             init_request = {
                 "jsonrpc": "2.0",

@@ -99,6 +99,7 @@ def test_error_listing_respects_env_restrictions(monkeypatch, reset_registry):
 
     # Reload may have re-applied .env overrides; enforce our test configuration
     for key, value in (
+        ("PAL_BACKEND", "api"),  # .env reload may leak subscription mode (ADR-002); these tests exercise API listing
         ("DEFAULT_MODEL", "auto"),
         ("GEMINI_API_KEY", "test-gemini"),
         ("OPENAI_API_KEY", "test-openai"),
@@ -187,6 +188,7 @@ def test_error_listing_without_restrictions_shows_full_catalog(monkeypatch, rese
     importlib.reload(server)
 
     for key, value in (
+        ("PAL_BACKEND", "api"),  # .env reload may leak subscription mode (ADR-002); these tests exercise API listing
         ("DEFAULT_MODEL", "auto"),
         ("GEMINI_API_KEY", "test-gemini"),
         ("OPENAI_API_KEY", "test-openai"),

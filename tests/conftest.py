@@ -205,6 +205,11 @@ def disable_force_env_override(monkeypatch):
 
     monkeypatch.setenv("PAL_MCP_FORCE_ENV_OVERRIDE", "false")
     env_config.reload_env({"PAL_MCP_FORCE_ENV_OVERRIDE": "false"})
+    # The historical suite exercises the API providers, which since ADR-002 form the
+    # PAL_BACKEND=api emergency-fallback mode (runtime default is 'subscription'). Pin the
+    # suite to api mode; subscription-mode behaviour is covered by test_pal_backend_switch.py
+    # and test_cli_provider.py, which set PAL_BACKEND themselves.
+    monkeypatch.setenv("PAL_BACKEND", "api")
     monkeypatch.setenv("DEFAULT_MODEL", "gemini-2.5-flash")
     monkeypatch.setenv("MAX_CONVERSATION_TURNS", "50")
     # Neutralize the developer's LOCALE (.env may set e.g. de-DE). base_tool prepends

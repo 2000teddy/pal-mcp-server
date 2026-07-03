@@ -247,6 +247,7 @@ class TestConfigureProvidersFunction:
         with patch.dict(
             os.environ,
             {
+                "PAL_BACKEND": "api",  # these tests validate the api fallback mode (ADR-002)
                 "CUSTOM_API_URL": "http://localhost:11434/v1",
                 "CUSTOM_API_KEY": "",
                 # Clear other API keys
@@ -270,6 +271,7 @@ class TestConfigureProvidersFunction:
         with patch.dict(
             os.environ,
             {
+                "PAL_BACKEND": "api",  # these tests validate the api fallback mode (ADR-002)
                 "OPENROUTER_API_KEY": "test-key",
                 # Clear other API keys
                 "GEMINI_API_KEY": "",
@@ -292,6 +294,7 @@ class TestConfigureProvidersFunction:
         with patch.dict(
             os.environ,
             {
+                "PAL_BACKEND": "api",  # these tests validate the api fallback mode (ADR-002)
                 "OPENROUTER_API_KEY": "test-openrouter-key",
                 "CUSTOM_API_URL": "http://localhost:11434/v1",
                 "CUSTOM_API_KEY": "",
@@ -314,7 +317,13 @@ class TestConfigureProvidersFunction:
 
         with patch.dict(
             os.environ,
-            {"GEMINI_API_KEY": "", "OPENAI_API_KEY": "", "OPENROUTER_API_KEY": "", "CUSTOM_API_URL": ""},
+            {
+                "PAL_BACKEND": "api",
+                "GEMINI_API_KEY": "",
+                "OPENAI_API_KEY": "",
+                "OPENROUTER_API_KEY": "",
+                "CUSTOM_API_URL": "",
+            },
             clear=True,
         ):
             with pytest.raises(ValueError, match="At least one API configuration is required"):

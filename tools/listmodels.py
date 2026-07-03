@@ -98,6 +98,7 @@ class ListModelsTool(BaseTool):
 
         # Map provider types to friendly names and their models
         provider_info = {
+            ProviderType.CLI: {"name": "Subscription CLIs (claude/codex/agy)", "env_key": "PAL_BACKEND=subscription"},
             ProviderType.GOOGLE: {"name": "Google Gemini", "env_key": "GEMINI_API_KEY"},
             ProviderType.OPENAI: {"name": "OpenAI", "env_key": "OPENAI_API_KEY"},
             ProviderType.AZURE: {"name": "Azure OpenAI", "env_key": "AZURE_OPENAI_API_KEY"},
@@ -313,12 +314,18 @@ class ListModelsTool(BaseTool):
 
         output_lines.append("")
 
-        # Check Custom API
+        # Check Custom API — registry-based: in subscription mode (PAL_BACKEND, ADR-002)
+        # the provider is not registered even when CUSTOM_API_URL is set.
         custom_url = get_env("CUSTOM_API_URL")
+        custom_registered = ModelProviderRegistry.get_provider(ProviderType.CUSTOM) is not None
 
-        output_lines.append(f"## Custom/Local API {'✅' if custom_url else '❌'}")
+        output_lines.append(f"## Custom/Local API {'✅' if (custom_url and custom_registered) else '❌'}")
 
-        if custom_url:
+        if custom_url and not custom_registered:
+            output_lines.append(
+                "**Status**: Disabled (PAL_BACKEND=subscription — open API providers are not registered)"
+            )
+        elif custom_url:
             output_lines.append("**Status**: Configured and available")
             output_lines.append(f"**Endpoint**: {custom_url}")
             output_lines.append("**Description**: Local models via Ollama, vLLM, LM Studio, etc.")

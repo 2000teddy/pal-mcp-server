@@ -121,11 +121,27 @@ class TestListModelsTool:
 
     @pytest.mark.asyncio
     async def test_execute_with_custom_api(self, tool):
-        """Test listing models with custom API configured"""
+        """Test listing models with custom API configured AND registered.
+
+        Since ADR-002 the display is registry-based: CUSTOM_API_URL alone is not
+        enough (in subscription mode the provider stays unregistered), so this
+        test registers the provider like configure_providers() does in api mode.
+        """
+        from providers.custom import CustomProvider
+        from providers.registry import ModelProviderRegistry
+        from providers.shared import ProviderType
+
         env_vars = {"CUSTOM_API_URL": "http://localhost:11434", "DEFAULT_MODEL": "auto"}
 
+        def custom_provider_factory(api_key=None):
+            return CustomProvider(api_key="", base_url="http://localhost:11434")
+
         with patch.dict(os.environ, env_vars, clear=True):
-            result = await tool.execute({})
+            ModelProviderRegistry.register_provider(ProviderType.CUSTOM, custom_provider_factory)
+            try:
+                result = await tool.execute({})
+            finally:
+                ModelProviderRegistry.unregister_provider(ProviderType.CUSTOM)
 
             response = json.loads(result[0].text)
             content = response["content"]
@@ -134,6 +150,20 @@ class TestListModelsTool:
             assert "Custom/Local API ✅" in content
             assert "http://localhost:11434" in content
             assert "Local models via Ollama" in content
+
+    @pytest.mark.asyncio
+    async def test_custom_api_disabled_in_subscription_mode(self, tool):
+        """CUSTOM_API_URL set but provider not registered (subscription mode) -> shown as disabled."""
+        env_vars = {"CUSTOM_API_URL": "http://localhost:11434", "DEFAULT_MODEL": "auto"}
+
+        with patch.dict(os.environ, env_vars, clear=True):
+            result = await tool.execute({})
+
+            response = json.loads(result[0].text)
+            content = response["content"]
+
+            assert "Custom/Local API ❌" in content
+            assert "PAL_BACKEND=subscription" in content
 
     @pytest.mark.asyncio
     async def test_output_includes_usage_tips(self, tool):

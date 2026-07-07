@@ -14,7 +14,7 @@
 
 pal ist ein **reifes** source-available Repo (ELv2), das in den **ThinkHub-Verbund** integriert wird (zentral
 auf dem Hub hinter mcporter + Bridge, von dort an die Mesh-Agenten verteilt). Dieser Workflow bringt
-die ThinkHub-Konventionen — Phasen-Modell, Doku-Pflege, PR-Reihenfolge, ADRs — auf pal, **unter
+die ThinkHub-Konventionen — Doku-Pflege, PR-Reihenfolge, ADRs — auf pal, **unter
 Wahrung von pal's Eigenheiten** (`semantic-release`, Conventional Commits, `code_quality_checks.sh`).
 Das DB-/Postgres-/Multi-VM-Material des ThinkHub-Musters ist hier bewusst weggelassen (pal ist ein
 stdio-MCP-Server, kein DB-Backend).
@@ -30,7 +30,7 @@ stdio-MCP-Server, kein DB-Backend).
 - **Author once, deploy per Hub-pull** — Code/Doku an EINER Stelle erzeugen (Mac
   `/Users/chris/pal-mcp-server`), der Hub zieht per `git pull`. Nie dieselbe Datei auf zwei Maschinen
   parallel erzeugen.
-- **Phasen-Bewusstsein** — die Strenge skaliert mit der Phase (§6).
+- **Ein durchgängiger Modus** — die Doku-/Review-Pflichten gelten je PR, kein Phasen-Schalter (§6).
 
 ---
 
@@ -111,13 +111,19 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
 
 ---
 
-## 6. Projekt-Phasen-Modell
+## 6. Arbeitsmodus (kein Phasen-Schalter mehr)
 
-| Phase | Charakter | Branch | Compliance-Tabelle | Gate |
-|-------|-----------|--------|--------------------|------|
-| **1 — Bootstrap (AKTUELL)** | Solo + Agenten, ThinkHub-Integration | direkter Push auf `main` | nein | Pre-Push-Check (§3) |
-| 2 — Hardening/Multi-Agent | mehrere Agenten/Maschinen | Branch + PR | **Pflicht** | CI + Compliance |
-| 3 — Production | produktiv im Mesh | geschützt | Pflicht | voll |
+Der frühere „Projekt-Phasen-Modell"-Schalter ist **ersatzlos gestrichen** (Christians Beschluss
+2026-07-07): Compliance an „ab Phase 2" zu koppeln war genau der Grund, dass die Tabelle einschlief
+(niemand rief den Phasenübergang je aus). **Es gilt durchgängig ein Modus:**
+
+| Aspekt | Regel (immer) |
+|--------|---------------|
+| Branch | Feature-Branch + PR |
+| Review | unabhängig über claude/codex/agy (nie MiniMax/pal:chat), **kein Selbst-Merge** |
+| `changes/`-Eintrag | **je PR Pflicht** (Ausnahme nur `docs:`/`chore:` oder Label `no-doc-needed` mit Begründung) |
+| `COMPLIANCE-TABLE.md`-Zeile | **je PR Pflicht — immer** |
+| Gate | Pre-Push-Check (§3) lokal **+** MD-Compliance CI-Gate (2 Wochen warnend, dann blockierend) |
 
 ---
 

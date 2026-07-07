@@ -37,7 +37,7 @@ LABEL org.opencontainers.image.description="AI-powered Model Context Protocol se
 LABEL org.opencontainers.image.version="1.0.0"
 LABEL org.opencontainers.image.source="https://github.com/BeehiveInnovations/pal-mcp-server"
 LABEL org.opencontainers.image.documentation="https://github.com/BeehiveInnovations/pal-mcp-server/blob/main/README.md"
-LABEL org.opencontainers.image.licenses="Apache 2.0 License"
+LABEL org.opencontainers.image.licenses="Elastic-2.0"
 
 # Create non-root user for security
 RUN groupadd -r paluser && useradd -r -g paluser paluser

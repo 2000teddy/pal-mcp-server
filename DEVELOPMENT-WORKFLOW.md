@@ -12,7 +12,7 @@
 
 ## 0. Wie zu lesen
 
-pal ist ein **reifes** Open-Source-Repo, das in den **ThinkHub-Verbund** integriert wird (zentral
+pal ist ein **reifes** source-available Repo (ELv2), das in den **ThinkHub-Verbund** integriert wird (zentral
 auf dem Hub hinter mcporter + Bridge, von dort an die Mesh-Agenten verteilt). Dieser Workflow bringt
 die ThinkHub-Konventionen — Phasen-Modell, Doku-Pflege, PR-Reihenfolge, ADRs — auf pal, **unter
 Wahrung von pal's Eigenheiten** (`semantic-release`, Conventional Commits, `code_quality_checks.sh`).

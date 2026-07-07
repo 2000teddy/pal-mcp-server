@@ -9,7 +9,7 @@
 
 ## Important Disclaimer
 
-PAL MCP is an open-source Model Context Protocol (MCP) server that acts as middleware between AI clients (Claude Code, Codex CLI, Cursor, etc.) and various AI model providers.
+PAL MCP is a source-available Model Context Protocol (MCP) server that acts as middleware between AI clients (Claude Code, Codex CLI, Cursor, etc.) and various AI model providers.
 
 **Please understand the following:**
 
@@ -44,7 +44,7 @@ We cannot commit to specific response timelines, but we take security seriously.
 
 ### After Resolution
 
-We welcome security researchers to submit a pull request with the fix. This is an open-source project and we appreciate community contributions to improve security.
+We welcome security researchers to submit a pull request with the fix. This is a source-available project and we appreciate community contributions to improve security.
 
 ## Disclosure Policy
 

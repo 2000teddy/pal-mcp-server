@@ -46,6 +46,19 @@ erhalten bleibt. Genau das ist umgesetzt.
 nutzt; Apache-2.0 §4 verlangt Attributionserhalt. Bei reinem Eigencode (wie den
 anderen vier Repos) wäre kein NOTICE nötig.
 
+## Nachtrag — Review PR #10 (2026-07-07, Blocker)
+
+Unabhängige Review fand widersprüchliche Apache-Metadaten trotz ELv2-Flip:
+
+- **Dockerfile:** `org.opencontainers.image.licenses="Apache 2.0 License"`
+  → `"Elastic-2.0"` (korrekter SPDX-Identifier für ELv2).
+- **SECURITY.md:** „provided 'AS IS' under the Apache 2.0 License" → ELv2.
+
+Repo-weiter Sweep über Markdown/Dockerfile/YAML/TOML/JSON: keine weiteren
+widersprüchlichen Apache-Referenzen (die verbleibenden Nennungen in
+`LICENSE-APACHE-2.0` und `NOTICE` sind gewollt — Ursprungs-Attribution).
+Validierung: `docker build --check` ohne Warnungen.
+
 ---
 
 **Kein Selbst-Merge.** Merge erst nach grüner, unabhängiger Review via

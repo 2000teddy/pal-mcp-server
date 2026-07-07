@@ -50,8 +50,9 @@ stdio-MCP-Server, kein DB-Backend).
 11. DO    — Doku:         CHANGES.md + HISTORY.md + TODO.md + BUILD_NUMBER +1
 ```
 
-In **Phase 1** (aktuell) gibt es keine Compliance-Tabelle und keinen zweiten Reviewer-Zwang —
-der Pre-Push-Checkpoint (§3) ist das Minimal-Gate.
+**Je PR verbindlich** (kein Phasen-Schalter mehr, Beschluss 2026-07-07): `changes/`-Eintrag +
+`COMPLIANCE-TABLE.md`-Zeile + unabhängige Review über claude/codex/agy. Der Pre-Push-Checkpoint (§3)
+bleibt zusätzlich das lokale Minimal-Gate.
 
 ---
 
@@ -87,7 +88,7 @@ Relevant v.a. bei der **Kostenregel-Migration** (API-Keys aus `.env`) — Keys d
 | `CLAUDE.md` / `AGENTS.md` | Dev-Guide / Repository Guidelines (bestehend) | bei Workflow-Änderung |
 | `APP_VERSION.md` | Spiegel der App-Version; **SSOT = config.py/pyproject** | bei Release (mit config.py) |
 | `BUILD_NUMBER.md` | Fork-Iterationszähler, +1 pro Arbeitsschritt | laufend |
-| `COMPLIANCE-TABLE.md` | PR-Compliance-Tracking | **ab Phase 2** |
+| `COMPLIANCE-TABLE.md` | PR-Compliance-Tracking | **jeder PR (immer Pflicht)** |
 | `docs/architecture/ADR-*.md` | eine ADR pro Architektur-Entscheidung | bei Entscheidung |
 
 ---

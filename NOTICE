@@ -1,0 +1,30 @@
+PAL MCP Server
+Copyright (c) 2026 Christian Ullmann
+Licensed under the Elastic License 2.0 — see LICENSE.
+
+-------------------------------------------------------------------------------
+Attribution for upstream work (Apache License 2.0)
+-------------------------------------------------------------------------------
+
+This project is a derivative of the Zen MCP Server (originally released as the
+"Gemini MCP Server"), developed by Beehive Innovations:
+
+    Copyright 2025 Beehive Innovations
+    https://github.com/BeehiveInnovations
+    Originally licensed under the Apache License, Version 2.0.
+
+Substantial portions of this software derive from that Apache-2.0-licensed work.
+Those original portions remain available under the Apache License, Version 2.0;
+a verbatim copy of that license is retained in this repository as
+LICENSE-APACHE-2.0 (per Apache-2.0 section 4(a)).
+
+Changes: The project has been renamed (Gemini MCP -> Zen MCP -> PAL MCP) and
+substantially modified — including the addition of a Provider Abstraction Layer,
+the subscription-CLI backend (PAL_BACKEND / CLIModelProvider, ADR-002), the
+cli_consensus tool (ADR-001), and numerous other features and fixes.
+
+The combined work — the original Apache-2.0 portions together with all
+subsequent modifications — is distributed under the Elastic License 2.0.
+This NOTICE preserves the upstream attribution required by Apache-2.0
+sections 4(b), 4(c), and 4(d); it does not grant any additional rights beyond
+those stated in LICENSE and LICENSE-APACHE-2.0.

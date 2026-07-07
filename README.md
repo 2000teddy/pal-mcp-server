@@ -432,7 +432,11 @@ DISABLED_TOOLS=
 
 ## License
 
-Apache 2.0 License - see [LICENSE](LICENSE) file for details.
+This project is **source-available**, licensed under the **Elastic License 2.0 (ELv2)** — see [LICENSE](LICENSE).
+
+**Free for your own use** — read, modify, distribute, and run it in your own operation (private or commercial, any number of machines), at no cost. Under ELv2 you may **not** provide it to third parties as a hosted or managed service (giving them access to a substantial set of its features), nor remove or obscure the license notices. This is *source-available*, **not** "Open Source" in the OSI sense (whose definition forbids exactly the hosted-service field-of-use restriction ELv2 imposes).
+
+PAL MCP derives from the Apache-2.0-licensed [Zen MCP Server](https://github.com/BeehiveInnovations) by Beehive Innovations; that upstream attribution is preserved in [NOTICE](NOTICE) and the original license text in [LICENSE-APACHE-2.0](LICENSE-APACHE-2.0).
 
 ## Acknowledgments
 

@@ -2,6 +2,160 @@
 
 <!-- version list -->
 
+## v9.9.0 (2026-07-08)
+
+### Bug Fixes
+
+- **cli_consensus**: Rate-limit heuristic must not scan the model answer
+  ([`6f7c0df`](https://github.com/2000teddy/pal-mcp-server/commit/6f7c0dfd1ca49a116acc044f683f15b0e7f6605b))
+
+- **codereview**: Reviewer-Guard haerten (codex-Review-Findings)
+  ([#2](https://github.com/2000teddy/pal-mcp-server/pull/2),
+  [`6577bc5`](https://github.com/2000teddy/pal-mcp-server/commit/6577bc5c288a22cafcf290f96e3af5eace776c61))
+
+- **listmodels**: Show the subscription-CLI provider, registry-based Custom status
+  ([`2039781`](https://github.com/2000teddy/pal-mcp-server/commit/2039781141283a3e3bda87d47db87e16447339f4))
+
+- **simulator**: Per_tool_deduplication — precommit schema requires total_steps >= 3
+  ([`1405f80`](https://github.com/2000teddy/pal-mcp-server/commit/1405f80cb93c49ed4ffb12d5323cd286edbffa09))
+
+- **simulator**: Shim required chat param 'working_directory_absolute_path'
+  ([`71b6c58`](https://github.com/2000teddy/pal-mcp-server/commit/71b6c5804e278f1ed25e05372434402816343858))
+
+- **simulator**: Summary counted never-run tests as FAIL in --quick/--tests mode
+  ([`78235dd`](https://github.com/2000teddy/pal-mcp-server/commit/78235dd7a3159e6183b2b999377ed83bc904a51d))
+
+- **tests**: Align Gemini model alias tests with current model aliases
+  ([`03cb50e`](https://github.com/2000teddy/pal-mcp-server/commit/03cb50e4940210e3619c7b4580a00ef35de07151))
+
+### Chores
+
+- Sync version to config.py [skip ci]
+  ([`7afc7c1`](https://github.com/2000teddy/pal-mcp-server/commit/7afc7c1cc96e23992c8f105f960132c657883bb1))
+
+- **docs**: MD-Pflege — Altlasten nachziehen + Rollen/Phasen klären (Teil A)
+  ([#12](https://github.com/2000teddy/pal-mcp-server/pull/12),
+  [`291e3f9`](https://github.com/2000teddy/pal-mcp-server/commit/291e3f9ed20e949f97be424af8b5384754f08491))
+
+- **license**: Relicense to Elastic License 2.0 (source-available)
+  ([#10](https://github.com/2000teddy/pal-mcp-server/pull/10),
+  [`6b56be2`](https://github.com/2000teddy/pal-mcp-server/commit/6b56be2b2fea99c6f8872e0a90c07344926c9d4c))
+
+### Code Style
+
+- Black/isort formatting (repo-wide gate) ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+### Documentation
+
+- ADR-002 (global CLI backend), PAL_BACKEND in .env.example and guides
+  ([`491b77b`](https://github.com/2000teddy/pal-mcp-server/commit/491b77ba663aae98e88e9bb1bd9af906c8439dbe))
+
+- CLAUDE.md -> ThinkHub-Lese-Reihenfolge + DEVELOPMENT-WORKFLOW-Pointer
+  ([#8](https://github.com/2000teddy/pal-mcp-server/pull/8),
+  [`7e4db00`](https://github.com/2000teddy/pal-mcp-server/commit/7e4db001eecee93efe6fc6acbb183b85e0435930))
+
+- Nacht-Lauf-Zusammenfassung API->CLI-Migration (ADR-002)
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+- **adr**: API-Token-Tools auf Subscription-CLIs migrieren
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+- **cli_consensus**: Codex-Review-Findings fixen
+  ([#9](https://github.com/2000teddy/pal-mcp-server/pull/9),
+  [`6a2ba55`](https://github.com/2000teddy/pal-mcp-server/commit/6a2ba55144116b6c3d6ab89ba8a5befa8e4fa14f))
+
+- **cli_consensus**: User-doc polish — Limits/Validation, Output-Felder, Plan-Verweis
+  ([#9](https://github.com/2000teddy/pal-mcp-server/pull/9),
+  [`6a2ba55`](https://github.com/2000teddy/pal-mcp-server/commit/6a2ba55144116b6c3d6ab89ba8a5befa8e4fa14f))
+
+- **license**: Replace remaining "open-source" wording with source-available (ELv2)
+  ([#11](https://github.com/2000teddy/pal-mcp-server/pull/11),
+  [`3ba46a0`](https://github.com/2000teddy/pal-mcp-server/commit/3ba46a0cbaef190926ede322a8f44a6c81a149b9))
+
+- **todo**: Heimstatt-Notiz fuer Hub-Deploy-Runbook (Folge-Brocken)
+  ([`19e88a3`](https://github.com/2000teddy/pal-mcp-server/commit/19e88a3ec5d2c602d44bd3da79666719957e23c7))
+
+- **todo**: TODO-Punkt CLAUDE.md-Lese-Reihenfolge als erledigt markiert
+  ([#8](https://github.com/2000teddy/pal-mcp-server/pull/8),
+  [`7e4db00`](https://github.com/2000teddy/pal-mcp-server/commit/7e4db001eecee93efe6fc6acbb183b85e0435930))
+
+- **workflow**: Abnahme-Regel — "fertig" = echter Testbeleg, MCP = Zwei-Peer-Beleg
+  ([#6](https://github.com/2000teddy/pal-mcp-server/pull/6),
+  [`602058b`](https://github.com/2000teddy/pal-mcp-server/commit/602058b988922b32ff99180095088fea4c6def12))
+
+- **workflow**: DoD-Zusatz — Testbeleg moeglichst lebensnah/nuetzlich
+  ([#7](https://github.com/2000teddy/pal-mcp-server/pull/7),
+  [`f033559`](https://github.com/2000teddy/pal-mcp-server/commit/f03355942669e55212e90a18ba7277e6b6ffc7d6))
+
+### Features
+
+- Nativen MiniMax-M2.7-Provider + GPT-5.5/5.4-Config + Tests
+  ([`06c1d2e`](https://github.com/2000teddy/pal-mcp-server/commit/06c1d2edb8175654f28d7457684d5dad78f72b92))
+
+- Pal API-Token-Tools auf Subscription-CLIs migrieren (ADR-002)
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+- **chat+consensus**: Generate ueber Subscription-CLI-Backend statt Provider-API
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+- **cli_consensus**: Blinded multi-model consensus over subscription CLIs
+  ([`1e2838d`](https://github.com/2000teddy/pal-mcp-server/commit/1e2838d2bc4b2ee6d256bad41cd9001f00a84e1d))
+
+- **clink**: Agy als vollwertiger clink-Client (prompt-as-arg)
+  ([#4](https://github.com/2000teddy/pal-mcp-server/pull/4),
+  [`6f10251`](https://github.com/2000teddy/pal-mcp-server/commit/6f10251b846b1579d5fa3c120170bb66c6d6aeb9))
+
+- **codereview**: Reviewer-Guard (nur claude/codex/agy) + optionaler key-freier Startup
+  ([#2](https://github.com/2000teddy/pal-mcp-server/pull/2),
+  [`6577bc5`](https://github.com/2000teddy/pal-mcp-server/commit/6577bc5c288a22cafcf290f96e3af5eace776c61))
+
+- **codereview**: Reviewer-Guard — nur claude/codex/agy, nie MiniMax/pal:chat
+  ([#2](https://github.com/2000teddy/pal-mcp-server/pull/2),
+  [`6577bc5`](https://github.com/2000teddy/pal-mcp-server/commit/6577bc5c288a22cafcf290f96e3af5eace776c61))
+
+- **gemini**: Gemini 3.1 Pro Preview + Gemini 3.5 Flash, ersetze deprecated 3-pro-preview
+  ([`9205ead`](https://github.com/2000teddy/pal-mcp-server/commit/9205ead7d7cc41a3105a307bb64f1de9f7c27cfa))
+
+- **keyfree**: CLI-Tools ohne Provider lauffaehig
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+- **minimax**: MiniMax-M3 nativ + reale Specs, minimax-Default-Alias auf M3
+  ([`f093d67`](https://github.com/2000teddy/pal-mcp-server/commit/f093d67f8aa3ab7f17ea5683673c91adcc756138))
+
+- **providers**: CLIModelProvider — subscription CLIs behind the standard provider interface
+  ([`fb8faea`](https://github.com/2000teddy/pal-mcp-server/commit/fb8faea6c40977c13cf2c853283f0d2d03c89fc4))
+
+- **server**: Global PAL_BACKEND switch — subscription default, api emergency fallback
+  ([`a8e1382`](https://github.com/2000teddy/pal-mcp-server/commit/a8e1382a5bc735f3062d02034bd000759662c971))
+
+- **server**: Optionaler key-freier Startup via PAL_MCP_ALLOW_KEYFREE_STARTUP
+  ([#2](https://github.com/2000teddy/pal-mcp-server/pull/2),
+  [`6577bc5`](https://github.com/2000teddy/pal-mcp-server/commit/6577bc5c288a22cafcf290f96e3af5eace776c61))
+
+- **workflow**: Expert_analysis ueber Subscription-CLI-Backend statt Provider-API
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+### Testing
+
+- Unit, switch and per-tool parity coverage for the subscription backend
+  ([`3b119a0`](https://github.com/2000teddy/pal-mcp-server/commit/3b119a039f758958edb1a251c4cf1ae060dd056f))
+
+- **conftest**: Hermetischer Unit-Gate — keine echten CLI-Subprozesse
+  ([#3](https://github.com/2000teddy/pal-mcp-server/pull/3),
+  [`5792b73`](https://github.com/2000teddy/pal-mcp-server/commit/5792b73648b0990f463d8d069743b308d2e801f4))
+
+- **live**: Praxisnaher CLI-Struktur-Smoke ueber echte Abo-CLIs
+  ([#1](https://github.com/2000teddy/pal-mcp-server/pull/1),
+  [`31ceacd`](https://github.com/2000teddy/pal-mcp-server/commit/31ceacdbb97c7a169aed4e7573eadaeccdc64bf5))
+
+
 ## v9.8.2 (2025-12-15)
 
 ### Bug Fixes

@@ -3,6 +3,39 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-07-07 — MD-Pflege: Altlasten nachgezogen + Rollen/Phasen geklärt
+
+Rückstand aus Christians MD-Pflege-Audit (`~/hermes/reference/2026-07-07_MD-Pflege-Audit-…`)
+aufgeholt: CHANGES.md und HISTORY.md waren seit dem 18.06. eingeschlafen (PRs #1–#11 ohne Spur),
+COMPLIANCE-TABLE.md verwaist. Diese Erzählung + die Änderungshistorie sind jetzt bis #11 nachgetragen,
+die Compliance-Tabelle rückwirkend befüllt. Der **Phasen-Schalter ist gestrichen**: COMPLIANCE-TABLE
+ist ab sofort in **jedem** PR Pflicht (nicht mehr „ab Phase 2" — der Trigger, den nie jemand ausrief,
+war genau der Grund fürs Einschlafen). Die **Rollen der fünf Doku-Dateien** sind in `CONTRIBUTING.md`
+festgeschrieben (changes/ = je PR granular · CHANGES.md = technische Programm-Historie · HISTORY.md =
+Agenten-Erzählung, bleibt · COMPLIANCE-TABLE.md = immer Pflicht · TODO.md = Backlog + Fortschritt).
+Folge-PR baut das warnende CI-Gate (Ebene 1: `changes/`-Eintrag + COMPLIANCE-Zeile je PR, 2 Wochen
+warnend, dann blockierend).
+
+## 2026-06-19…07-07 — Nachtrag: was zwischen Build 2 und der MD-Pflege lief (#1–#11)
+
+Für die Lücke, die das Audit fand, hier die Erzählung in Kürze:
+
+- **ADR-002 — der globale Subscription-Backend-Schalter (#1).** Der in ADR-001 verworfene
+  „CLI-*Provider* für alle Tools" wurde bewusst revidiert: `PAL_BACKEND=subscription` ist jetzt der
+  Normalbetrieb, alle Tools laufen über einen regulären `CLIModelProvider` hinter dem Standard-Interface
+  (kein Tool angefasst/dupliziert), synchron via subprocess (löst das alte Deadlock-Argument), mit
+  Alias-Spiegelung, damit kein Modellwunsch unauflösbar ist. `api` bleibt als Notfall. Auf main
+  gelandet als „ours-merge" (7887dd7), der Minimacs CLI-Provider-Variante als Zielarchitektur adoptierte.
+- **Härtung drumherum:** Reviewer-Guard (#2, Review nur claude/codex/agy) + key-freier Startup;
+  hermetischer Unit-Gate (#3, keine echten CLI-Subprozesse im Test); `agy` als vollwertiger
+  clink-Client (#4, prompt-as-arg).
+- **Doku-Welle:** Hub-Deploy-Runbook (#5, später in ADR-002 gefaltet), Abnahme-Regel/DoD „echter
+  Testbeleg = fertig", MCP = Zwei-Peer-Beleg (#6/#7), CLAUDE.md-Lese-Reihenfolge (#8),
+  cli_consensus-Nutzer-Doku (#9).
+- **ELv2-Relicense (#10/#11):** Apache 2.0 → Elastic License 2.0; Sonderfall ggü. den Geschwister-Repos,
+  weil pal Apache-Fremdcode (Beehive Innovations) derivativ nutzt → NOTICE + erhaltene Apache-Kopie.
+  Beide PRs haben eigene `changes/`-Einträge.
+
 ## 2026-06-17 — cli_consensus gebaut + selbst-reviewt (Build 2)
 
 `cli_consensus` implementiert (ADR-001, „Option 1.5"): neues Tool + `CliBackend`-Schicht

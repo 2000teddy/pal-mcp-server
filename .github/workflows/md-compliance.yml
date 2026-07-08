@@ -1,0 +1,84 @@
+name: MD-Compliance Gate
+
+# Ebene 1 aus Christians MD-Pflege-Beschluss (2026-07-07):
+# Prüft je PR mindestens (a) einen changes/-Eintrag im Diff und (b) eine
+# COMPLIANCE-TABLE.md-Zeile im Diff.
+#
+# Rollout: 2 Wochen WARNEND (kommentiert, blockiert nicht), danach BLOCKIEREND.
+# Umschaltung automatisch über WARN_UNTIL (kein zweiter Commit nötig). Damit der
+# Check tatsächlich blockt, muss er nach dem Fenster in den Branch-Protection-
+# Rules als *required status check* eingetragen werden (Repo-Einstellung).
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  md-compliance:
+    runs-on: ubuntu-latest
+    env:
+      # Ende des Warn-Fensters (ISO). Bis dahin: nur Warnung (exit 0).
+      # Ab diesem Tag: Verstöße blockieren (exit 1).
+      WARN_UNTIL: "2026-07-21"
+      PR_TITLE: ${{ github.event.pull_request.title }}
+      PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changes/ entry + COMPLIANCE-TABLE row
+        run: |
+          set -euo pipefail
+          BASE="origin/${{ github.base_ref }}"
+          git fetch --no-tags --depth=1 origin "${{ github.base_ref }}" || true
+
+          # Geänderte Dateien im PR (Basis...HEAD)
+          CHANGED="$(git diff --name-only "${BASE}"...HEAD || git diff --name-only "${{ github.event.pull_request.base.sha }}"...HEAD)"
+          echo "Changed files:"; echo "${CHANGED}" | sed 's/^/  /'
+
+          # --- Ausnahme-Kennzeichnung (nur für den changes/-Teil) ---
+          exempt_changes=0
+          case "${PR_TITLE}" in
+            docs:*|docs\(*|chore:*|chore\(*) exempt_changes=1 ;;
+          esac
+          case ",${PR_LABELS}," in
+            *,no-doc-needed,*) exempt_changes=1 ;;
+          esac
+
+          violations=0
+
+          # --- Check 1: changes/-Eintrag (ausnahmefähig) ---
+          if echo "${CHANGED}" | grep -qE '^changes/.+\.md$'; then
+            echo "✓ changes/-Eintrag vorhanden."
+          elif [ "${exempt_changes}" = "1" ]; then
+            echo "✓ changes/-Eintrag fehlt, aber Ausnahme greift (docs:/chore: oder Label no-doc-needed)."
+          else
+            echo "✗ Kein changes/-Eintrag im Diff und keine Ausnahme (docs:/chore:-Titel oder Label 'no-doc-needed')."
+            violations=$((violations+1))
+          fi
+
+          # --- Check 2: COMPLIANCE-TABLE.md-Zeile (IMMER Pflicht, keine Ausnahme) ---
+          if echo "${CHANGED}" | grep -qE '^COMPLIANCE-TABLE\.md$'; then
+            echo "✓ COMPLIANCE-TABLE.md im Diff angefasst."
+          else
+            echo "✗ COMPLIANCE-TABLE.md unverändert — jede PR braucht eine COMPLIANCE-Zeile (immer Pflicht)."
+            violations=$((violations+1))
+          fi
+
+          # --- Verdikt: warnend vs. blockierend ---
+          TODAY="$(date -u +%F)"
+          if [ "${violations}" -eq 0 ]; then
+            echo "MD-Compliance: OK."
+            exit 0
+          fi
+          if [ "${TODAY}" \< "${WARN_UNTIL}" ]; then
+            echo "::warning::MD-Compliance: ${violations} Verstoß/Verstöße — WARN-Fenster bis ${WARN_UNTIL}, blockiert noch nicht. Bitte changes/-Eintrag + COMPLIANCE-Zeile nachziehen."
+            exit 0
+          else
+            echo "::error::MD-Compliance: ${violations} Verstoß/Verstöße — Warn-Fenster (${WARN_UNTIL}) abgelaufen, dieser Check blockiert jetzt."
+            exit 1
+          fi

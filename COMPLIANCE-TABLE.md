@@ -23,4 +23,5 @@
 | 10 | #10 | ELv2-Relicense | 2026-07-07 | -- | ok | ok | ok | ok | ok | changes/ vorhanden; NOTICE-Sonderfall |
 | 11 | #11 | ELv2-Wording source-available | 2026-07-07 | -- | ok | -- | ok | ok | ok | changes/ vorhanden |
 | 12 | #12 | MD-Pflege: Altlasten + Rollen + Phasen-Schalter streichen | 2026-07-07 | -- | ok | ok | ok | ok | ok | changes/ vorhanden |
-| 13 | (dieser PR) | Ebene 1: warnendes MD-Compliance CI-Gate | 2026-07-07 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; CI-only |
+| 14 | #14 | Ebene 1: warnendes MD-Compliance CI-Gate (Reland auf main) | 2026-07-08 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; CI-only, Inhalt von #13 sauber auf main erneut gelandet |
+| 15 | (dieser PR) | MD-Nachtrag: PR #14 in CHANGES/COMPLIANCE dokumentiert | 2026-07-09 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; reiner MD-Nachtrag zu #14 |

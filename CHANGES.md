@@ -28,6 +28,7 @@
   möglichst lebensnah (`DEVELOPMENT-WORKFLOW.md`).
 - **CLAUDE.md ThinkHub-Lese-Reihenfolge** (#8) + DEVELOPMENT-WORKFLOW-Pointer.
 - **`cli_consensus` Nutzer-Doku** (#9): Limits/Validation, Output-Felder, Plan-Verweis.
+- **Warn-Modus MD-Compliance-Gate relandet** (#14): `.github/workflows/md-compliance.yml` nach geschlossenem Stack-PR #13 unverändert sauber auf `main` erneut aufgelegt; lokal verifiziert mit `git diff --check`, YAML-Parse und `bash -n` des Workflow-Skripts.
 
 ### Earlier (Build 1–2, vor #1)
 - **`cli_consensus`** tool (Build 2): blinded multi-model consensus over subscription CLIs

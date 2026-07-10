@@ -7,11 +7,13 @@
 
 ## 🟠 In Arbeit
 
-- [ ] **MD-Pflege / Durchsetzungssystem** (Christians Beschluss 2026-07-07):
+- [x] **MD-Pflege / Durchsetzungssystem** (Christians Beschluss 2026-07-07) — Ebene-1-Kern erledigt:
   - [x] Altlasten: CHANGES.md + HISTORY.md bis #11 nachgezogen, COMPLIANCE-TABLE rückwirkend befüllt
   - [x] Phasen-Schalter gestrichen (COMPLIANCE immer Pflicht)
   - [x] Rollen der Doku-Dateien in `CONTRIBUTING.md` festgeschrieben
-  - [ ] Ebene 1: warnendes CI-Gate (`changes/`-Eintrag + COMPLIANCE-Zeile je PR), 2 Wochen warnend → blockierend *(Folge-PR)*
+  - [x] Ebene 1: warnendes CI-Gate gelandet (#14, `.github/workflows/md-compliance.yml`); Warn→blockierend
+    flippt automatisch am `WARN_UNTIL=2026-07-21` (kein zweiter Commit). **Repo-Admin-Follow-up offen:**
+    Check nach dem Warn-Fenster in Branch-Protection als *required status check* eintragen.
 
 ## ✅ cli_consensus + Subscription-Backend (Build 2 → #1–#9)
 

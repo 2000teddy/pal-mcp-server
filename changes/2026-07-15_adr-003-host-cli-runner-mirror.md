@@ -1,12 +1,15 @@
 # 2026-07-15 — ADR-003 PAL-Repo-Referenzspiegel + CO-01-Rebuild-Konformität
 
 Repo-naher Vorbau für den CO-01-Rebuild von `thinkhub-pal`. Der Rebuild selbst (`docker compose …`
-unter `/opt/thinkhub`) bleibt Core-/Nacht-Fenster-Mandat (TABU); diese Änderung liefert die PAL-seitige
-autoritative Referenz, gegen die die neu gebaute Image-/`clink`-Version geprüft wird.
+unter `/opt/thinkhub`) bleibt Core-/Nacht-Fenster-Mandat (TABU); diese Änderung liefert einen
+**nicht-normativen Referenzspiegel** der Core-Vertragsquelle, gegen den die neu gebaute
+Image-/`clink`-Version geprüft wird. Normativ bleibt allein Core-`ADR-003` §8 (Core PR #52).
 
 ## Was
-- **Neu `docs/architecture/ADR-003-host-cli-runner.md`:** Referenz-Spiegel (kein Fork) auf den Core-Runner-Vertrag
-  (Quelle: Core-`ADR-003` + Handoff `~/hermes/reports/2026-07-15_1115_ADR-003-runner-contract-handoff.md`).
+- **Neu `docs/architecture/ADR-003-host-cli-runner.md`:** nicht-normativer Referenz-Spiegel (kein Fork).
+  **Normative Quelle: allein die gemergte Core-`ADR-003` §8 (Core PR #52)**, gepinnt durch
+  `tests/unit/test_adr003_contract_doc.py`. Handoff `~/hermes/reports/2026-07-15_1115_ADR-003-runner-contract-handoff.md`
+  und Bridge-Karte `~/hermes/reports/2026-07-15_1049_CO-01-bridge-runner-verifikation.md` = nur historischer/Live-**Beleg**.
   Enthält Draht-Vertrag (§2), Socket-Konvention (§3), Ordering-Invariante (§5) und eine
   **CO-01-Rebuild-Konformitäts-Checkliste** (C1–C5) mit Ist-Stand am HEAD `f5173d5`.
 - **`docs/architecture/README.md`:** ADR-Index nachgezogen (001/002 auf `Implemented`, 003 als `Reference`).

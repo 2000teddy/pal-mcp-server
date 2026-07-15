@@ -27,4 +27,6 @@ Positiv, negativ, Risiken.
 
 | ADR | Titel | Status |
 |-----|-------|--------|
-| 001 | cli_consensus — Multi-Modell-Konsens über Abo-CLIs | _folgt (Paket 2)_ |
+| 001 | cli_consensus — Multi-Modell-Konsens über Abo-CLIs | Implemented |
+| 002 | Globaler CLI-Backend-Schalter (`PAL_BACKEND`) | Implemented |
+| 003 | Keyfree Host-CLI-Runner — Draht-Vertrag & CO-01-Rebuild-Konformität (Referenz-Spiegel; Eigentum Core) | Reference |

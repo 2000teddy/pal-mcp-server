@@ -26,4 +26,5 @@
 | 14 | #14 | Ebene 1: warnendes MD-Compliance CI-Gate (Reland auf main) | 2026-07-08 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; CI-only, Inhalt von #13 sauber auf main erneut gelandet |
 | 15 | #15 | MD-Nachtrag: PR #14 in CHANGES/COMPLIANCE dokumentiert | 2026-07-09 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; reiner MD-Nachtrag zu #14 |
 | 16 | #16 | TODO-Reconcile: Ebene-1-CI-Gate als gelandet abgehakt | 2026-07-10 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; reiner TODO-Reconcile (Ebene 2) |
-| 17 | (dieser PR) | TODO-Reconcile: CO-01-Blocker auf Realität umgeschrieben (TL-07 erbracht → Core-Fenster + ADR-003) | 2026-07-15 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; reiner Doku-Reword, Zeiger auf Bridge-Runner-Report |
+| 17 | #17 | TODO-Reconcile: CO-01-Blocker auf Realität umgeschrieben (TL-07 erbracht → Core-Fenster + ADR-003) | 2026-07-15 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; reiner Doku-Reword, Zeiger auf Bridge-Runner-Report |
+| 18 | (dieser PR) | ADR-003 PAL-Repo-Referenzspiegel + CO-01-Rebuild-Konformitäts-Checkliste | 2026-07-15 | -- | ok | -- | ok | ok | ok | changes/ vorhanden; Referenz auf Core-Vertrag, /opt read-only, kein Rebuild |

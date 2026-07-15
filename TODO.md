@@ -38,8 +38,11 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 - [ ] CO-01 pal-Rebuild auf TH01 — ThinkLocal-Zwei-Peer-Proof ist **erbracht** (TL-07 grün, 15.07.,
   `~/hermes/reports/2026-07-15_0918_TL07-zwei-peer-proof-ERBRACHT.md`); Gate-Revalidierung am HEAD `3fdb27d`
   grün (`~/hermes/reports/2026-07-15_0934_CO-01-pal-gate-revalidation.md`). **Blocker jetzt nicht mehr TL-07,
-  sondern:** (a) **Core-/Hub-Mandat + Nacht-Fenster** — Rebuild-Trigger (`docker compose … thinkhub-pal`
-  unter `/opt/thinkhub`) = TABU für Admin-/PAL-Lane, Core stößt ihn an; (b) **geteilter Runner-Vertrag
-  ADR-003** — der Host-CLI-Runner `/opt/thinkhub/core/pal-runner/` ist noch nirgends dokumentiert.
-  Bridge-Pfad live grün + Lücke belegt: `~/hermes/reports/2026-07-15_1049_CO-01-bridge-runner-verifikation.md`
-  (Handoff-Prep: `~/hermes/reports/2026-07-07-1832-pal-handoff-prep.md`).
+  sondern nur noch:** (a) **Core-/Hub-Mandat + Nacht-Fenster** — Rebuild-Trigger (`docker compose … thinkhub-pal`
+  unter `/opt/thinkhub`) = TABU für Admin-/PAL-Lane, Core stößt ihn an. Blocker (b) **Runner-Vertrag ADR-003**
+  ist **geschlossen** — die gemergte **Core-`ADR-003` §8 (Core PR #52)** verankert den Vertrag durable
+  (gepinnt via `tests/unit/test_adr003_contract_doc.py`). PAL-seitig als Referenz gespiegelt:
+  `docs/architecture/ADR-003-host-cli-runner.md`. Nur Belege (nicht normativ): Core-Handoff
+  `~/hermes/reports/2026-07-15_1115_ADR-003-runner-contract-handoff.md`, Bridge-Karte
+  `~/hermes/reports/2026-07-15_1049_CO-01-bridge-runner-verifikation.md`, Handoff-Prep
+  `~/hermes/reports/2026-07-07-1832-pal-handoff-prep.md`.

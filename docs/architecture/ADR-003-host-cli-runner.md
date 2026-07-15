@@ -1,8 +1,11 @@
 # ADR-003 (PAL-Repo-Spiegel) — Keyfree Host-CLI-Runner: Draht-Vertrag & CO-01-Rebuild-Konformität
 
-> **Status:** Referenz-Spiegel · **Eigentum:** Core · **Autoritative Quelle:** Core-Repo
-> `docs/architecture/ADR-003-pal-keyfree-host-cli-runner.md` (Design-Entscheidung) +
-> Core→PAL-Handoff `~/hermes/reports/2026-07-15_1115_ADR-003-runner-contract-handoff.md` (Draht-Vertrag).
+> **Status:** Referenz-Spiegel · **Eigentum:** Core · **Einzige normative Quelle:** die **gemergte** Core-`ADR-003`
+> `docs/architecture/ADR-003-pal-keyfree-host-cli-runner.md` **§8 (Contract)** — gelandet als **Core PR #52**,
+> per `tests/unit/test_adr003_contract_doc.py` an den Runner-Code gepinnt. Bei jeder Abweichung gilt Core §8, nicht dieser Spiegel.
+> **Nur historischer/Live-Beleg (nicht normativ):** Core→PAL-Handoff
+> `~/hermes/reports/2026-07-15_1115_ADR-003-runner-contract-handoff.md` und PAL-Bridge-Karte
+> `~/hermes/reports/2026-07-15_1049_CO-01-bridge-runner-verifikation.md`.
 >
 > **Warum dieser Spiegel:** Der Runner-Code lebt im Core-Baum (`/opt/thinkhub/core/pal-runner/`, TABU für
 > Admin/PAL). Im PAL-Repo war `grep ADR-003` = 0 Treffer — der Vertrag `server.py`/`clink` → Container-Shim →
@@ -18,7 +21,7 @@ Die PAL-Seite spricht den Runner **nicht direkt**, sondern ruft `claude`/`codex`
 **Shim** (`_forwarder`), der über AF_UNIX an den Host-Runner weiterreicht. PAL-seitige Vertragskonformität =
 korrekte Aufruf-Konstruktion + kompatible Limits, nicht das Framing selbst (das lebt im Shim/Runner, Core-Baum).
 
-## 2 · Draht-Vertrag (autoritativ im Handoff §2 — hier als Referenz)
+## 2 · Draht-Vertrag (normativ: Core `ADR-003` §8 / Core PR #52 — hier nur als Referenz gespiegelt)
 
 - **Transport:** `AF_UNIX` / `SOCK_STREAM`, eine Anfrage pro Verbindung.
 - **Framing:** 4-Byte big-endian Länge (`struct >I`) + UTF-8-JSON-Body.
@@ -57,5 +60,7 @@ Das ist ein **Core-/Nacht-Fenster-Schritt**; hier nur als Referenz, damit der Re
 ## 6 · Grenzen
 
 Reiner Referenz-Spiegel. Kein Runner-Code, kein Framing-Fork. Die **durable** Vertrags-Verankerung
-(Erweiterung der Core-`ADR-003` um §2/§3/§5) ist ein Core-Repo-PR (`/opt`-Write) und bleibt Core-Eigentum
-(Handoff §7.1). Dieser Spiegel deckt nur die PAL-Repo-Seite (Handoff §7.2).
+ist **bereits gelandet**: Core-`ADR-003` §8 (Contract) via **Core PR #52**, an den Runner-Code gepinnt durch
+`tests/unit/test_adr003_contract_doc.py`. Sie ist damit **nicht mehr ausstehend**; der frühere Handoff war laut
+seinem eigenen §7 nur ein temporärer Vorläufer dieser Verankerung. Dieser Spiegel deckt allein die PAL-Repo-Seite
+und **referenziert** Core §8 als Quelle — er ergänzt oder ändert den Vertrag nicht.

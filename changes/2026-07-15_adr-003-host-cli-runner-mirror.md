@@ -30,6 +30,12 @@ Core-Baum sichtbaren Vertrag — Drift-Risiko bei Socket-Env, Framing, Whitelist
 Reine MD-Änderung (docs/architecture + TODO), **kein** Python/Dockerfile/CI → kein Test-/Build-Delta.
 `/opt/thinkhub` nur read-only referenziert (kein Write, kein Rebuild). `git diff --check` sauber.
 
+## Review-Nachtrag (codex CHANGES-NEEDED, 2026-07-15)
+Quellen-Hierarchie geschärft: **einzige normative Quelle = gemergte Core-`ADR-003` §8 (Contract) via Core PR #52**,
+gepinnt durch `tests/unit/test_adr003_contract_doc.py`. Handoff- und Bridge-Reports sind nur noch
+historischer/Live-Beleg, nicht autoritativ. Stale Zukunfts-Formulierung in §6 („durable Verankerung ist ein
+Core-Repo-PR / steht aus") entfernt — die Verankerung ist bereits gelandet.
+
 ## Status
 Kein Selbst-Merge, kein PR ohne echten Review (claude/codex/agy, nie MiniMax/pal:chat).
 Auf Feature-Branch `docs/adr-003-host-cli-runner-20260715`, wartet auf Review-Freigabe.

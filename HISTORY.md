@@ -44,6 +44,22 @@ und **alle acht** Zeilen in `requirements-dev.txt` haben ebenfalls keine Obergre
 diesem PR ist deshalb nicht „mcp war schuld", sondern: offene Versionsbereiche plus ein CI, das nur
 auf PRs läuft, ergeben eine Zeitbombe mit unbekannter Laufzeit.
 
+**Nachtrag am selben Tag — die Checkbox, die der Rebase vergessen hat.** Der Watchdog-Sweep um
+15:0x UTC hat gemeldet, dass `git diff origin/main..origin/fix/mcp-pin-upper-bound -- TODO.md`
+**leer** ist: der Pin war gesetzt, aber `TODO.md:47` führte ihn im Branch weiter als offene
+🔴-Sofortmaßnahme. Nachgeprüft, trifft zu. Die Ursache ist lehrreicher als der Fehler: die Anweisung
+„`TODO.md:47` bleibt offen" war **richtig**, solange die Zeile zu #19 gehörte und #20 noch rot war —
+und ist mit dem Merge von #19 um 07:39 UTC ungültig geworden, ohne dass jemand sie neu bewertet hat.
+Ein Reconcile-Punkt, der an einer Merge-Reihenfolge hängt, ist nach dem ersten Merge **erneut**
+fällig; genau diesen zweiten Blick hat der Rebase nicht gemacht.
+
+Abgehakt wurde nicht einfach das Kästchen. Der Punkt enthielt zwei Dinge, die der Pin **nicht**
+erledigt — die ungeprüfte Restfläche (`requirements.txt:2-4` und alle acht Zeilen in
+`requirements-dev.txt`) und die mcp-2.x-Migration. Als Nebensatz unter einem `[x]` wären beide
+verschwunden. Sie stehen deshalb jetzt als eigene offene Einträge unter „🟡 Offen". **Die Lehre für
+Reconcile-Arbeit:** ein Häkchen gilt für genau das, was belegt ist; alles andere, was im selben
+Absatz mitgeschleppt wurde, muss vorher heraus.
+
 ## 2026-10-26 — 13 Wochen Stillstand als Stillstand benannt (TODO-Kopfzeile KW44)
 
 Zwischen dem 15.07. und heute ist in diesem Repo **nichts** passiert — `main` stand die ganze Zeit

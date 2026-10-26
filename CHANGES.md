@@ -29,6 +29,11 @@
   Matrix-Versionen. Der Pin hält die Auflösung in der 1er-Reihe (frische venv: **mcp 1.30.0**,
   `list_tools` vorhanden) und lässt Patch-/Minor-Updates weiter zu. Die Migration auf die
   mcp-2.x-API bleibt eine offene ADR-Frage. Siehe `changes/2026-10-26_mcp-pin-upper-bound.md`.
+  Im selben PR nachgezogen: `TODO.md:47` ist abgehakt (der Rebase hatte das Dokument nicht
+  angefasst, Watchdog-Befund 26.10.), und die beiden Punkte, die der Pin **nicht** erledigt —
+  ungeprüfte Restfläche (`requirements.txt:2-4`, alle acht Zeilen `requirements-dev.txt`) und
+  mcp-2.x-Migration — stehen jetzt als eigene offene Backlog-Einträge statt als Nebensatz unter
+  einem Häkchen.
 
 ### Docs
 - **Hub-Deploy-Runbook** (#5) — später in ADR-002 §"Hub-Deploy" eingearbeitet.

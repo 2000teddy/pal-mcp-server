@@ -83,6 +83,41 @@ Damit ist belegt, dass Wheel/sdist-Installationen nicht mehr auf 2.x laufen.
   (`pyproject.toml:124`, `patch_tags = ["fix", "perf"]`), nicht diese Lane. Ein manueller Eingriff
   in die Spiegel-Datei würde dem zuvorkommen.
 
+## Nachtrag 26.10. 15:3x — `TODO.md`-Checkbox im Branch abgehakt
+
+**Befund (Watchdog-Sweep 26.10. ~15:0x UTC):** `git diff origin/main..origin/fix/mcp-pin-upper-bound
+-- TODO.md` war **leer**. Der Rebase auf `5d41a7c` hat das Repo-Dokument nicht angefasst —
+`TODO.md:47` stand im Branch weiterhin als offene 🔴-Sofortmaßnahme, identisch zu `main`. Damit war
+genau der Zustand eingetreten, den der PR-Kommentar vom 26.10. 07:40 UTC selbst beschrieben hatte:
+ein `main` mit gesetztem Pin, das den Pin im Backlog weiter als offen führt. Der Befund trifft zu
+und ist nachgeprüft, nicht übernommen.
+
+**Warum es passiert ist:** Die Checkbox kam mit PR #19 auf `main`; die Merge-Reihenfolge
+(#19 zuerst) war bewusst so gewählt, damit sie überhaupt existiert. Der Auftrag zum Rebase sagte
+dann ausdrücklich „`TODO.md:47` bleibt offen" — korrekt für den Zeitpunkt, an dem die Zeile noch
+#19 gehörte und #20 noch nicht grün war. Nach dem Merge von #19 kippt diese Begründung, und das ist
+beim Rebase nicht nachgezogen worden. Lehre: ein Reconcile-Punkt, der an einer Merge-Reihenfolge
+hängt, muss nach dem ersten Merge **erneut** geprüft werden, nicht nur beim Setzen.
+
+**Nachgezogen in diesem PR:**
+- `TODO.md:47` → `- [x]`, mit Abschluss-Absatz (beide Deklarationen, aufgelöste Version, Testzahlen,
+  Beleg-Datei). Der ursprüngliche Punkt-Text bleibt **wörtlich** stehen; es ist ein Zusatz, keine
+  Umschreibung.
+- Die beiden Dinge, die der Pin **nicht** erledigt, sind aus dem Punkt **herausgelöst** und stehen
+  jetzt als eigene offene Einträge unter „🟡 Offen": die ungeprüfte Restfläche
+  (`requirements.txt:2-4` + alle acht Zeilen `requirements-dev.txt`) und die mcp-2.x-Migration
+  (ADR-Frage). Grund: ein `[x]` über einem Absatz, der „gleiche Drift-Fläche, noch ungeprüft"
+  enthält, liest sich als erledigt. Die Trennung ist der eigentliche Punkt des Nachtrags —
+  ohne sie hätte das Häkchen zwei offene Themen mit zugedeckt.
+- `COMPLIANCE-TABLE.md`: Zeile 19 trug noch den Platzhalter `(dieser PR)` aus der Zeit, als #19
+  offen war. Da #19 am 26.10. 07:39 UTC als `5d41a7c` gelandet ist, steht dort jetzt `#19` —
+  Konvention wie in allen Zeilen davor.
+
+**Kein Merge.** PR #20 ist laut `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md` ein eigenes
+Christian-Gate: der Merge löst `semantic-release` aus und publiziert öffentlich (`v9.9.1` +
+`ghcr.io`-Image, Repo-`visibility: PUBLIC`). Dieser Nachtrag macht den PR merge-**ready**, nicht
+merge-**bar**.
+
 ## `BUILD_NUMBER.md`: gebumpt (3 → 4)
 
 Der erste Anlauf hatte **nicht** gebumpt, mit Verweis auf die Hauspraxis der Doku-PRs #15–#18.

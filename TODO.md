@@ -44,7 +44,7 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 
 - [ ] `.env`-Backups auf dem Mac löschen (`.env.bak-openai-…`, `.env.old`) — vom Classifier blockiert, Christians Wort
 - [ ] Optional: `AGY.md` (Antigravity-CLI-Hinweise) statt/neben `GEMINI.md`
-- [ ] 🔴 **Dependency-Drift: `mcp` nach oben begrenzen.** `requirements.txt:1` pinnt `mcp>=1.0.0`
+- [x] 🔴 **Dependency-Drift: `mcp` nach oben begrenzen.** `requirements.txt:1` pinnt `mcp>=1.0.0`
   ohne Obergrenze; CI installiert inzwischen mcp **2.3.0**, wo die lowlevel-Dekoratoren entfallen
   sind → `AttributeError` an `server.py:731` beim Modul-Import, 9 Test-Dateien scheitern bei der
   Collection. Seit dem 15.07. unbemerkt, weil kein CI-Lauf stattfand. **Sofortmaßnahme:** `mcp<2`
@@ -53,6 +53,26 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   Drift-Fläche, noch ungeprüft:** `requirements.txt:2-4` und **alle** Zeilen in
   `requirements-dev.txt` haben ebenfalls keine Obergrenze. Belege:
   `changes/2026-10-26_todo-kw44-status-kopfzeile.md` §CI-Stand, PR #19.
+  **Sofortmaßnahme erledigt (26.10., PR #20 `fix/mcp-pin-upper-bound`):** `requirements.txt:1`
+  **und** `pyproject.toml:7` stehen auf `mcp>=1.0.0,<2`. Frische venv aus
+  `requirements.txt`+`requirements-dev.txt` löst **mcp 1.30.0** auf, `list_tools` vorhanden,
+  **971 passed, 0 failed**, keine Collection-Errors; CI 7/7 grün. Beleg:
+  `changes/2026-10-26_mcp-pin-upper-bound.md`. **Nicht mit erledigt** sind die mcp-2.x-Migration
+  (ADR-Frage) und die restliche Drift-Fläche — beide als eigene Punkte unten geführt, damit das
+  Häkchen hier sie nicht mit zudeckt.
+
+- [ ] 🟡 **Dependency-Drift, Restfläche — noch ungeprüft.** `requirements.txt:2-4`
+  (`google-genai`, `openai`, `pydantic`) und **alle acht** Zeilen in `requirements-dev.txt` haben
+  weiterhin **keine Obergrenze**. Aus dem 🔴-Punkt herausgelöst, als dessen Sofortmaßnahme mit
+  PR #20 geschlossen wurde; dort bewusst **nicht** mitgepinnt, weil der Auftrag zu #20 Pins ohne
+  vorherige Nennung untersagte. **Zu entscheiden:** ob und wie gepinnt wird (je Zeile ein
+  Verträglichkeits-Nachweis in frischer venv). Gleiche Mechanik wie bei `mcp`: offene
+  Versionsbereiche + ein CI, das nur auf `pull_request` läuft, bleiben unbemerkt bis zum nächsten PR.
+
+- [ ] 🟡 **Migration auf die mcp-2.x-API (ADR-Frage).** `server.py` nutzt die entfallenen
+  lowlevel-Dekoratoren an mehreren Stellen; Ersatz ist `add_request_handler` /
+  `get_request_handler` / `middleware`. Umbau, keine Umbenennung — gehört in ein ADR, nicht in
+  einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es nicht auf.
 
 ## ⏸️ Blockiert (extern)
 

@@ -60,10 +60,31 @@ weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests
   Lokal läuft `.pal_venv` noch auf **mcp 1.27.2**, dort ist `hasattr(Server, 'list_tools') == True`
   — darum fällt es beim lokalen Arbeiten nicht auf.
 - **Grün geblieben:** `lint`, `md-compliance`, `Validate PR`.
-- **Lokal am Branch-HEAD** (mcp 1.27.2): `966 passed, 5 failed, 4 skipped`. Die 5 Fehler sind die
-  bekannten Gemini-Alias-Fehler (`test_alias_target_restrictions`, `test_auto_mode`,
-  `test_image_support_integration`) — in `HISTORY.md` (2026-06-18) als vorbestehend und
-  cli_consensus-fremd geflaggt, nicht aus diesem PR.
+- **Lokale Testlage — vier Läufe, der Scope entscheidet** (26.10., mcp 1.27.2 außer Lauf 1):
+  1. CI-Scope `-m "not integration"`, mcp **2.3.0**, kein `.env` → **9 Collection-Errors** (rot).
+  2. CI-Scope, `.env` **vorhanden** → `966 passed, 5 failed, 4 skipped, 16 deselected`.
+  3. **Volle** Suite ohne `-m`-Filter, `.env` vorhanden → `971 passed, 15 failed, 5 skipped`.
+  4. `fd0b91f` via `git archive`, CI-Scope, **ohne** `.env` → **`971 passed, 0 failed`**, 4 skipped.
+
+  Lauf 2 und 3 widersprechen sich nicht: `966+5+4+16 = 991 = 971+15+5`. Die 16 deselektierten
+  Integrationstests liefern in Lauf 3 genau `5 passed + 10 failed + 1 skipped`. Maßgeblich ist
+  Lauf 2/4, weil `-m "not integration"` der CI-Scope ist (`.github/workflows/test.yml:32`).
+
+  **Die 15 Failures aus Lauf 3 sind kein Code-Defekt**, sondern zwei Gruppen:
+  - **5 = `.env`-Artefakt.** Lauf 4 ist der Kontrollversuch: derselbe Commit, dieselbe mcp-Version,
+    nur ohne `.env` → 0 Failures. Betroffen: `test_gemini_restriction_policy_alias_allows_canonical`,
+    `test_service_alias_allows_canonical_gemini`, `test_tool_schema_in_normal_mode`,
+    `test_model_field_schema_generation`, `test_image_validation_model_specific_limits`. Die
+    geladenen Keys ändern die erlaubten Modell-Aliasse und damit die erwarteten Schemata.
+  - **10 = `integration`-markiert**, brauchen `CUSTOM_API_URL`/Ollama (`CLAUDE.md`): 9 ×
+    `test_prompt_regression.py` + 1 × `test_clink_integration.py::test_clink_claude_single_digit_sum`.
+    CI deselektiert sie, sie gehen ins CI-Verdikt nicht ein.
+
+  **Konsequenz:** Lauf 4 **ist** die CI-Konfiguration (kein `.env`, mcp 1.x) → mit `mcp<2` wäre der
+  Unit-Job grün. Frühere Formulierung in diesem Eintrag („die 5 sind die bekannten
+  Gemini-Alias-Fehler aus `HISTORY.md`") war im Mechanismus falsch: die Testnamen überlappen, aber
+  es sind Umgebungsartefakte, keine latenten Code-Fehler. Korrigiert nach Watchdog-Nachmessung,
+  unabhängig nachgestellt.
 - **Prä-Existenz gemessen (26.10.):** `git archive fd0b91f` in ein Scratchpad-Verzeichnis (kein
   Repo-State angefasst), frisches venv mit `mcp==2.3.0` + `requirements.txt`, dann
   `pytest tests/ -q -m "not integration"` → **dieselben 9 Collection-Errors**

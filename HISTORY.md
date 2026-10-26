@@ -30,6 +30,13 @@ aus `requirements.txt` + `requirements-dev.txt` löst damit auf **mcp 1.30.0** a
 zurück auf die alte 1.27.2, sondern auf den aktuellen Stand der 1er-Reihe, in der die Dekoratoren
 existieren. Patch- und Minor-Updates bleiben erlaubt, Sicherheitsfixes kommen weiter an.
 
+**Merge-Reihenfolge, nicht beliebig:** `TODO.md:47` — die Checkbox für genau diesen Pin — liegt im
+Branch von PR #19, nicht auf `main`. **#19 muss zuerst**, sonst führt `TODO.md` nach dem Merge einen
+erledigten Punkt als offen. Umgekehrt bleibt #19 bis dahin CI-rot, weil der Pin erst mit diesem PR
+kommt; das ist die beabsichtigte Reihenfolge, kein Widerspruch. Die beiden PRs ergänzen zudem
+dieselben Dateien (`COMPLIANCE-TABLE.md`, `HISTORY.md`) — der zweite Merge braucht eine
+Konfliktauflösung von Hand.
+
 **Offen geblieben, bewusst:** die Migration auf die mcp-2.x-API (`add_request_handler` /
 `get_request_handler` / `middleware` statt der Dekoratoren) ist ein Umbau, keine Umbenennung, und
 gehört in ein ADR. Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-4`

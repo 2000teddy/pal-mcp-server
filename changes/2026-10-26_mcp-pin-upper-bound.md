@@ -78,10 +78,18 @@ Damit ist belegt, dass Wheel/sdist-Installationen nicht mehr auf 2.x laufen.
 - **`APP_VERSION.md` ist aus dem Takt:** `pyproject.toml:3` steht auf **9.9.0**, `APP_VERSION.md`
   auf **9.8.2**. Die Datei soll laut ihrem eigenen Kommentar die Version spiegeln. Nebenbefund
   dieses PRs, hier **nicht** mitgeändert (eigener Punkt).
-- **`BUILD_NUMBER.md` nicht gebumpt** — so beauftragt. Hinweis: `CONTRIBUTING.md:44` sagt „+1 pro
-  Arbeitsschritt" ohne Ausnahme für `fix`-PRs, und dies *ist* ein Arbeitsschritt, kein Doku-PR.
-  Die Review hat das als Regel-Unklarheit markiert: entweder bumpen oder die Ausnahme in
-  `CONTRIBUTING.md` festschreiben. Entscheidung liegt nicht in diesem PR.
+- **`APP_VERSION.md`/`pyproject.toml`-Spiegelung** bleibt als Nebenbefund stehen und wird
+  **nicht** mitgeändert: die Version entscheidet `semantic-release` aus dem Commit-Titel
+  (`pyproject.toml:124`, `patch_tags = ["fix", "perf"]`), nicht diese Lane. Ein manueller Eingriff
+  in die Spiegel-Datei würde dem zuvorkommen.
+
+## `BUILD_NUMBER.md`: gebumpt (3 → 4)
+
+Der erste Anlauf hatte **nicht** gebumpt, mit Verweis auf die Hauspraxis der Doku-PRs #15–#18.
+Die Review hat das als Regel-Unklarheit markiert, und die Auflösung ist eindeutig:
+`CONTRIBUTING.md:44` sagt „+1 pro Arbeitsschritt" **ohne** Ausnahme für `fix`-PRs, und dies ist ein
+`fix`-PR mit drei Commits und einer Runtime-Wirkung — also ein Arbeitsschritt, kein Bookkeeping.
+Die Nicht-Bump-Praxis gilt für Doku-PRs; hier greift sie nicht. Gebumpt auf **4**.
 
 ## Review
 `pal clink` · `cli_name=claude` · `role=codereviewer` → **`claude-sonnet-5-5`**, 2026-10-26.

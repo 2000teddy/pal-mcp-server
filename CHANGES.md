@@ -29,6 +29,7 @@
 - **CLAUDE.md ThinkHub-Lese-Reihenfolge** (#8) + DEVELOPMENT-WORKFLOW-Pointer.
 - **`cli_consensus` Nutzer-Doku** (#9): Limits/Validation, Output-Felder, Plan-Verweis.
 - **Warn-Modus MD-Compliance-Gate relandet** (#14): `.github/workflows/md-compliance.yml` nach geschlossenem Stack-PR #13 unverändert sauber auf `main` erneut aufgelegt; lokal verifiziert mit `git diff --check`, YAML-Parse und `bash -n` des Workflow-Skripts.
+- **TODO.md-Status-Kopfzeile auf KW44-Stand** (#19): ehrliche Ein-Zeile „Build 2 fertig; CO-01 core-gegated" plus Scope-Abgrenzung (Christian-Gate-Liste liegt in `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md`, hier nur Bauplan-Punkte). Backlog-Körper unverändert. Präzisierung gegenüber der Watchdog-Vorlage: das MD-Compliance-Gate blockiert seit 21.07., ist aber **nicht** als *required status check* eingetragen (`main` ohne Branch-Protection, 404) — das Follow-up bleibt offen. Siehe `changes/2026-10-26_todo-kw44-status-kopfzeile.md`.
 
 ### Earlier (Build 1–2, vor #1)
 - **`cli_consensus`** tool (Build 2): blinded multi-model consensus over subscription CLIs

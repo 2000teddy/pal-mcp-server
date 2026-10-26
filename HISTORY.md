@@ -3,6 +3,31 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-10-26 — 13 Wochen Stillstand als Stillstand benannt (TODO-Kopfzeile KW44)
+
+Zwischen dem 15.07. und heute ist in diesem Repo **nichts** passiert — `main` stand die ganze Zeit
+auf `fd0b91f`, kein offener PR, Working-Tree clean. Das war kein Versehen: die PAL-Lane ist im
+Wochenplan bewusst sekundär, und der einzige große Punkt (CO-01 pal-Rebuild) hängt an einem
+Core-/Hub-Fenster, das diese Lane nicht öffnen darf. Fertig gebaut ist alles, was PAL-seitig
+zu bauen war.
+
+Was dabei kaputt ging, war nur die **Lesbarkeit**: `TODO.md` hatte keine Status-Zeile, also musste
+man 48 Zeilen Backlog lesen, um zu erkennen, dass hier nichts wartet außer einer fremden
+Entscheidung. Genau das hat der Wochenplan KW44 als „Bookkeeping-Nachholbedarf" eingetragen
+(§4 Gate 9, drei TODO-Dateien, 12–13 Wochen alt). Behoben mit einer Kopfzeile, nicht mit einer
+Umschreibung: **„Build 2 fertig; CO-01 core-gegated"**, plus der Abgrenzung, dass die vollständige
+Christian-Gate-Liste in `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md` steht und hier nur
+bauplan-relevante Punkte geführt werden.
+
+**Dabei aufgefallen (für die Agenten wichtiger als die Kopfzeile selbst):** die Vorlage-Zeile des
+Watchdogs sagte „MD-Pflege abgeschlossen (CI-Gate #14)". Live ist das zu optimistisch. Das Gate
+liegt auf `main` und blockiert auch wirklich (`WARN_UNTIL=2026-07-21` ist seit Juli abgelaufen),
+aber `main` trägt **überhaupt keine Branch-Protection** — `gh api …/branches/main/protection`
+antwortet 404. Der Check läuft also, ohne irgendetwas verhindern zu können, und das seit drei
+Monaten unbemerkt. Das ist exakt das Repo-Admin-Follow-up, das `TODO.md` seit dem 08.07. als offen
+führt; es bleibt offen und steht jetzt auch in der Kopfzeile. Wer „kein Selbst-Merge" für
+technisch erzwungen hielt: es ist eine Hausregel (`CONTRIBUTING.md`), keine Wand.
+
 ## 2026-07-07 — MD-Pflege: Altlasten nachgezogen + Rollen/Phasen geklärt
 
 Rückstand aus Christians MD-Pflege-Audit (`~/hermes/reference/2026-07-07_MD-Pflege-Audit-…`)

@@ -46,6 +46,28 @@ Reine MD-Änderung, **kein** Python/Dockerfile/CI-Delta → kein Test-/Build-Del
 nur echte Arbeitsschritte (#12, `cli_consensus`).
 `/opt/thinkhub` nicht angefasst, CO-01 nicht berührt, kein Christian-Gate angefasst.
 
+## CI-Stand (vorbestehend rot, nicht aus diesem PR)
+
+Dieser PR fasst ausschließlich `*.md` an (`git diff main...HEAD --name-only` → 5 MD-Dateien,
+0 Python/CI). Trotzdem sind die `test`-Jobs rot — das ist **Fäule, die dieser PR nur aufdeckt**,
+weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests`-Run:
+`docs/adr-003-host-cli-runner-20260715`, 2026-07-15 11:09).
+
+- **Symptom:** 9 Collection-Errors auf 3.10/3.11/3.12, jeweils
+  `AttributeError: 'Server' object has no attribute 'list_tools'` an `server.py:731`.
+- **Ursache:** `requirements.txt:1` pinnt `mcp>=1.0.0` **ohne Obergrenze**. CI installiert
+  inzwischen **mcp 2.3.0**; die Dekorator-API `Server.list_tools()` existiert dort nicht mehr.
+  Lokal läuft `.pal_venv` noch auf **mcp 1.27.2**, dort ist `hasattr(Server, 'list_tools') == True`
+  — darum fällt es beim lokalen Arbeiten nicht auf.
+- **Grün geblieben:** `lint`, `md-compliance`, `Validate PR`.
+- **Lokal am Branch-HEAD** (mcp 1.27.2): `966 passed, 5 failed, 4 skipped`. Die 5 Fehler sind die
+  bekannten Gemini-Alias-Fehler (`test_alias_target_restrictions`, `test_auto_mode`,
+  `test_image_support_integration`) — in `HISTORY.md` (2026-06-18) als vorbestehend und
+  cli_consensus-fremd geflaggt, nicht aus diesem PR.
+- **Nicht hier behoben:** ein `mcp<2`-Pin (oder die Migration auf die 2.x-API) ist eine
+  Code-Änderung und gehört in einen eigenen PR. Dieser PR ist Bookkeeping; ihn mit einem
+  Dependency-Pin zu mischen würde beides schlechter reviewbar machen.
+
 ## Status
 Kein Selbst-Merge (`CONTRIBUTING.md` §Branch-Strategie). Auf Feature-Branch
 `docs/todo-kw44-status-kopfzeile-20261026`, wartet auf Review-Freigabe über claude/codex/agy

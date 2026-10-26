@@ -188,6 +188,15 @@ Befunde, alle zutreffend und behoben:
    Layout-Hinweis (Punkt nach „✅" verschieben) war kein Befund, sondern eine Empfehlung, die der
    Reviewer selbst als nicht blockierend bezeichnet hat. Vereinheitlicht.
 
+**Vierte Runde (Gegenprüfung auf `e571088`), 15:16 UTC: APPROVE.** Alle drei Punkte am Repo-Stand
+bestätigt (Zeilenangaben, Uhrzeiten, Zählung), keine neuen Fehler. Damit ist die Review-of-Record
+für den Nachtrag geschlossen. Der Reviewer hat selbst darauf hingewiesen, dass jeder weitere
+Commit formal eine weitere Runde auslöst — dieser Absatz hält das APPROVE fest und ändert sonst
+nichts; eine fünfte Runde darauf wäre reine Rekursion und findet nicht statt. Ausdrücklich
+**nicht** vom Reviewer bestätigt (zweimal so gesagt, weil ohne Paket-Download nicht prüfbar): die
+mcp-2.3.0-API-Details. Die sind von dieser Lane geprüft, mit genannter Methode — nicht von zwei
+Seiten.
+
 **Nicht übernommen:** den abgehakten Punkt aus „🟡 Offen" nach „✅" zu verschieben. Der
 Reviewer nennt es selbst eine Layout-Entscheidung, nicht blockierend; `CONTRIBUTING.md:42`
 definiert `TODO.md` als „Backlog **und** Fortschritt (offen/erledigt)", und `TODO.md:22` führt

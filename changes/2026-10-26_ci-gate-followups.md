@@ -122,6 +122,14 @@ der Bump gilt dem Arbeitsschritt, nicht jedem Doku-Commit darin (Hauspraxis der 
    Hausregel) — hier als zu niedrig benannt.
 Dazu der nicht blockierende Hinweis zu „kostenneutral", übernommen.
 
+**Runde 7** (Gegenprüfung auf `804bfcb`): **APPROVE**, beide Befunde sitzen, nichts Neues
+beschädigt. Damit ist die Review-of-Record für diesen Eintrag geschlossen; dieser Absatz hält nur
+das Votum fest. Ein **optionaler** Rest, ausdrücklich nicht behoben: `HISTORY.md:110`,
+COMPLIANCE-Zeile 19 und `CHANGES.md` (#19-Abschnitt) nennen das 404 weiterhin allein. Das sind
+datierte Funde aus #19, die zum damaligen Stand stimmten; sie zu überschreiben hieße, einen
+fremden, gemergten Eintrag nachträglich umzuschreiben. Der vollständige Beleg steht in CI-Gate-1,
+die Kopfzeile verweist darauf.
+
 **Bestätigt von der Review:** die Trennung in CI-Gate-1 und CI-Gate-2 ist technisch korrekt und
 der Widerspruch zum Sweep-Auftrag berechtigt („Branch-Protection macht einen vorhandenen Check
 verbindlich, erzeugt aber keinen").

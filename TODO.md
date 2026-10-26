@@ -1,5 +1,17 @@
 # TODO — PAL MCP Server (ThinkHub-Fork)
 
+> **Status-Kurzzeile (Stand 2026-10-26, KW44):** Build 2 fertig; CO-01 core-gegated.
+> **Scope:** Dieses File ist das **Bauplan-Backlog** der PALDEV-Lane, **nicht** die Freigaben-Liste.
+> Die vollständige Christian-Gate-Liste (mit Fristen und Belegen) steht in
+> `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md`; hier stehen nur die bauplan-relevanten Punkte.
+> **Im Klartext:** `cli_consensus` + `PAL_BACKEND`-Subscription-Backend (ADR-001/ADR-002, #1–#9) sind
+> gebaut, getestet und gemergt. Die MD-Pflege steht bis auf **ein Repo-Admin-Follow-up**: das CI-Gate
+> aus #14 liegt auf `main` und blockiert seit dem 21.07. (`WARN_UNTIL`), ist aber noch **nicht** als
+> *required status check* eingetragen — `main` trägt am 26.10. gar keine Branch-Protection
+> (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
+> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind nur die zwei
+> Kleinigkeiten unter „🟡 Offen".
+>
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
 > Priorität: 🔴 kritisch · 🟠 wichtig · 🟡 normal · 🟢 nice · 💡 Idee.

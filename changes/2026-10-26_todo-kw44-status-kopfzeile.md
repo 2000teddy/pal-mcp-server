@@ -64,6 +64,15 @@ weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests
   bekannten Gemini-Alias-Fehler (`test_alias_target_restrictions`, `test_auto_mode`,
   `test_image_support_integration`) — in `HISTORY.md` (2026-06-18) als vorbestehend und
   cli_consensus-fremd geflaggt, nicht aus diesem PR.
+- **Prä-Existenz gemessen (26.10.):** `git archive fd0b91f` in ein Scratchpad-Verzeichnis (kein
+  Repo-State angefasst), frisches venv mit `mcp==2.3.0` + `requirements.txt`, dann
+  `pytest tests/ -q -m "not integration"` → **dieselben 9 Collection-Errors**
+  (`9 errors in 2.35s`), ohne eine Zeile aus diesem PR. Zusätzlich im isolierten venv:
+  `mcp 2.3.0` → `hasattr(Server('probe'), 'list_tools') == False`; die Instanz bietet statt der
+  Dekoratoren jetzt `add_request_handler` / `get_request_handler` / `middleware`. Es ist also ein
+  API-Wechsel, kein Umbenennen — `mcp<2` stellt die CI-Aussagekraft her, erledigt aber die
+  2.x-Migration nicht (`server.py` nutzt die lowlevel-Dekoratoren an mehreren Stellen).
+  Der Workday-Watchdog hat denselben Kontroll-Lauf unabhängig mit demselben Ergebnis gefahren.
 - **Nicht hier behoben:** ein `mcp<2`-Pin (oder die Migration auf die 2.x-API) ist eine
   Code-Änderung und gehört in einen eigenen PR. Dieser PR ist Bookkeeping; ihn mit einem
   Dependency-Pin zu mischen würde beides schlechter reviewbar machen.

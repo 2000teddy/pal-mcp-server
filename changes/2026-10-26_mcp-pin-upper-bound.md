@@ -6,7 +6,8 @@ Obergrenze**, CI installierte inzwischen mcp **2.3.0**, und dort ist die lowleve
 entfallen → `AttributeError: 'Server' object has no attribute 'list_tools'` an `server.py:731`
 beim Modul-Import → **9 Collection-Errors** auf allen drei Matrix-Versionen.
 
-Dieser PR ist **ein Einzeiler plus Nachweis**. Er fasst bewusst nichts anderes an.
+Dieser PR sind **zwei Code-Zeilen plus Nachweis** — eine je Versionsdeklaration. Er fasst bewusst
+nichts anderes an. (Im ersten Anlauf war es eine Zeile; `pyproject.toml` kam über die Review herein.)
 
 ## Was
 **Beide** Versionsdeklarationen des Repos, gleich gezogen:
@@ -55,6 +56,17 @@ deshalb nicht abhaken, ohne denselben Textblock ein zweites Mal anzulegen. Darum
 hier **unangetastet**; das Abhaken gehört in den PR, der als **zweiter** merged. Wird das
 vergessen, führt `TODO.md` einen erledigten Punkt als offen — deshalb steht es hier, im PR-Body
 und im Watchdog-Bericht.
+
+## Nachweis für die `pyproject.toml`-Seite
+Nicht nur statisch (Diff + grep), sondern aufgelöst — `pip install --dry-run .` in der frischen venv:
+
+```
+Collecting click>=7.0 (from uvicorn>=0.31.1->mcp<2,>=1.0.0->pal-mcp-server==9.9.0)
+Would install … mcp-1.30.0 … pal-mcp-server-9.9.0 …
+```
+
+Der Resolver liest die Grenze aus `pyproject.toml` (`mcp<2,>=1.0.0`) und landet auf **1.30.0**.
+Damit ist belegt, dass Wheel/sdist-Installationen nicht mehr auf 2.x laufen.
 
 ## Offen geblieben (bewusst, mit Begründung)
 - **Untergrenze `>=1.0.0` ist unrealistisch.** `server.py:31-43` importiert `ToolAnnotations`,

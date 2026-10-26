@@ -50,8 +50,12 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 - [ ] Optional: `AGY.md` (Antigravity-CLI-Hinweise) statt/neben `GEMINI.md`
 
 - [ ] 🟠 **CI-Gate-1: `main` hat keine Branch-Protection — die Gates blockieren faktisch nichts.**
-  **Ist-Stand (live geprüft 26.10.):** `gh api repos/2000teddy/pal-mcp-server/branches/main/protection`
-  → **HTTP 404 „Branch not protected"**. Das md-compliance-Gate (`.github/workflows/md-compliance.yml`)
+  **Ist-Stand (live geprüft 26.10., alle drei Schutzmechanismen):**
+  `…/branches/main/protection` → **HTTP 404 „Branch not protected"** (klassische Protection),
+  `…/rules/branches/main` → **`[]`** (keine greifende Regel) und `…/rulesets` → **`[]`**
+  (überhaupt kein Ruleset angelegt). Die ersten beiden allein würden nichts beweisen —
+  **Rulesets** schützen einen Branch unabhängig von der klassischen Protection und erscheinen im
+  `protection`-Endpunkt **nicht**. Erst alle drei leer heißt: `main` ist ungeschützt. Das md-compliance-Gate (`.github/workflows/md-compliance.yml`)
   ist seit dem 21.07. im **blockierenden** Modus (`WARN_UNTIL=2026-07-21` → `exit 1` statt
   `::warning::`), aber ohne Branch-Protection ist es **kein** *required status check*: ein roter
   Check verhindert den Merge nicht. Dasselbe gilt für `test`, `lint`, `Validate PR` und
@@ -67,9 +71,10 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   ausführen — tut es aber nicht).
   **Warum gegated:** Branch-Protection auf einem **öffentlichen** Repo (`visibility: public`) ist
   eine **Policy-Entscheidung**, nicht eine Konfigurationskleinigkeit: sie legt fest, wer unter
-  welchen Bedingungen auf `main` schreiben darf, wirkt auf **alle** künftigen Beiträge (auch
-  externe Forks und PRs) und kann den Owner im Notfall selbst aussperren, wenn „include
-  administrators" mitgesetzt wird. → **⛔ Christian-Freigabe nötig**, Lane führt es nicht
+  welchen Bedingungen auf `main` schreiben darf, und wirkt auf **alle** künftigen Beiträge, auch
+  externe Forks und PRs. Mit „include administrators" bindet sie **den Owner selbst** an den
+  PR-Weg und an grüne Checks — er kann die Regel in den Settings jederzeit ändern oder löschen,
+  aber nicht im Vorbeigehen umgehen. → **⛔ Christian-Freigabe nötig**, Lane führt es nicht
   eigenmächtig aus. Belege: `changes/2026-10-26_todo-kw44-status-kopfzeile.md` §Nebenbefunde,
   `changes/2026-10-26_ci-gate-followups.md`.
 
@@ -82,13 +87,24 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   pass" (`pytest … -m "not integration"`, Zeile 36-40) — der ist am 26.10. nach dem Merge von #19
   mit denselben 9 Collection-Errors gescheitert (Run `40287130220`). Folge: **kein Release** — aber
   auch **kein sichtbares rotes Signal**, weil ein fehlgeschlagener Release-Lauf in keiner
-  PR-Checkliste auftaucht. **Was konkret zu tun ist:** `push: branches: [main]` und/oder ein
-  `schedule:`-Trigger (nächtlich/wöchentlich) in `test.yml`, damit Dependency-Drift ohne PR
-  auffällt. **Wer:** Änderung an `.github/workflows/` → **Repo-Admin-Aktion**; ein `schedule:`-Lauf
-  auf einem öffentlichen Repo verbraucht keine bezahlten Actions-Minuten, ist also kostenneutral,
-  aber es bleibt eine Workflow-Entscheidung. → **⛔ Christian-Freigabe nötig.** Dieser Punkt kam
-  aus der Nacharbeit zu PR #20 und stand bisher **nirgends** im Backlog, nur als Lehre im
-  Fließtext von `HISTORY.md`.
+  PR-Checkliste auftaucht. **Was konkret zu tun ist — und die beiden Trigger sind *nicht*
+  gleichwertig:** `push: branches: [main]` schließt nur die Lücke „gemergt, aber nie getestet" und
+  feuert **erst nach** dem Merge, also nach dem Schaden; gegen eine Drift, die **ohne** jeden
+  Commit reift, hilft er gar nicht — und genau das war hier der Fall, drei Monate ohne Push.
+  **Nur ein `schedule:`-Trigger** (nächtlich/wöchentlich) findet Drift ohne Commit; das ist der
+  eigentliche Fix. **Fallstrick, der zum Fix gehört:** GitHub **deaktiviert geplante Workflows in
+  öffentlichen Repos automatisch nach 60 Tagen ohne Repo-Aktivität**
+  ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)).
+  In einem Repo, das 13 Wochen stillstand, wäre der nächtliche Lauf also selbst verstummt — und
+  zwar lautlos. Ein `schedule:` allein genügt deshalb nicht: dazu gehört entweder ein
+  Keepalive-Mechanismus oder die bewusste Inkaufnahme, dass der Lauf bei Repo-Stille abgeschaltet
+  wird und nach der Rückkehr im Actions-Tab manuell zu reaktivieren ist. Was GitHub genau als
+  „Aktivität" zählt, ist **nicht dokumentiert** — vor dem Bau zu klären, nicht zu raten.
+  **Wer:** Änderung an `.github/workflows/` → **Repo-Admin-Aktion**; auf einem öffentlichen Repo
+  verbraucht ein Standard-Runner keine bezahlten Actions-Minuten, das Kostenargument spricht also
+  dafür — es bleibt aber eine Workflow-Entscheidung. → **⛔ Christian-Freigabe nötig.** Dieser
+  Punkt kam aus der Nacharbeit zu PR #20 und stand bisher **nirgends** im Backlog, nur als Lehre
+  im Fließtext von `HISTORY.md`.
 - [x] 🔴 **Dependency-Drift: `mcp` nach oben begrenzen.** `requirements.txt:1` pinnt `mcp>=1.0.0`
   ohne Obergrenze; CI installiert inzwischen mcp **2.3.0**, wo die lowlevel-Dekoratoren entfallen
   sind → `AttributeError` an `server.py:731` beim Modul-Import, 9 Test-Dateien scheitern bei der

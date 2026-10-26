@@ -75,8 +75,13 @@ ist kein Check *required*; CI-Gate-2: kein `push`-/`schedule`-Trigger, deshalb e
 gar kein Check). Es sind **zwei** Lücken, nicht eine, und das ist der Punkt: eine
 Branch-Protection hätte die `mcp`-Drift nicht gefunden, weil ohne PR nichts läuft — und ein
 nächtlicher Testlauf hätte sie gezeigt, aber niemanden am Merge gehindert. Die eine macht rote
-Checks verbindlich, die andere lässt überhaupt erst welche entstehen. Beide sind Repo-Admin auf
-einem öffentlichen Repo und damit Christians Entscheidung — das Lane-Token hätte `admin=true`,
+Checks verbindlich, die andere lässt überhaupt erst welche entstehen. Und der zweite Fix hat eine
+Pointe, die man kennen muss, bevor man ihn für erledigt hält: GitHub schaltet geplante Workflows
+in öffentlichen Repos nach 60 Tagen Repo-Stille **automatisch ab** — der nächtliche Lauf, der
+diese Drift gefunden hätte, wäre in genau diesem Repo nach zwei Monaten Stille selbst verstummt,
+lautlos. Ein Wächter, der einschläft, wenn nichts passiert, bewacht die Lage nicht, in der er
+gebraucht wird. Beide Punkte sind Repo-Admin auf einem öffentlichen Repo und damit Christians
+Entscheidung — das Lane-Token hätte `admin=true`,
 was die Sache technisch möglich und trotzdem nicht erlaubt macht. **Die allgemeinere Lehre:** eine
 Lehre, die nur in `HISTORY.md` steht, ist Prosa; erst der Backlog-Eintrag macht sie zur Arbeit. **Die Lehre für
 Reconcile-Arbeit:** ein Häkchen gilt für genau das, was belegt ist; alles andere, was im selben

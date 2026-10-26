@@ -3,6 +3,90 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-10-26 — Die Abhängigkeit, die drei Monate lang unbemerkt weggelaufen ist
+
+Der Bookkeeping-PR #19 hat nebenbei etwas aufgedeckt, das wichtiger ist als sein eigener Inhalt:
+`requirements.txt:1` stand auf `mcp>=1.0.0` **ohne Obergrenze**. Upstream ist inzwischen bei
+**mcp 2.3.0**, und dort sind die lowlevel-Dekoratoren weg — `server.py:731` nutzt
+`@server.list_tools()`, also bricht schon der Modul-Import, und 9 Test-Dateien scheitern bei der
+Collection, auf allen drei Matrix-Versionen.
+
+**Warum es niemand gemerkt hat, ist die eigentliche Lehre.** Zwei Dinge mussten zusammenkommen:
+`test.yml` triggert ausschließlich auf `pull_request`, es gibt also **nie** einen CI-Lauf auf
+`main`; und in diesem Repo ist zwischen dem 15.07. und dem 26.10. kein PR geöffnet worden. Drei
+Monate ohne einen einzigen CI-Lauf bei gleichzeitig offenen Versionsbereichen heißt: der Zustand
+„grün" war schlicht nicht mehr gemessen, nur erinnert. Lokal fiel es auch nicht auf, weil
+`.pal_venv` seit Juli auf mcp 1.27.2 steht — ein installiertes venv friert die Auflösung ein und
+verdeckt damit genau die Drift, die ein frischer Install sofort zeigt.
+
+Behoben mit dem kleinsten Eingriff, der den Bruch ausschließt: `mcp>=1.0.0,<2` — und zwar in
+**beiden** Deklarationen, `requirements.txt:1` *und* `pyproject.toml:7`. Die zweite hatte der erste
+Anlauf übersehen; die Review hat sie als High-Befund hereingeholt. Das war wichtiger als es klingt:
+`pyproject.toml` ist die Metadaten-Quelle für Wheel und sdist, und `semantic-release.yml` hätte nach
+dem `fix(deps)`-Titel genau dieses Artefakt veröffentlicht — ein Release, der einen Fix behauptet,
+den er nicht enthält. **Lehre fürs nächste Mal:** bei einem Dependency-Pin immer
+`git ls-files | xargs grep -lE 'mcp[>=<~]'` fahren, nicht nur `requirements.txt` ansehen. Eine frische venv
+aus `requirements.txt` + `requirements-dev.txt` löst damit auf **mcp 1.30.0** auf — also nicht
+zurück auf die alte 1.27.2, sondern auf den aktuellen Stand der 1er-Reihe, in der die Dekoratoren
+existieren. Patch- und Minor-Updates bleiben erlaubt, Sicherheitsfixes kommen weiter an.
+
+**Merge-Reihenfolge, nicht beliebig:** `TODO.md:47` — die Checkbox für genau diesen Pin — liegt im
+Branch von PR #19, nicht auf `main`. **#19 muss zuerst**, sonst führt `TODO.md` nach dem Merge einen
+erledigten Punkt als offen. Umgekehrt bleibt #19 bis dahin CI-rot, weil der Pin erst mit diesem PR
+kommt; das ist die beabsichtigte Reihenfolge, kein Widerspruch. Die beiden PRs ergänzen zudem
+dieselben Dateien (`COMPLIANCE-TABLE.md`, `HISTORY.md`) — der zweite Merge braucht eine
+Konfliktauflösung von Hand.
+
+**Offen geblieben, bewusst:** die Migration auf die mcp-2.x-API ist ein Umbau, keine Umbenennung,
+und gehört in ein ADR. (Nachtrag, am Paket geprüft: in 2.3.0 gehen die Handler als
+`on_list_tools=` / `on_call_tool=` / `on_list_prompts=` / `on_get_prompt=` in den `Server`-
+Konstruktor, eigene Methoden über `add_request_handler`; `middleware` ist **nicht** der
+Dekorator-Ersatz, sondern eine eigene Schicht. Die erste Fassung dieses Absatzes hat das
+zusammengeworfen.) Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-6`,
+die vier Spiegelzeilen `pyproject.toml:8-11` und **alle acht** Zeilen in `requirements-dev.txt` haben
+ebenfalls keine Obergrenze. Die Lehre aus
+diesem PR ist deshalb nicht „mcp war schuld", sondern: offene Versionsbereiche plus ein CI, das nur
+auf PRs läuft, ergeben eine Zeitbombe mit unbekannter Laufzeit.
+
+**Nachtrag am selben Tag — die Checkbox, die der Rebase vergessen hat.** Der Watchdog-Sweep
+(15:05 UTC in der Lane eingegangen) hat gemeldet, dass `git diff origin/main..origin/fix/mcp-pin-upper-bound -- TODO.md`
+**leer** ist: der Pin war gesetzt, aber `TODO.md:47` führte ihn im Branch weiter als offene
+🔴-Sofortmaßnahme. Nachgeprüft, trifft zu. Die Ursache ist lehrreicher als der Fehler: die Anweisung
+„`TODO.md:47` bleibt offen" war **richtig**, solange die Zeile zu #19 gehörte und #20 noch rot war —
+und ist mit dem Merge von #19 um 07:39 UTC ungültig geworden, ohne dass jemand sie neu bewertet hat.
+Ein Reconcile-Punkt, der an einer Merge-Reihenfolge hängt, ist nach dem ersten Merge **erneut**
+fällig; genau diesen zweiten Blick hat der Rebase nicht gemacht.
+
+Abgehakt wurde nicht einfach das Kästchen. Der Punkt enthielt zwei Dinge, die der Pin **nicht**
+erledigt — die ungeprüfte Restfläche (`requirements.txt:2-6`, `pyproject.toml:8-11` und alle acht
+Zeilen in `requirements-dev.txt`) und die mcp-2.x-Migration. Als Nebensatz unter einem `[x]` wären
+beide verschwunden. Sie stehen deshalb jetzt zusätzlich als eigene offene Einträge unter
+„🟡 Offen" — kopiert, nicht verschoben, damit der Original-Text wörtlich erhalten bleibt. Dass
+die Restfläche dabei erst **falsch gezählt** war (`2-4`, ohne `python-dotenv`,
+`importlib-resources` und die ganze `pyproject.toml`-Seite), hat die Review gefunden: ein
+kopierter Fehler wird durch das Kopieren nicht richtiger, er bekommt nur eine zweite Stelle.
+
+**Und noch ein Nachtrag, der die eigentliche Lehre endlich an die richtige Stelle bringt.** Dass
+`test.yml` nur auf `pull_request` läuft, stand bis heute **nur in diesem Fließtext** — als
+Erkenntnis also, nicht als Aufgabe. Dasselbe beim Repo-Admin-Follow-up zum MD-Gate: es hing als
+Unterzeile unter einem abgehakten `[x]`, wo es in einer Checkliste niemand sieht. Beides steht
+jetzt als benannter offener Punkt im Backlog (CI-Gate-1: `main` ohne Branch-Protection, deshalb
+ist kein Check *required*; CI-Gate-2: kein `push`-/`schedule`-Trigger, deshalb entsteht ohne PR
+gar kein Check). Es sind **zwei** Lücken, nicht eine, und das ist der Punkt: eine
+Branch-Protection hätte die `mcp`-Drift nicht gefunden, weil ohne PR nichts läuft — und ein
+nächtlicher Testlauf hätte sie gezeigt, aber niemanden am Merge gehindert. Die eine macht rote
+Checks verbindlich, die andere lässt überhaupt erst welche entstehen. Und der zweite Fix hat eine
+Pointe, die man kennen muss, bevor man ihn für erledigt hält: GitHub schaltet geplante Workflows
+in öffentlichen Repos nach 60 Tagen Repo-Stille **automatisch ab** — der nächtliche Lauf, der
+diese Drift gefunden hätte, wäre in genau diesem Repo nach zwei Monaten Stille selbst verstummt,
+lautlos. Ein Wächter, der einschläft, wenn nichts passiert, bewacht die Lage nicht, in der er
+gebraucht wird. Beide Punkte sind Repo-Admin auf einem öffentlichen Repo und damit Christians
+Entscheidung — das Lane-Token hätte `admin=true`,
+was die Sache technisch möglich und trotzdem nicht erlaubt macht. **Die allgemeinere Lehre:** eine
+Lehre, die nur in `HISTORY.md` steht, ist Prosa; erst der Backlog-Eintrag macht sie zur Arbeit. **Die Lehre für
+Reconcile-Arbeit:** ein Häkchen gilt für genau das, was belegt ist; alles andere, was im selben
+Absatz mitgeschleppt wurde, muss vorher heraus.
+
 ## 2026-10-26 — 13 Wochen Stillstand als Stillstand benannt (TODO-Kopfzeile KW44)
 
 Zwischen dem 15.07. und heute ist in diesem Repo **nichts** passiert — `main` stand die ganze Zeit

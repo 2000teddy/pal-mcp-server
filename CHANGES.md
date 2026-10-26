@@ -22,7 +22,37 @@
   README/SECURITY/Dockerfile-Label/Workflow-Doku auf „source-available" umgestellt.
   Siehe `changes/2026-07-07_elv2-license.md`, `changes/2026-07-07_elv2-security-wording.md`.
 
+### Fixed
+- **`mcp` nach oben begrenzt** (#20): `requirements.txt:1` **und** `pyproject.toml:7` → `mcp>=1.0.0,<2`. Ohne Obergrenze
+  installierte CI inzwischen mcp **2.3.0**, wo die lowlevel-Dekorator-API entfallen ist →
+  `AttributeError` an `server.py:731` beim Modul-Import und **9 Collection-Errors** auf allen drei
+  Matrix-Versionen. Der Pin hält die Auflösung in der 1er-Reihe (frische venv: **mcp 1.30.0**,
+  `list_tools` vorhanden) und lässt Patch-/Minor-Updates weiter zu. Die Migration auf die
+  mcp-2.x-API bleibt eine offene ADR-Frage. Siehe `changes/2026-10-26_mcp-pin-upper-bound.md`.
+  Im selben PR nachgezogen: `TODO.md:47` ist abgehakt (der Rebase hatte das Dokument nicht
+  angefasst, Watchdog-Befund 26.10., 15:05 UTC in der Lane), und die beiden Punkte, die der Pin **nicht**
+  erledigt, stehen jetzt als eigene offene Backlog-Einträge statt als Nebensatz unter einem
+  Häkchen: die ungeprüfte Restfläche — **alle** übrigen Laufzeit-Deklarationen, also
+  `requirements.txt:2-6` **und** `pyproject.toml:8-11` plus alle acht Zeilen `requirements-dev.txt`
+  — und die mcp-2.x-Migration. Für letztere ist die Ersatz-API jetzt am Paket geprüft statt
+  behauptet: Konstruktor-Callbacks (`on_list_tools=` …) und `add_request_handler`, **nicht**
+  `middleware`.
+
 ### Docs
+- **CI-Gate-Lücken als eigene Backlog-Punkte benannt** (#20): die beiden Stellen, an denen die
+  MD-Pflege-Kette und der Testlauf auf `main` faktisch nicht greifen, standen bisher nur als
+  Unterzeile unter einem abgehakten Punkt bzw. gar nicht im Backlog. Jetzt zwei benannte offene
+  Posten in `TODO.md`: **CI-Gate-1** — `main` ist ungeschützt, geprüft über alle drei Mechanismen
+  (`…/branches/main/protection` → 404, `…/rules/branches/main` → `[]`, `…/rulesets` → `[]`;
+  Rulesets erscheinen im `protection`-Endpunkt nicht, ein 404 dort allein beweist also nichts),
+  deshalb ist kein Check ein *required status check* und keiner blockiert einen Merge;
+  **CI-Gate-2** — `test.yml` triggert nur auf `pull_request`, auf `main` läuft nie ein Testlauf
+  (die einzige Ausnahme, der „Verify tests pass"-Schritt in `semantic-release.yml`, erzeugt bei
+  Fehlschlag kein sichtbares rotes Signal). Dort ist **nur** ein `schedule:`-Trigger der Fix —
+  `push` feuert erst nach dem Merge — und auch der hat einen Fallstrick: GitHub schaltet geplante
+  Workflows in öffentlichen Repos nach 60 Tagen Repo-Stille automatisch ab. Beides Repo-Admin **und** Public-Repo-Policy →
+  Christian-Gate, von der Lane nicht ausgeführt. Keine Berechtigungs- oder Workflow-Änderung in
+  diesem PR. Siehe `changes/2026-10-26_ci-gate-followups.md`.
 - **Hub-Deploy-Runbook** (#5) — später in ADR-002 §"Hub-Deploy" eingearbeitet.
 - **Abnahme-Regel & DoD** (#6, #7): „fertig" = echter Testbeleg; MCP = Zwei-Peer-Beleg; Testbeleg
   möglichst lebensnah (`DEVELOPMENT-WORKFLOW.md`).

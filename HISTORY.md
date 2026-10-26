@@ -37,15 +37,19 @@ kommt; das ist die beabsichtigte Reihenfolge, kein Widerspruch. Die beiden PRs e
 dieselben Dateien (`COMPLIANCE-TABLE.md`, `HISTORY.md`) — der zweite Merge braucht eine
 Konfliktauflösung von Hand.
 
-**Offen geblieben, bewusst:** die Migration auf die mcp-2.x-API (`add_request_handler` /
-`get_request_handler` / `middleware` statt der Dekoratoren) ist ein Umbau, keine Umbenennung, und
-gehört in ein ADR. Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-4`
-und **alle acht** Zeilen in `requirements-dev.txt` haben ebenfalls keine Obergrenze. Die Lehre aus
+**Offen geblieben, bewusst:** die Migration auf die mcp-2.x-API ist ein Umbau, keine Umbenennung,
+und gehört in ein ADR. (Nachtrag, am Paket geprüft: in 2.3.0 gehen die Handler als
+`on_list_tools=` / `on_call_tool=` / `on_list_prompts=` / `on_get_prompt=` in den `Server`-
+Konstruktor, eigene Methoden über `add_request_handler`; `middleware` ist **nicht** der
+Dekorator-Ersatz, sondern eine eigene Schicht. Die erste Fassung dieses Absatzes hat das
+zusammengeworfen.) Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-6`,
+die Spiegelzeilen `pyproject.toml:8-12` und **alle acht** Zeilen in `requirements-dev.txt` haben
+ebenfalls keine Obergrenze. Die Lehre aus
 diesem PR ist deshalb nicht „mcp war schuld", sondern: offene Versionsbereiche plus ein CI, das nur
 auf PRs läuft, ergeben eine Zeitbombe mit unbekannter Laufzeit.
 
-**Nachtrag am selben Tag — die Checkbox, die der Rebase vergessen hat.** Der Watchdog-Sweep um
-15:0x UTC hat gemeldet, dass `git diff origin/main..origin/fix/mcp-pin-upper-bound -- TODO.md`
+**Nachtrag am selben Tag — die Checkbox, die der Rebase vergessen hat.** Der Watchdog-Sweep
+(15:05 UTC in der Lane eingegangen) hat gemeldet, dass `git diff origin/main..origin/fix/mcp-pin-upper-bound -- TODO.md`
 **leer** ist: der Pin war gesetzt, aber `TODO.md:47` führte ihn im Branch weiter als offene
 🔴-Sofortmaßnahme. Nachgeprüft, trifft zu. Die Ursache ist lehrreicher als der Fehler: die Anweisung
 „`TODO.md:47` bleibt offen" war **richtig**, solange die Zeile zu #19 gehörte und #20 noch rot war —
@@ -54,9 +58,13 @@ Ein Reconcile-Punkt, der an einer Merge-Reihenfolge hängt, ist nach dem ersten 
 fällig; genau diesen zweiten Blick hat der Rebase nicht gemacht.
 
 Abgehakt wurde nicht einfach das Kästchen. Der Punkt enthielt zwei Dinge, die der Pin **nicht**
-erledigt — die ungeprüfte Restfläche (`requirements.txt:2-4` und alle acht Zeilen in
-`requirements-dev.txt`) und die mcp-2.x-Migration. Als Nebensatz unter einem `[x]` wären beide
-verschwunden. Sie stehen deshalb jetzt als eigene offene Einträge unter „🟡 Offen". **Die Lehre für
+erledigt — die ungeprüfte Restfläche (`requirements.txt:2-6`, `pyproject.toml:8-12` und alle acht
+Zeilen in `requirements-dev.txt`) und die mcp-2.x-Migration. Als Nebensatz unter einem `[x]` wären
+beide verschwunden. Sie stehen deshalb jetzt zusätzlich als eigene offene Einträge unter
+„🟡 Offen" — kopiert, nicht verschoben, damit der Original-Text wörtlich erhalten bleibt. Dass
+die Restfläche dabei erst **falsch gezählt** war (`2-4`, ohne `python-dotenv`,
+`importlib-resources` und die ganze `pyproject.toml`-Seite), hat die Review gefunden: ein
+kopierter Fehler wird durch das Kopieren nicht richtiger, er bekommt nur eine zweite Stelle. **Die Lehre für
 Reconcile-Arbeit:** ein Häkchen gilt für genau das, was belegt ist; alles andere, was im selben
 Absatz mitgeschleppt wurde, muss vorher heraus.
 

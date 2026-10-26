@@ -9,8 +9,9 @@
 > aus #14 liegt auf `main` und blockiert seit dem 21.07. (`WARN_UNTIL`), ist aber noch **nicht** als
 > *required status check* eingetragen — `main` trägt am 26.10. gar keine Branch-Protection
 > (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
-> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit drei Punkte:
-> das Branch-Protection-Follow-up oben, plus die zwei Kleinigkeiten unter „🟡 Offen".
+> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit fünf Punkte:
+> das Branch-Protection-Follow-up oben, plus die vier Einträge unter „🟡 Offen" (zwei
+> Kleinigkeiten und die beiden Dependency-Punkte aus der mcp-Drift, Stand 26.10. 15:2x UTC).
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -58,21 +59,34 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   `requirements.txt`+`requirements-dev.txt` löst **mcp 1.30.0** auf, `list_tools` vorhanden,
   **971 passed, 0 failed**, keine Collection-Errors; CI 7/7 grün. Beleg:
   `changes/2026-10-26_mcp-pin-upper-bound.md`. **Nicht mit erledigt** sind die mcp-2.x-Migration
-  (ADR-Frage) und die restliche Drift-Fläche — beide als eigene Punkte unten geführt, damit das
-  Häkchen hier sie nicht mit zudeckt.
+  (ADR-Frage) und die restliche Drift-Fläche; beide stehen **zusätzlich als eigene offene Punkte**
+  unten (der Text hier bleibt wörtlich stehen, die Punkte sind kopiert, nicht entfernt), damit das
+  Häkchen sie nicht mit zudeckt.
 
-- [ ] 🟡 **Dependency-Drift, Restfläche — noch ungeprüft.** `requirements.txt:2-4`
-  (`google-genai`, `openai`, `pydantic`) und **alle acht** Zeilen in `requirements-dev.txt` haben
-  weiterhin **keine Obergrenze**. Aus dem 🔴-Punkt herausgelöst, als dessen Sofortmaßnahme mit
-  PR #20 geschlossen wurde; dort bewusst **nicht** mitgepinnt, weil der Auftrag zu #20 Pins ohne
-  vorherige Nennung untersagte. **Zu entscheiden:** ob und wie gepinnt wird (je Zeile ein
-  Verträglichkeits-Nachweis in frischer venv). Gleiche Mechanik wie bei `mcp`: offene
-  Versionsbereiche + ein CI, das nur auf `pull_request` läuft, bleiben unbemerkt bis zum nächsten PR.
+- [ ] 🟡 **Dependency-Drift, Restfläche — noch ungeprüft.** Ohne Obergrenze sind **alle übrigen**
+  Laufzeit-Deklarationen: `requirements.txt:2-6` (`google-genai`, `openai`, `pydantic`,
+  `python-dotenv`, `importlib-resources`) und spiegelbildlich `pyproject.toml:8-12` — plus **alle
+  acht** Zeilen in `requirements-dev.txt`. (Korrektur 26.10.: der ursprüngliche 🔴-Punkt nannte nur
+  `requirements.txt:2-4` und die `pyproject.toml`-Seite gar nicht; nachgezählt am Dateistand.)
+  Mit PR #20 wurde nur `mcp` begrenzt — die einzige Zeile, die real gebrochen ist; der Rest blieb
+  bewusst außerhalb des Fix-Scopes, weil jede Obergrenze ihren eigenen Verträglichkeits-Nachweis
+  braucht. **Zu entscheiden:** ob und wie gepinnt wird (je Zeile eine frische venv + Testlauf).
+  Gleiche Mechanik wie bei `mcp`: offene Versionsbereiche plus ein CI, das nur auf `pull_request`
+  läuft, bleiben unbemerkt bis zum nächsten PR.
 
-- [ ] 🟡 **Migration auf die mcp-2.x-API (ADR-Frage).** `server.py` nutzt die entfallenen
-  lowlevel-Dekoratoren an mehreren Stellen; Ersatz ist `add_request_handler` /
-  `get_request_handler` / `middleware`. Umbau, keine Umbenennung — gehört in ein ADR, nicht in
-  einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es nicht auf.
+- [ ] 🟡 **Migration auf die mcp-2.x-API (ADR-Frage).** `server.py` nutzt die in 2.x entfallenen
+  lowlevel-Dekoratoren an vier Stellen: `server.py:731` (`@server.list_tools()`), `:793`
+  (`@server.call_tool()`), `:1392` (`@server.list_prompts()`), `:1442` (`@server.get_prompt()`).
+  **Ersatz in 2.3.0, am installierten Paket nachgesehen** (frische venv mit `mcp==2.3.0`,
+  `inspect.signature`): die Handler werden dem Konstruktor übergeben — `Server(name, …,
+  on_list_tools=…, on_call_tool=…, on_list_prompts=…, on_get_prompt=…)` — und für eigene Methoden
+  gibt es `add_request_handler(method, params_type, handler)` / `add_notification_handler`. Die
+  Handler-Signatur ändert sich mit (`ServerRequestContext` + typisierte `*Result`-Objekte statt
+  freier Rückgaben), `Server.run()` nimmt weiterhin `InitializationOptions`. `middleware` ist in
+  2.x **nicht** der Dekorator-Ersatz, sondern eine eigene Schicht (`ServerMiddleware`,
+  `mcp/server/runner.py`) — frühere Notiz hier war unpräzise. Also Umbau, keine Umbenennung:
+  gehört in ein ADR, nicht in einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es
+  nicht auf.
 
 ## ⏸️ Blockiert (extern)
 

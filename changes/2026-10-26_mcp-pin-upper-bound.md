@@ -30,16 +30,22 @@ anhalten, aber auch jedes Sicherheitsupdate blockieren. `<2` ist die kleinste Ä
 tatsächlichen Bruch ausschließt.
 
 ## Was dieser PR ausdrücklich NICHT tut
-- **Keine Migration auf die mcp-2.x-API.** `server.py` nutzt die lowlevel-Dekoratoren an mehreren
-  Stellen; in 2.x heißen die Einstiegspunkte `add_request_handler` / `get_request_handler` /
-  `middleware`. Das ist ein Umbau, keine Umbenennung → bleibt eine **ADR-Frage** und ein offener
-  TODO-Punkt.
-- **Keine Obergrenzen für die übrigen Abhängigkeiten.** `requirements.txt:2-4`
-  (`google-genai`, `openai`, `pydantic`) und **alle acht Zeilen** in `requirements-dev.txt`
+- **Keine Migration auf die mcp-2.x-API.** `server.py` nutzt die lowlevel-Dekoratoren an vier
+  Stellen (`:731`, `:793`, `:1392`, `:1442`); in 2.3.0 gehen dieselben Handler als
+  Konstruktor-Callbacks (`on_list_tools=` / `on_call_tool=` / `on_list_prompts=` /
+  `on_get_prompt=`) in den `Server`, eigene Methoden über `add_request_handler`. Am Paket
+  nachgesehen (siehe §Review, zweite Runde) — die erste Fassung dieses Absatzes nannte
+  zusätzlich `middleware`, das ist in 2.x aber eine eigene Schicht und **nicht** der
+  Dekorator-Ersatz. Das ist ein Umbau, keine Umbenennung → bleibt eine **ADR-Frage** und ein
+  offener TODO-Punkt.
+- **Keine Obergrenzen für die übrigen Abhängigkeiten.** `requirements.txt:2-6`
+  (`google-genai`, `openai`, `pydantic`, `python-dotenv`, `importlib-resources`), die
+  Spiegelzeilen `pyproject.toml:8-12` und **alle acht Zeilen** in `requirements-dev.txt`
   (`pytest`, `pytest-asyncio`, `pytest-mock`, `black`, `ruff`, `isort`,
-  `python-semantic-release`, `build`) sind ebenfalls nur nach unten begrenzt. Der Auftrag verlangt
-  ausdrücklich, das hier **nicht** mitzunehmen; es bleibt ein eigener offener Punkt. Dieser PR
-  fasst `requirements-dev.txt` **nicht** an.
+  `python-semantic-release`, `build`) sind ebenfalls nur nach unten begrenzt. (Korrektur in der
+  zweiten Review-Runde: hier stand erst `2-4` ohne die `pyproject.toml`-Seite.) Bewusst nicht
+  mitgenommen — jede Obergrenze braucht ihren eigenen Verträglichkeits-Nachweis; es bleibt ein
+  eigener offener Punkt. Dieser PR fasst `requirements-dev.txt` **nicht** an.
 
 ## Validierung
 Siehe PR-Body für die vollständigen Läufe. Kurzform: frische venv aus
@@ -83,9 +89,9 @@ Damit ist belegt, dass Wheel/sdist-Installationen nicht mehr auf 2.x laufen.
   (`pyproject.toml:124`, `patch_tags = ["fix", "perf"]`), nicht diese Lane. Ein manueller Eingriff
   in die Spiegel-Datei würde dem zuvorkommen.
 
-## Nachtrag 26.10. 15:3x — `TODO.md`-Checkbox im Branch abgehakt
+## Nachtrag 26.10. 15:07–15:2x UTC — `TODO.md`-Checkbox im Branch abgehakt
 
-**Befund (Watchdog-Sweep 26.10. ~15:0x UTC):** `git diff origin/main..origin/fix/mcp-pin-upper-bound
+**Befund (Watchdog-Sweep, im Bericht auf 15:0x UTC datiert, in der Lane eingegangen 15:05 UTC):** `git diff origin/main..origin/fix/mcp-pin-upper-bound
 -- TODO.md` war **leer**. Der Rebase auf `5d41a7c` hat das Repo-Dokument nicht angefasst —
 `TODO.md:47` stand im Branch weiterhin als offene 🔴-Sofortmaßnahme, identisch zu `main`. Damit war
 genau der Zustand eingetreten, den der PR-Kommentar vom 26.10. 07:40 UTC selbst beschrieben hatte:
@@ -103,15 +109,21 @@ hängt, muss nach dem ersten Merge **erneut** geprüft werden, nicht nur beim Se
 - `TODO.md:47` → `- [x]`, mit Abschluss-Absatz (beide Deklarationen, aufgelöste Version, Testzahlen,
   Beleg-Datei). Der ursprüngliche Punkt-Text bleibt **wörtlich** stehen; es ist ein Zusatz, keine
   Umschreibung.
-- Die beiden Dinge, die der Pin **nicht** erledigt, sind aus dem Punkt **herausgelöst** und stehen
-  jetzt als eigene offene Einträge unter „🟡 Offen": die ungeprüfte Restfläche
-  (`requirements.txt:2-4` + alle acht Zeilen `requirements-dev.txt`) und die mcp-2.x-Migration
-  (ADR-Frage). Grund: ein `[x]` über einem Absatz, der „gleiche Drift-Fläche, noch ungeprüft"
-  enthält, liest sich als erledigt. Die Trennung ist der eigentliche Punkt des Nachtrags —
-  ohne sie hätte das Häkchen zwei offene Themen mit zugedeckt.
+- Die beiden Dinge, die der Pin **nicht** erledigt, stehen jetzt **zusätzlich als eigene offene
+  Einträge** unter „🟡 Offen": die ungeprüfte Restfläche und die mcp-2.x-Migration (ADR-Frage).
+  Genauer als „herausgelöst": die Originalsätze bleiben wörtlich unter dem `[x]` stehen, die
+  Punkte sind **kopiert**, nicht verschoben. Grund für die Dopplung: ein `[x]` über einem
+  Absatz, der „gleiche Drift-Fläche, noch ungeprüft" enthält, liest sich als erledigt. Die
+  Trennung ist der eigentliche Punkt des Nachtrags — ohne sie hätte das Häkchen zwei offene
+  Themen mit zugedeckt.
 - `COMPLIANCE-TABLE.md`: Zeile 19 trug noch den Platzhalter `(dieser PR)` aus der Zeit, als #19
   offen war. Da #19 am 26.10. 07:39 UTC als `5d41a7c` gelandet ist, steht dort jetzt `#19` —
-  Konvention wie in allen Zeilen davor.
+  Konvention wie in allen Zeilen davor. Zeile 20 analog auf `#20`.
+- **`BUILD_NUMBER.md` bleibt bei 4.** Der erste Anlauf des Nachtrags hatte auf 5 gebumpt; die
+  zweite Review-Runde hat das als Doppelzählung markiert, und das trifft zu: die Begründung für
+  3 → 4 war „dieser `fix`-PR = ein Arbeitsschritt". Ein Doku-Nachtrag **innerhalb** desselben
+  PRs korrigiert diesen Schritt, er ist kein neuer — und die Hauspraxis der Doku-Commits
+  (#15–#19) bumpt nicht. Zurückgenommen auf **4**.
 
 **Kein Merge.** PR #20 ist laut `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md` ein eigenes
 Christian-Gate: der Merge löst `semantic-release` aus und publiziert öffentlich (`v9.9.1` +
@@ -130,6 +142,36 @@ Die Nicht-Bump-Praxis gilt für Doku-PRs; hier greift sie nicht. Gebumpt auf **4
 `pal clink` · `cli_name=claude` · `role=codereviewer` → **`claude-sonnet-5-5`**, 2026-10-26.
 Erstes Votum **CHANGES-NEEDED** mit einem High-Befund (`pyproject.toml` nicht mitgezogen) — der
 Befund wurde nachgeprüft, traf zu und ist in diesem PR behoben.
+
+**Zweite Runde (Review-of-Record für den TODO-Nachtrag), 15:1x UTC:** erneut
+**CHANGES-NEEDED**, sechs Befunde, alle Doku, kein Code. Nachgeprüft und behoben:
+1. **Restfläche war unvollständig (Medium, traf zu).** Der neue Backlog-Punkt nannte nur
+   `requirements.txt:2-4`. Ohne Obergrenze sind auch `:5` (`python-dotenv`) und `:6`
+   (`importlib-resources`) sowie die Spiegelzeilen `pyproject.toml:8-12`. Am Dateistand
+   nachgezählt, auf `2-6` + `pyproject.toml` korrigiert. Der Zählfehler stammt aus dem
+   Original-Punkt von #19 und wäre mit der Kopie weitergetragen worden.
+2. **`middleware` als 2.x-Dekorator-Ersatz war falsch (traf zu).** Der Reviewer konnte es nicht
+   prüfen (kein Paket-Download freigegeben) und hat es als unbelegt markiert. Hier nachgesehen:
+   frische venv mit `mcp==2.3.0`, `inspect.signature(Server.__init__)`. Ergebnis: die Handler
+   gehen als `on_list_tools=` / `on_call_tool=` / `on_list_prompts=` / `on_get_prompt=` in den
+   Konstruktor, eigene Methoden über `add_request_handler(method, params_type, handler)`;
+   `Server.middleware` existiert **nicht**, `ServerMiddleware` ist eine eigene Schicht
+   (`mcp/server/runner.py`). Backlog-Punkt und `HISTORY.md` entsprechend korrigiert. Die vier
+   betroffenen Dekorator-Stellen sind `server.py:731`, `:793`, `:1392`, `:1442`.
+3. **`BUILD_NUMBER` 4 → 5 war Doppelzählung (traf zu).** Zurückgenommen, siehe oben.
+4. **Kopfzeilen-Zählung (traf zu).** `TODO.md:12-13` sprach von „drei Punkten … plus die zwei
+   Kleinigkeiten"; mit den zwei neuen Einträgen sind es fünf. Angepasst.
+5. **Formulierungen (traf zu).** „herausgelöst" → „zusätzlich als eigene Punkte geführt" (es
+   ist eine Kopie); der Verweis auf eine lane-interne Auftragsformulierung ist aus dem
+   Backlog-Text raus — das Repo ist öffentlich, und „bewusst außerhalb des Fix-Scopes, weil
+   jede Obergrenze einen eigenen Nachweis braucht" ist die sachliche Begründung.
+6. **Platzhalter-Uhrzeiten (traf zu).** „15:0x"/„15:3x" durch die tatsächlichen Zeiten ersetzt.
+
+**Nicht übernommen:** den abgehakten Punkt aus „🟡 Offen" nach „✅" zu verschieben. Der
+Reviewer nennt es selbst eine Layout-Entscheidung, nicht blockierend; `CONTRIBUTING.md:42`
+definiert `TODO.md` als „Backlog **und** Fortschritt (offen/erledigt)", und `TODO.md:22` führt
+dasselbe Muster. Ein Verschieben würde den Diff um einen Block-Move vergrößern, der im Review
+schlechter zu lesen ist als das `[x]` an seiner Stelle.
 
 ## Status
 Kein Selbst-Merge (`CONTRIBUTING.md` §Branch-Strategie). Review über `claude`

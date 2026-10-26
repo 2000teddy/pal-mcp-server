@@ -30,10 +30,13 @@
   `list_tools` vorhanden) und lässt Patch-/Minor-Updates weiter zu. Die Migration auf die
   mcp-2.x-API bleibt eine offene ADR-Frage. Siehe `changes/2026-10-26_mcp-pin-upper-bound.md`.
   Im selben PR nachgezogen: `TODO.md:47` ist abgehakt (der Rebase hatte das Dokument nicht
-  angefasst, Watchdog-Befund 26.10.), und die beiden Punkte, die der Pin **nicht** erledigt —
-  ungeprüfte Restfläche (`requirements.txt:2-4`, alle acht Zeilen `requirements-dev.txt`) und
-  mcp-2.x-Migration — stehen jetzt als eigene offene Backlog-Einträge statt als Nebensatz unter
-  einem Häkchen.
+  angefasst, Watchdog-Befund 26.10., 15:05 UTC in der Lane), und die beiden Punkte, die der Pin **nicht**
+  erledigt, stehen jetzt als eigene offene Backlog-Einträge statt als Nebensatz unter einem
+  Häkchen: die ungeprüfte Restfläche — **alle** übrigen Laufzeit-Deklarationen, also
+  `requirements.txt:2-6` **und** `pyproject.toml:8-12` plus alle acht Zeilen `requirements-dev.txt`
+  — und die mcp-2.x-Migration. Für letztere ist die Ersatz-API jetzt am Paket geprüft statt
+  behauptet: Konstruktor-Callbacks (`on_list_tools=` …) und `add_request_handler`, **nicht**
+  `middleware`.
 
 ### Docs
 - **Hub-Deploy-Runbook** (#5) — später in ADR-002 §"Hub-Deploy" eingearbeitet.

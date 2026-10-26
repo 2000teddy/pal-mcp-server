@@ -9,9 +9,10 @@
 > aus #14 liegt auf `main` und blockiert seit dem 21.07. (`WARN_UNTIL`), ist aber noch **nicht** als
 > *required status check* eingetragen — `main` trägt am 26.10. gar keine Branch-Protection
 > (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
-> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit fünf Punkte:
-> das Branch-Protection-Follow-up oben, plus die vier Einträge unter „🟡 Offen" (zwei
-> Kleinigkeiten und die beiden Dependency-Punkte aus der mcp-Drift; Stand 2026-10-26).
+> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit **sechs Punkte,
+> alle unter „🟡 Offen"**: zwei Kleinigkeiten, die beiden Dependency-Punkte aus der mcp-Drift und
+> die beiden CI-Gate-Punkte (Branch-Protection, Test-Trigger auf `main`) — letztere beide
+> **Repo-Admin + Christian-Freigabe**, keine Lane-Arbeit. Stand 2026-10-26.
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -27,6 +28,8 @@
   - [x] Ebene 1: warnendes CI-Gate gelandet (#14, `.github/workflows/md-compliance.yml`); Warn→blockierend
     flippt automatisch am `WARN_UNTIL=2026-07-21` (kein zweiter Commit). **Repo-Admin-Follow-up offen:**
     Check nach dem Warn-Fenster in Branch-Protection als *required status check* eintragen.
+    → Steht ab 26.10. als **eigener offener Punkt** unter „🟡 Offen" (CI-Gate-1); als Unterzeile
+    unter einem `[x]` war er in einer Checkliste unsichtbar.
 
 ## ✅ cli_consensus + Subscription-Backend (Build 2 → #1–#9)
 
@@ -45,6 +48,47 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 
 - [ ] `.env`-Backups auf dem Mac löschen (`.env.bak-openai-…`, `.env.old`) — vom Classifier blockiert, Christians Wort
 - [ ] Optional: `AGY.md` (Antigravity-CLI-Hinweise) statt/neben `GEMINI.md`
+
+- [ ] 🟠 **CI-Gate-1: `main` hat keine Branch-Protection — die Gates blockieren faktisch nichts.**
+  **Ist-Stand (live geprüft 26.10.):** `gh api repos/2000teddy/pal-mcp-server/branches/main/protection`
+  → **HTTP 404 „Branch not protected"**. Das md-compliance-Gate (`.github/workflows/md-compliance.yml`)
+  ist seit dem 21.07. im **blockierenden** Modus (`WARN_UNTIL=2026-07-21` → `exit 1` statt
+  `::warning::`), aber ohne Branch-Protection ist es **kein** *required status check*: ein roter
+  Check verhindert den Merge nicht. Dasselbe gilt für `test`, `lint`, `Validate PR` und
+  `Build Docker Image` — alle sieben Checks sind derzeit **Hinweis, nicht Schranke**. Die Kette
+  „Gate gebaut (#13/#14) → Warn-Fenster → blockierend" ist damit auf dem letzten Meter offen, und
+  zwar seit drei Monaten unbemerkt.
+  **Was konkret zu tun ist:** auf `main` eine Branch-Protection-Rule anlegen und darin
+  `md-compliance`, `test (3.10)`, `test (3.11)`, `test (3.12)` und `lint` als *required status
+  checks* eintragen; zu entscheiden ist zusätzlich, ob `Build Docker Image` und `Validate PR`
+  mitkommen und ob „require a pull request before merging" + „dismiss stale approvals" gesetzt
+  werden.
+  **Wer:** **Repo-Admin-Aktion** (das Lane-Token hat `admin=true`, könnte es also technisch
+  ausführen — tut es aber nicht).
+  **Warum gegated:** Branch-Protection auf einem **öffentlichen** Repo (`visibility: public`) ist
+  eine **Policy-Entscheidung**, nicht eine Konfigurationskleinigkeit: sie legt fest, wer unter
+  welchen Bedingungen auf `main` schreiben darf, wirkt auf **alle** künftigen Beiträge (auch
+  externe Forks und PRs) und kann den Owner im Notfall selbst aussperren, wenn „include
+  administrators" mitgesetzt wird. → **⛔ Christian-Freigabe nötig**, Lane führt es nicht
+  eigenmächtig aus. Belege: `changes/2026-10-26_todo-kw44-status-kopfzeile.md` §Nebenbefunde,
+  `changes/2026-10-26_ci-gate-followups.md`.
+
+- [ ] 🟠 **CI-Gate-2: auf `main` läuft nie ein Testlauf.** `.github/workflows/test.yml` triggert
+  ausschließlich auf `pull_request: branches: [main]` — es gibt **keinen** `push`- und keinen
+  `schedule`-Trigger. Zwischen dem 15.07. und dem 26.10. wurde in diesem Repo kein PR geöffnet,
+  also lief **drei Monate kein einziger Testlauf**; „grün" war in dieser Zeit erinnert, nicht
+  gemessen. Genau darin konnte die `mcp`-Drift unbemerkt reifen. **Teil-Ausnahme, die es nicht
+  auffängt:** `semantic-release.yml` läuft auf `push: main` und hat einen Schritt „Verify tests
+  pass" (`pytest … -m "not integration"`, Zeile 36-40) — der ist am 26.10. nach dem Merge von #19
+  mit denselben 9 Collection-Errors gescheitert (Run `40287130220`). Folge: **kein Release** — aber
+  auch **kein sichtbares rotes Signal**, weil ein fehlgeschlagener Release-Lauf in keiner
+  PR-Checkliste auftaucht. **Was konkret zu tun ist:** `push: branches: [main]` und/oder ein
+  `schedule:`-Trigger (nächtlich/wöchentlich) in `test.yml`, damit Dependency-Drift ohne PR
+  auffällt. **Wer:** Änderung an `.github/workflows/` → **Repo-Admin-Aktion**; ein `schedule:`-Lauf
+  auf einem öffentlichen Repo verbraucht keine bezahlten Actions-Minuten, ist also kostenneutral,
+  aber es bleibt eine Workflow-Entscheidung. → **⛔ Christian-Freigabe nötig.** Dieser Punkt kam
+  aus der Nacharbeit zu PR #20 und stand bisher **nirgends** im Backlog, nur als Lehre im
+  Fließtext von `HISTORY.md`.
 - [x] 🔴 **Dependency-Drift: `mcp` nach oben begrenzen.** `requirements.txt:1` pinnt `mcp>=1.0.0`
   ohne Obergrenze; CI installiert inzwischen mcp **2.3.0**, wo die lowlevel-Dekoratoren entfallen
   sind → `AttributeError` an `server.py:731` beim Modul-Import, 9 Test-Dateien scheitern bei der

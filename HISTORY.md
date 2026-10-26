@@ -64,7 +64,21 @@ beide verschwunden. Sie stehen deshalb jetzt zusätzlich als eigene offene Eintr
 „🟡 Offen" — kopiert, nicht verschoben, damit der Original-Text wörtlich erhalten bleibt. Dass
 die Restfläche dabei erst **falsch gezählt** war (`2-4`, ohne `python-dotenv`,
 `importlib-resources` und die ganze `pyproject.toml`-Seite), hat die Review gefunden: ein
-kopierter Fehler wird durch das Kopieren nicht richtiger, er bekommt nur eine zweite Stelle. **Die Lehre für
+kopierter Fehler wird durch das Kopieren nicht richtiger, er bekommt nur eine zweite Stelle.
+
+**Und noch ein Nachtrag, der die eigentliche Lehre endlich an die richtige Stelle bringt.** Dass
+`test.yml` nur auf `pull_request` läuft, stand bis heute **nur in diesem Fließtext** — als
+Erkenntnis also, nicht als Aufgabe. Dasselbe beim Repo-Admin-Follow-up zum MD-Gate: es hing als
+Unterzeile unter einem abgehakten `[x]`, wo es in einer Checkliste niemand sieht. Beides steht
+jetzt als benannter offener Punkt im Backlog (CI-Gate-1: `main` ohne Branch-Protection, deshalb
+ist kein Check *required*; CI-Gate-2: kein `push`-/`schedule`-Trigger, deshalb entsteht ohne PR
+gar kein Check). Es sind **zwei** Lücken, nicht eine, und das ist der Punkt: eine
+Branch-Protection hätte die `mcp`-Drift nicht gefunden, weil ohne PR nichts läuft — und ein
+nächtlicher Testlauf hätte sie gezeigt, aber niemanden am Merge gehindert. Die eine macht rote
+Checks verbindlich, die andere lässt überhaupt erst welche entstehen. Beide sind Repo-Admin auf
+einem öffentlichen Repo und damit Christians Entscheidung — das Lane-Token hätte `admin=true`,
+was die Sache technisch möglich und trotzdem nicht erlaubt macht. **Die allgemeinere Lehre:** eine
+Lehre, die nur in `HISTORY.md` steht, ist Prosa; erst der Backlog-Eintrag macht sie zur Arbeit. **Die Lehre für
 Reconcile-Arbeit:** ein Häkchen gilt für genau das, was belegt ist; alles andere, was im selben
 Absatz mitgeschleppt wurde, muss vorher heraus.
 

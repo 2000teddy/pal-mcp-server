@@ -39,6 +39,16 @@
   `middleware`.
 
 ### Docs
+- **CI-Gate-Lücken als eigene Backlog-Punkte benannt** (#20): die beiden Stellen, an denen die
+  MD-Pflege-Kette und der Testlauf auf `main` faktisch nicht greifen, standen bisher nur als
+  Unterzeile unter einem abgehakten Punkt bzw. gar nicht im Backlog. Jetzt zwei benannte offene
+  Posten in `TODO.md`: **CI-Gate-1** — `main` ohne Branch-Protection (`…/branches/main/protection`
+  → 404), deshalb ist kein Check ein *required status check* und keiner blockiert einen Merge;
+  **CI-Gate-2** — `test.yml` triggert nur auf `pull_request`, auf `main` läuft nie ein Testlauf
+  (die einzige Ausnahme, der „Verify tests pass"-Schritt in `semantic-release.yml`, erzeugt bei
+  Fehlschlag kein sichtbares rotes Signal). Beides Repo-Admin **und** Public-Repo-Policy →
+  Christian-Gate, von der Lane nicht ausgeführt. Keine Berechtigungs- oder Workflow-Änderung in
+  diesem PR. Siehe `changes/2026-10-26_ci-gate-followups.md`.
 - **Hub-Deploy-Runbook** (#5) — später in ADR-002 §"Hub-Deploy" eingearbeitet.
 - **Abnahme-Regel & DoD** (#6, #7): „fertig" = echter Testbeleg; MCP = Zwei-Peer-Beleg; Testbeleg
   möglichst lebensnah (`DEVELOPMENT-WORKFLOW.md`).

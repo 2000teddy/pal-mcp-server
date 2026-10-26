@@ -3,6 +3,34 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-10-26 — Die Abhängigkeit, die drei Monate lang unbemerkt weggelaufen ist
+
+Der Bookkeeping-PR #19 hat nebenbei etwas aufgedeckt, das wichtiger ist als sein eigener Inhalt:
+`requirements.txt:1` stand auf `mcp>=1.0.0` **ohne Obergrenze**. Upstream ist inzwischen bei
+**mcp 2.3.0**, und dort sind die lowlevel-Dekoratoren weg — `server.py:731` nutzt
+`@server.list_tools()`, also bricht schon der Modul-Import, und 9 Test-Dateien scheitern bei der
+Collection, auf allen drei Matrix-Versionen.
+
+**Warum es niemand gemerkt hat, ist die eigentliche Lehre.** Zwei Dinge mussten zusammenkommen:
+`test.yml` triggert ausschließlich auf `pull_request`, es gibt also **nie** einen CI-Lauf auf
+`main`; und in diesem Repo ist zwischen dem 15.07. und dem 26.10. kein PR geöffnet worden. Drei
+Monate ohne einen einzigen CI-Lauf bei gleichzeitig offenen Versionsbereichen heißt: der Zustand
+„grün" war schlicht nicht mehr gemessen, nur erinnert. Lokal fiel es auch nicht auf, weil
+`.pal_venv` seit Juli auf mcp 1.27.2 steht — ein installiertes venv friert die Auflösung ein und
+verdeckt damit genau die Drift, die ein frischer Install sofort zeigt.
+
+Behoben mit dem kleinsten Eingriff, der den Bruch ausschließt: `mcp>=1.0.0,<2`. Eine frische venv
+aus `requirements.txt` + `requirements-dev.txt` löst damit auf **mcp 1.30.0** auf — also nicht
+zurück auf die alte 1.27.2, sondern auf den aktuellen Stand der 1er-Reihe, in der die Dekoratoren
+existieren. Patch- und Minor-Updates bleiben erlaubt, Sicherheitsfixes kommen weiter an.
+
+**Offen geblieben, bewusst:** die Migration auf die mcp-2.x-API (`add_request_handler` /
+`get_request_handler` / `middleware` statt der Dekoratoren) ist ein Umbau, keine Umbenennung, und
+gehört in ein ADR. Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-4`
+und **alle acht** Zeilen in `requirements-dev.txt` haben ebenfalls keine Obergrenze. Die Lehre aus
+diesem PR ist deshalb nicht „mcp war schuld", sondern: offene Versionsbereiche plus ein CI, das nur
+auf PRs läuft, ergeben eine Zeitbombe mit unbekannter Laufzeit.
+
 ## 2026-10-26 — 13 Wochen Stillstand als Stillstand benannt (TODO-Kopfzeile KW44)
 
 Zwischen dem 15.07. und heute ist in diesem Repo **nichts** passiert — `main` stand die ganze Zeit

@@ -22,6 +22,14 @@
   README/SECURITY/Dockerfile-Label/Workflow-Doku auf „source-available" umgestellt.
   Siehe `changes/2026-07-07_elv2-license.md`, `changes/2026-07-07_elv2-security-wording.md`.
 
+### Fixed
+- **`mcp` nach oben begrenzt** (#20): `requirements.txt:1` → `mcp>=1.0.0,<2`. Ohne Obergrenze
+  installierte CI inzwischen mcp **2.3.0**, wo die lowlevel-Dekorator-API entfallen ist →
+  `AttributeError` an `server.py:731` beim Modul-Import und **9 Collection-Errors** auf allen drei
+  Matrix-Versionen. Der Pin hält die Auflösung in der 1er-Reihe (frische venv: **mcp 1.30.0**,
+  `list_tools` vorhanden) und lässt Patch-/Minor-Updates weiter zu. Die Migration auf die
+  mcp-2.x-API bleibt eine offene ADR-Frage. Siehe `changes/2026-10-26_mcp-pin-upper-bound.md`.
+
 ### Docs
 - **Hub-Deploy-Runbook** (#5) — später in ADR-002 §"Hub-Deploy" eingearbeitet.
 - **Abnahme-Regel & DoD** (#6, #7): „fertig" = echter Testbeleg; MCP = Zwei-Peer-Beleg; Testbeleg

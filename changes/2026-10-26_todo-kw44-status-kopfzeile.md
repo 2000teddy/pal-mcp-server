@@ -42,16 +42,21 @@ abgehakt; CO-01 steht unverändert unter „⏸️ Blockiert (extern)".
 ## Validierung
 Reine MD-Änderung, **kein** Python/Dockerfile/CI-Delta → kein Test-/Build-Delta
 (`./code_quality_checks.sh` nicht betroffen, wie bei #16–#18). Lokal: `git diff --check` sauber.
-`BUILD_NUMBER.md` **nicht** gebumpt — Hauspraxis: Bookkeeping-PRs (#15–#18) bumpen nicht,
-nur echte Arbeitsschritte (#12, `cli_consensus`).
+`BUILD_NUMBER.md` **nicht** gebumpt — Hauspraxis: Bookkeeping-PRs (#15–#18) bumpen nicht, nur
+echte Arbeitsschritte. Gebumpt haben bisher genau zwei Commits: `1e2838d` (`cli_consensus`, Build 2)
+und `291e3f9` (PR #12, MD-Pflege).
 `/opt/thinkhub` nicht angefasst, CO-01 nicht berührt, kein Christian-Gate angefasst.
 
 ## CI-Stand (vorbestehend rot, nicht aus diesem PR)
 
 Dieser PR fasst ausschließlich `*.md` an (`git diff main...HEAD --name-only` → 5 MD-Dateien,
 0 Python/CI). Trotzdem sind die `test`-Jobs rot — das ist **Fäule, die dieser PR nur aufdeckt**,
-weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests`-Run:
-`docs/adr-003-host-cli-runner-20260715`, 2026-07-15 11:09).
+weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat. Der letzte grüne `Tests`-Run lief am
+2026-07-15 11:09 auf dem PR-Branch `docs/adr-003-host-cli-runner-20260715` — **nicht** auf dem
+Merge-Commit `fd0b91f` selbst, denn `test.yml:3-5` triggert ausschließlich auf `pull_request`, auf
+`main` läuft **nie** ein `test`-Job. Inhaltlich deckungsgleich: `git diff --stat f21b9d3 fd0b91f`
+ist leer, identischer Tree. „main ist auch rot" ist damit ein gültiger **lokaler** Kontrollbefund,
+kein CI-Beleg — einen CI-Beleg dafür kann es bauartbedingt nicht geben.
 
 - **Symptom:** 9 Collection-Errors auf 3.10/3.11/3.12, jeweils
   `AttributeError: 'Server' object has no attribute 'list_tools'` an `server.py:731`.
@@ -80,8 +85,12 @@ weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests
     `test_prompt_regression.py` + 1 × `test_clink_integration.py::test_clink_claude_single_digit_sum`.
     CI deselektiert sie, sie gehen ins CI-Verdikt nicht ein.
 
-  **Konsequenz:** Lauf 4 **ist** die CI-Konfiguration (kein `.env`, mcp 1.x) → mit `mcp<2` wäre der
-  Unit-Job grün. Frühere Formulierung in diesem Eintrag („die 5 sind die bekannten
+  **Konsequenz, mit der Grenze des Belegs:** Lauf 4 entspricht der CI-Konfiguration (kein `.env`,
+  mcp 1.x) und ist dort **lokal reproduziert grün** — allerdings nur auf **Python 3.12.3**, während
+  CI die Matrix 3.10/3.11/3.12 fährt, und `requirements.txt:2-4` sowie **alle** Zeilen in
+  `requirements-dev.txt` sind ebenfalls ohne Obergrenze, können also mitgedriftet sein. Ein
+  `mcp<2`-Pin ist damit die belegte nächste Maßnahme, **kein garantiert grüner CI-Lauf**; das zeigt
+  erst der Folge-PR. Frühere Formulierung in diesem Eintrag („die 5 sind die bekannten
   Gemini-Alias-Fehler aus `HISTORY.md`") war im Mechanismus falsch: die Testnamen überlappen, aber
   es sind Umgebungsartefakte, keine latenten Code-Fehler. Korrigiert nach Watchdog-Nachmessung,
   unabhängig nachgestellt.
@@ -97,6 +106,18 @@ weil seit dem 15.07. kein CI-Lauf mehr stattgefunden hat (letzter grüner `Tests
 - **Nicht hier behoben:** ein `mcp<2`-Pin (oder die Migration auf die 2.x-API) ist eine
   Code-Änderung und gehört in einen eigenen PR. Dieser PR ist Bookkeeping; ihn mit einem
   Dependency-Pin zu mischen würde beides schlechter reviewbar machen.
+
+## Review
+
+`pal clink` · `cli_name=claude` · `role=codereviewer` → **`claude-sonnet-5-5`** (das Preset pinnt
+`--model sonnet`), 2026-10-26 07:40 CET. **Votum: APPROVE**, Nachbesserungen nicht blockierend.
+Der ursprünglich angewiesene Reviewer `codex` ist nicht einholbar (`~/.codex/auth.json` vom 08.07.,
+`auth_mode: chatgpt`, Token nicht refreshbar → 401 auf allen Codex-Pfaden); die Hausregel erlaubt
+`claude`/`codex`/`agy`, `pal:chat` bleibt gesperrt. Alle vier Reviewer-Befunde wurden nachgemessen
+und halten — sie sind in diesem Eintrag und in `TODO.md` eingearbeitet (Kopfblock-Zählung,
+`mcp<2` als Backlog-Punkt, „lokal grün ≠ CI grün", Merge-Commit-vs-Branch-Head-Präzisierung).
+Reviewer-Wortlaut zum roten Job: „kein Grund gegen den Merge-Inhalt, sondern ein repo-weites
+Vorproblem." Kommentar: PR #19, `issuecomment-6409932957`.
 
 ## Status
 Kein Selbst-Merge (`CONTRIBUTING.md` §Branch-Strategie). Auf Feature-Branch

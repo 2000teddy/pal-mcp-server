@@ -9,8 +9,8 @@
 > aus #14 liegt auf `main` und blockiert seit dem 21.07. (`WARN_UNTIL`), ist aber noch **nicht** als
 > *required status check* eingetragen — `main` trägt am 26.10. gar keine Branch-Protection
 > (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
-> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind nur die zwei
-> Kleinigkeiten unter „🟡 Offen".
+> CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit drei Punkte:
+> das Branch-Protection-Follow-up oben, plus die zwei Kleinigkeiten unter „🟡 Offen".
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -44,6 +44,15 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 
 - [ ] `.env`-Backups auf dem Mac löschen (`.env.bak-openai-…`, `.env.old`) — vom Classifier blockiert, Christians Wort
 - [ ] Optional: `AGY.md` (Antigravity-CLI-Hinweise) statt/neben `GEMINI.md`
+- [ ] 🔴 **Dependency-Drift: `mcp` nach oben begrenzen.** `requirements.txt:1` pinnt `mcp>=1.0.0`
+  ohne Obergrenze; CI installiert inzwischen mcp **2.3.0**, wo die lowlevel-Dekoratoren entfallen
+  sind → `AttributeError` an `server.py:731` beim Modul-Import, 9 Test-Dateien scheitern bei der
+  Collection. Seit dem 15.07. unbemerkt, weil kein CI-Lauf stattfand. **Sofortmaßnahme:** `mcp<2`
+  als eigener `fix`-PR mit CI-Nachweis. **Danach getrennt zu entscheiden:** Migration auf die
+  mcp-2.x-API (ADR-Frage — `server.py` nutzt die Dekoratoren an mehreren Stellen). **Gleiche
+  Drift-Fläche, noch ungeprüft:** `requirements.txt:2-4` und **alle** Zeilen in
+  `requirements-dev.txt` haben ebenfalls keine Obergrenze. Belege:
+  `changes/2026-10-26_todo-kw44-status-kopfzeile.md` §CI-Stand, PR #19.
 
 ## ⏸️ Blockiert (extern)
 

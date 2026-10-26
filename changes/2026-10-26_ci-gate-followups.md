@@ -67,13 +67,15 @@ Gate-Begründung:
 - **Fallstrick, der zum Fix gehört:** GitHub deaktiviert geplante Workflows in öffentlichen Repos
   **automatisch nach 60 Tagen ohne Repo-Aktivität**
   ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows),
-  nachgelesen 26.10.). In einem Repo, das 13 Wochen stillstand, wäre der nächtliche Lauf also
+  nachgelesen 26.10.). In einem Repo, das **103 Tage** stillstand (15.07.–26.10., knapp 15 Wochen,
+  nachgerechnet — die ältere Angabe „13 Wochen" aus #19 ist zu niedrig), wäre der nächtliche Lauf also
   selbst verstummt, und zwar lautlos. Ein `schedule:` allein genügt deshalb nicht — es braucht
   einen Keepalive oder die bewusste Inkaufnahme der Abschaltung plus manuelle Reaktivierung im
   Actions-Tab. Was GitHub als „Aktivität" zählt, definiert die Doku **nicht**; das ist vor dem
   Bau zu klären. Der Hinweis kam aus der Review und ist am Doku-Stand gegengeprüft.
 - **Warum Christian-Gate:** Änderung an `.github/workflows/` ist Repo-Admin. Kostenargument spricht
-  dafür (Actions-Minuten sind auf öffentlichen Repos frei, also kostenneutral), aber es bleibt eine
+  dafür (Standard-Runner verbrauchen auf öffentlichen Repos keine bezahlten Actions-Minuten; für
+  größere Runner gilt das nicht), aber es bleibt eine
   Workflow-Entscheidung, und dieser Auftrag schließt Workflow-Änderungen ausdrücklich aus.
 
 ## Abgrenzung zum Auftragstext
@@ -110,6 +112,15 @@ der Bump gilt dem Arbeitsschritt, nicht jedem Doku-Commit darin (Hauspraxis der 
    aufgenommen, inklusive der Einschränkung, dass „Aktivität" nicht definiert ist.
 4. „kann den Owner aussperren" war überzogen; `docker-release.yml`-Trigger unvollständig. Beides
    korrigiert.
+
+**Runde 6** (auf `535dc9d`): **CHANGES-NEEDED**, zwei Befunde, beide zutreffend und behoben:
+1. Die `TODO.md`-**Kopfzeile** nannte das 404 weiter als Alleinbeleg — genau der Fehler, den
+   CI-Gate-1 zwanzig Zeilen später einschränkt, und die Kopfzeile liest man zuerst. Ergänzt.
+2. „13 Wochen Stillstand" war **falsch** und in das 60-Tage-Argument kopiert, wo es auf die Dauer
+   ankommt: 15.07.–26.10. sind **103 Tage**, knapp 15 Wochen. In beiden neuen Stellen korrigiert.
+   Die ältere Angabe in `HISTORY.md:90/:101` stammt aus #19 und bleibt stehen (fremder Eintrag,
+   Hausregel) — hier als zu niedrig benannt.
+Dazu der nicht blockierende Hinweis zu „kostenneutral", übernommen.
 
 **Bestätigt von der Review:** die Trennung in CI-Gate-1 und CI-Gate-2 ist technisch korrekt und
 der Widerspruch zum Sweep-Auftrag berechtigt („Branch-Protection macht einen vorhandenen Check

@@ -7,8 +7,10 @@
 > **Im Klartext:** `cli_consensus` + `PAL_BACKEND`-Subscription-Backend (ADR-001/ADR-002, #1–#9) sind
 > gebaut, getestet und gemergt. Die MD-Pflege steht bis auf **ein Repo-Admin-Follow-up**: das CI-Gate
 > aus #14 liegt auf `main` und blockiert seit dem 21.07. (`WARN_UNTIL`), ist aber noch **nicht** als
-> *required status check* eingetragen — `main` trägt am 26.10. gar keine Branch-Protection
-> (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
+> *required status check* eingetragen — `main` ist am 26.10. **ungeschützt**, und zwar über alle
+> drei Mechanismen geprüft: `…/branches/main/protection` → 404, `…/rules/branches/main` → `[]`,
+> `…/rulesets` → `[]` (das 404 allein beweist nichts, weil Rulesets dort nicht erscheinen — siehe
+> CI-Gate-1 unten). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
 > CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit **sechs Punkte,
 > alle unter „🟡 Offen"**: zwei Kleinigkeiten, die beiden Dependency-Punkte aus der mcp-Drift und
 > die beiden CI-Gate-Punkte (Branch-Protection, Test-Trigger auf `main`) — letztere beide
@@ -95,7 +97,8 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   eigentliche Fix. **Fallstrick, der zum Fix gehört:** GitHub **deaktiviert geplante Workflows in
   öffentlichen Repos automatisch nach 60 Tagen ohne Repo-Aktivität**
   ([GitHub Docs](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows)).
-  In einem Repo, das 13 Wochen stillstand, wäre der nächtliche Lauf also selbst verstummt — und
+  In einem Repo, das **103 Tage** stillstand (15.07.–26.10., knapp 15 Wochen), wäre der nächtliche
+  Lauf also selbst verstummt — und
   zwar lautlos. Ein `schedule:` allein genügt deshalb nicht: dazu gehört entweder ein
   Keepalive-Mechanismus oder die bewusste Inkaufnahme, dass der Lauf bei Repo-Stille abgeschaltet
   wird und nach der Rückkehr im Actions-Tab manuell zu reaktivieren ist. Was GitHub genau als

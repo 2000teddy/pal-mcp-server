@@ -33,7 +33,7 @@
   angefasst, Watchdog-Befund 26.10., 15:05 UTC in der Lane), und die beiden Punkte, die der Pin **nicht**
   erledigt, stehen jetzt als eigene offene Backlog-Einträge statt als Nebensatz unter einem
   Häkchen: die ungeprüfte Restfläche — **alle** übrigen Laufzeit-Deklarationen, also
-  `requirements.txt:2-6` **und** `pyproject.toml:8-12` plus alle acht Zeilen `requirements-dev.txt`
+  `requirements.txt:2-6` **und** `pyproject.toml:8-11` plus alle acht Zeilen `requirements-dev.txt`
   — und die mcp-2.x-Migration. Für letztere ist die Ersatz-API jetzt am Paket geprüft statt
   behauptet: Konstruktor-Callbacks (`on_list_tools=` …) und `add_request_handler`, **nicht**
   `middleware`.

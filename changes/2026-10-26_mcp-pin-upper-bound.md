@@ -40,7 +40,7 @@ tatsächlichen Bruch ausschließt.
   offener TODO-Punkt.
 - **Keine Obergrenzen für die übrigen Abhängigkeiten.** `requirements.txt:2-6`
   (`google-genai`, `openai`, `pydantic`, `python-dotenv`, `importlib-resources`), die
-  Spiegelzeilen `pyproject.toml:8-12` und **alle acht Zeilen** in `requirements-dev.txt`
+  vier Spiegelzeilen `pyproject.toml:8-11` (ohne `importlib-resources`) und **alle acht Zeilen** in `requirements-dev.txt`
   (`pytest`, `pytest-asyncio`, `pytest-mock`, `black`, `ruff`, `isort`,
   `python-semantic-release`, `build`) sind ebenfalls nur nach unten begrenzt. (Korrektur in der
   zweiten Review-Runde: hier stand erst `2-4` ohne die `pyproject.toml`-Seite.) Bewusst nicht
@@ -89,9 +89,12 @@ Damit ist belegt, dass Wheel/sdist-Installationen nicht mehr auf 2.x laufen.
   (`pyproject.toml:124`, `patch_tags = ["fix", "perf"]`), nicht diese Lane. Ein manueller Eingriff
   in die Spiegel-Datei würde dem zuvorkommen.
 
-## Nachtrag 26.10. 15:07–15:2x UTC — `TODO.md`-Checkbox im Branch abgehakt
+## Nachtrag 26.10. — `TODO.md`-Checkbox im Branch abgehakt
 
-**Befund (Watchdog-Sweep, im Bericht auf 15:0x UTC datiert, in der Lane eingegangen 15:05 UTC):** `git diff origin/main..origin/fix/mcp-pin-upper-bound
+(Commits `779047f` 15:07 UTC, `2d52791` 15:13 UTC und die Korrekturrunde darauf.)
+
+**Befund (Watchdog-Sweep, im Bericht wörtlich auf „15:0x UTC" datiert, in der Lane eingegangen
+15:05 UTC):** `git diff origin/main..origin/fix/mcp-pin-upper-bound
 -- TODO.md` war **leer**. Der Rebase auf `5d41a7c` hat das Repo-Dokument nicht angefasst —
 `TODO.md:47` stand im Branch weiterhin als offene 🔴-Sofortmaßnahme, identisch zu `main`. Damit war
 genau der Zustand eingetreten, den der PR-Kommentar vom 26.10. 07:40 UTC selbst beschrieben hatte:
@@ -143,11 +146,11 @@ Die Nicht-Bump-Praxis gilt für Doku-PRs; hier greift sie nicht. Gebumpt auf **4
 Erstes Votum **CHANGES-NEEDED** mit einem High-Befund (`pyproject.toml` nicht mitgezogen) — der
 Befund wurde nachgeprüft, traf zu und ist in diesem PR behoben.
 
-**Zweite Runde (Review-of-Record für den TODO-Nachtrag), 15:1x UTC:** erneut
+**Zweite Runde (Review-of-Record für den TODO-Nachtrag), 15:08 UTC auf `779047f`:** erneut
 **CHANGES-NEEDED**, sechs Befunde, alle Doku, kein Code. Nachgeprüft und behoben:
 1. **Restfläche war unvollständig (Medium, traf zu).** Der neue Backlog-Punkt nannte nur
    `requirements.txt:2-4`. Ohne Obergrenze sind auch `:5` (`python-dotenv`) und `:6`
-   (`importlib-resources`) sowie die Spiegelzeilen `pyproject.toml:8-12`. Am Dateistand
+   (`importlib-resources`) sowie die Spiegelzeilen `pyproject.toml:8-11`. Am Dateistand
    nachgezählt, auf `2-6` + `pyproject.toml` korrigiert. Der Zählfehler stammt aus dem
    Original-Punkt von #19 und wäre mit der Kopie weitergetragen worden.
 2. **`middleware` als 2.x-Dekorator-Ersatz war falsch (traf zu).** Der Reviewer konnte es nicht
@@ -165,7 +168,25 @@ Befund wurde nachgeprüft, traf zu und ist in diesem PR behoben.
    ist eine Kopie); der Verweis auf eine lane-interne Auftragsformulierung ist aus dem
    Backlog-Text raus — das Repo ist öffentlich, und „bewusst außerhalb des Fix-Scopes, weil
    jede Obergrenze einen eigenen Nachweis braucht" ist die sachliche Begründung.
-6. **Platzhalter-Uhrzeiten (traf zu).** „15:0x"/„15:3x" durch die tatsächlichen Zeiten ersetzt.
+6. **Platzhalter-Uhrzeiten (traf zu).** Durch die tatsächlichen Commit-Zeiten aus `git log`
+   ersetzt. Die Zeitangabe „15:0x UTC" des Sweep-Berichts bleibt als **Zitat** stehen — so steht
+   sie im Bericht; der Eingang in der Lane war 15:05 UTC.
+
+**Dritte Runde (Gegenprüfung auf `2d52791`), 15:13 UTC:** nochmals **CHANGES-NEEDED**, drei
+Befunde, alle zutreffend und behoben:
+1. **`pyproject.toml:8-12` war falsch (Medium).** Die Abhängigkeiten stehen auf **8–11**, Zeile 12
+   ist die schließende `]`, und `importlib-resources` ist dort **nicht** deklariert (es ist ein
+   `python_version<"3.9"`-Eintrag nur in `requirements.txt:6`). Also vier Spiegelzeilen, nicht
+   fünf, und „spiegelbildlich" war zu stark. An allen sechs Stellen korrigiert. Die Zahl kam aus
+   der zweiten Review-Runde und ist von mir ungeprüft übernommen worden — derselbe Fehler, den
+   diese Runde beim Original-Punkt von #19 aufgedeckt hat, eine Ebene höher.
+2. **Zukunfts-Uhrzeiten (Medium).** `15:2x`/`15:1x` waren zum Schreibzeitpunkt noch nicht
+   eingetreten. Ersetzt durch die Commit-Zeiten aus `git log`; die Kopfzeile in `TODO.md` trägt
+   jetzt nur noch das Datum.
+3. **Befund-Zählung (Low-Medium).** COMPLIANCE-Zeile 20 sprach von „sechs Befunden, fünf trafen
+   zu". Richtig ist: **sechs Befunde, alle sechs trafen zu und sind behoben**; der zusätzliche
+   Layout-Hinweis (Punkt nach „✅" verschieben) war kein Befund, sondern eine Empfehlung, die der
+   Reviewer selbst als nicht blockierend bezeichnet hat. Vereinheitlicht.
 
 **Nicht übernommen:** den abgehakten Punkt aus „🟡 Offen" nach „✅" zu verschieben. Der
 Reviewer nennt es selbst eine Layout-Entscheidung, nicht blockierend; `CONTRIBUTING.md:42`

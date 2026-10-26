@@ -11,7 +11,7 @@
 > (`gh api …/branches/main/protection` → 404). Der verbleibende Hauptpunkt ist **keine PAL-Arbeit**:
 > CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit fünf Punkte:
 > das Branch-Protection-Follow-up oben, plus die vier Einträge unter „🟡 Offen" (zwei
-> Kleinigkeiten und die beiden Dependency-Punkte aus der mcp-Drift, Stand 26.10. 15:2x UTC).
+> Kleinigkeiten und die beiden Dependency-Punkte aus der mcp-Drift; Stand 2026-10-26).
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -65,7 +65,8 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
 
 - [ ] 🟡 **Dependency-Drift, Restfläche — noch ungeprüft.** Ohne Obergrenze sind **alle übrigen**
   Laufzeit-Deklarationen: `requirements.txt:2-6` (`google-genai`, `openai`, `pydantic`,
-  `python-dotenv`, `importlib-resources`) und spiegelbildlich `pyproject.toml:8-12` — plus **alle
+  `python-dotenv`, `importlib-resources`) und `pyproject.toml:8-11` (dieselben vier ohne
+  `importlib-resources`, das dort nicht deklariert ist) — plus **alle
   acht** Zeilen in `requirements-dev.txt`. (Korrektur 26.10.: der ursprüngliche 🔴-Punkt nannte nur
   `requirements.txt:2-4` und die `pyproject.toml`-Seite gar nicht; nachgezählt am Dateistand.)
   Mit PR #20 wurde nur `mcp` begrenzt — die einzige Zeile, die real gebrochen ist; der Rest blieb

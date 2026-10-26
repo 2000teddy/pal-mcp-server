@@ -43,7 +43,7 @@ und gehört in ein ADR. (Nachtrag, am Paket geprüft: in 2.3.0 gehen die Handler
 Konstruktor, eigene Methoden über `add_request_handler`; `middleware` ist **nicht** der
 Dekorator-Ersatz, sondern eine eigene Schicht. Die erste Fassung dieses Absatzes hat das
 zusammengeworfen.) Und `mcp` war nur die Zeile, die zuerst gebrochen ist: `requirements.txt:2-6`,
-die Spiegelzeilen `pyproject.toml:8-12` und **alle acht** Zeilen in `requirements-dev.txt` haben
+die vier Spiegelzeilen `pyproject.toml:8-11` und **alle acht** Zeilen in `requirements-dev.txt` haben
 ebenfalls keine Obergrenze. Die Lehre aus
 diesem PR ist deshalb nicht „mcp war schuld", sondern: offene Versionsbereiche plus ein CI, das nur
 auf PRs läuft, ergeben eine Zeitbombe mit unbekannter Laufzeit.
@@ -58,7 +58,7 @@ Ein Reconcile-Punkt, der an einer Merge-Reihenfolge hängt, ist nach dem ersten 
 fällig; genau diesen zweiten Blick hat der Rebase nicht gemacht.
 
 Abgehakt wurde nicht einfach das Kästchen. Der Punkt enthielt zwei Dinge, die der Pin **nicht**
-erledigt — die ungeprüfte Restfläche (`requirements.txt:2-6`, `pyproject.toml:8-12` und alle acht
+erledigt — die ungeprüfte Restfläche (`requirements.txt:2-6`, `pyproject.toml:8-11` und alle acht
 Zeilen in `requirements-dev.txt`) und die mcp-2.x-Migration. Als Nebensatz unter einem `[x]` wären
 beide verschwunden. Sie stehen deshalb jetzt zusätzlich als eigene offene Einträge unter
 „🟡 Offen" — kopiert, nicht verschoben, damit der Original-Text wörtlich erhalten bleibt. Dass

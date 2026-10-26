@@ -23,7 +23,7 @@
   Siehe `changes/2026-07-07_elv2-license.md`, `changes/2026-07-07_elv2-security-wording.md`.
 
 ### Fixed
-- **`mcp` nach oben begrenzt** (#20): `requirements.txt:1` → `mcp>=1.0.0,<2`. Ohne Obergrenze
+- **`mcp` nach oben begrenzt** (#20): `requirements.txt:1` **und** `pyproject.toml:7` → `mcp>=1.0.0,<2`. Ohne Obergrenze
   installierte CI inzwischen mcp **2.3.0**, wo die lowlevel-Dekorator-API entfallen ist →
   `AttributeError` an `server.py:731` beim Modul-Import und **9 Collection-Errors** auf allen drei
   Matrix-Versionen. Der Pin hält die Auflösung in der 1er-Reihe (frische venv: **mcp 1.30.0**,

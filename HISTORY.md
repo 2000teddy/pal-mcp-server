@@ -19,7 +19,13 @@ Monate ohne einen einzigen CI-Lauf bei gleichzeitig offenen Versionsbereichen he
 `.pal_venv` seit Juli auf mcp 1.27.2 steht — ein installiertes venv friert die Auflösung ein und
 verdeckt damit genau die Drift, die ein frischer Install sofort zeigt.
 
-Behoben mit dem kleinsten Eingriff, der den Bruch ausschließt: `mcp>=1.0.0,<2`. Eine frische venv
+Behoben mit dem kleinsten Eingriff, der den Bruch ausschließt: `mcp>=1.0.0,<2` — und zwar in
+**beiden** Deklarationen, `requirements.txt:1` *und* `pyproject.toml:7`. Die zweite hatte der erste
+Anlauf übersehen; die Review hat sie als High-Befund hereingeholt. Das war wichtiger als es klingt:
+`pyproject.toml` ist die Metadaten-Quelle für Wheel und sdist, und `semantic-release.yml` hätte nach
+dem `fix(deps)`-Titel genau dieses Artefakt veröffentlicht — ein Release, der einen Fix behauptet,
+den er nicht enthält. **Lehre fürs nächste Mal:** bei einem Dependency-Pin immer
+`git ls-files | xargs grep -lE 'mcp[>=<~]'` fahren, nicht nur `requirements.txt` ansehen. Eine frische venv
 aus `requirements.txt` + `requirements-dev.txt` löst damit auf **mcp 1.30.0** auf — also nicht
 zurück auf die alte 1.27.2, sondern auf den aktuellen Stand der 1er-Reihe, in der die Dekoratoren
 existieren. Patch- und Minor-Updates bleiben erlaubt, Sicherheitsfixes kommen weiter an.

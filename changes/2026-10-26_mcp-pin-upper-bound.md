@@ -9,7 +9,18 @@ beim Modul-Import → **9 Collection-Errors** auf allen drei Matrix-Versionen.
 Dieser PR ist **ein Einzeiler plus Nachweis**. Er fasst bewusst nichts anderes an.
 
 ## Was
-- `requirements.txt:1`: `mcp>=1.0.0` → **`mcp>=1.0.0,<2`**.
+**Beide** Versionsdeklarationen des Repos, gleich gezogen:
+- `requirements.txt:1`: `mcp>=1.0.0` → **`mcp>=1.0.0,<2`**
+- `pyproject.toml:7`: `"mcp>=1.0.0"` → **`"mcp>=1.0.0,<2"`**
+
+`pyproject.toml` war im ersten Anlauf übersehen und kam über die Review herein (High-Befund). Das
+war kein Schönheitsfehler: `pyproject.toml` ist die Metadaten-Quelle für Wheel und sdist, also
+hätten `pip install .` und jeder Install des veröffentlichten Pakets weiter auf mcp 2.x aufgelöst
+und am Import gebrochen — während `semantic-release.yml:48-49` nach einem `fix(deps)`-Titel genau
+dieses Artefakt veröffentlicht. Der Release hätte einen Fix behauptet, den sein Artefakt nicht
+enthält. `git ls-files | xargs grep -lE 'mcp[>=<~]'` bestätigt, dass es **keine weiteren**
+Deklarationen gibt (kein Lockfile, kein `setup.py`, kein `setup.cfg`); `test.yml:25` und
+`Dockerfile:24` lesen `requirements.txt`.
 
 ## Warum eine Obergrenze und nicht ein exakter Pin
 `mcp 1.x` enthält die Dekoratoren, die `server.py` nutzt; innerhalb der 1er-Reihe sind
@@ -44,6 +55,26 @@ deshalb nicht abhaken, ohne denselben Textblock ein zweites Mal anzulegen. Darum
 hier **unangetastet**; das Abhaken gehört in den PR, der als **zweiter** merged. Wird das
 vergessen, führt `TODO.md` einen erledigten Punkt als offen — deshalb steht es hier, im PR-Body
 und im Watchdog-Bericht.
+
+## Offen geblieben (bewusst, mit Begründung)
+- **Untergrenze `>=1.0.0` ist unrealistisch.** `server.py:31-43` importiert `ToolAnnotations`,
+  `PromptsCapability` und `ToolsCapability` und übergibt `instructions=` an `InitializationOptions`
+  (`server.py:1605-1607`) — Symbole, die mcp 1.0.0 noch nicht hatte. Die Untergrenze ist damit eine
+  Zusage, die der Code nicht hält. Die **echte** Mindestversion zu bestimmen heißt bisecten
+  (frische venv pro Kandidat) und ist ein eigener Schritt; dieser PR behebt den real auftretenden
+  Bruch nach oben, nicht die theoretische Lücke nach unten. Als Folgepunkt notiert, nicht geraten.
+- **`APP_VERSION.md` ist aus dem Takt:** `pyproject.toml:3` steht auf **9.9.0**, `APP_VERSION.md`
+  auf **9.8.2**. Die Datei soll laut ihrem eigenen Kommentar die Version spiegeln. Nebenbefund
+  dieses PRs, hier **nicht** mitgeändert (eigener Punkt).
+- **`BUILD_NUMBER.md` nicht gebumpt** — so beauftragt. Hinweis: `CONTRIBUTING.md:44` sagt „+1 pro
+  Arbeitsschritt" ohne Ausnahme für `fix`-PRs, und dies *ist* ein Arbeitsschritt, kein Doku-PR.
+  Die Review hat das als Regel-Unklarheit markiert: entweder bumpen oder die Ausnahme in
+  `CONTRIBUTING.md` festschreiben. Entscheidung liegt nicht in diesem PR.
+
+## Review
+`pal clink` · `cli_name=claude` · `role=codereviewer` → **`claude-sonnet-5-5`**, 2026-10-26.
+Erstes Votum **CHANGES-NEEDED** mit einem High-Befund (`pyproject.toml` nicht mitgezogen) — der
+Befund wurde nachgeprüft, traf zu und ist in diesem PR behoben.
 
 ## Status
 Kein Selbst-Merge (`CONTRIBUTING.md` §Branch-Strategie). Review über `claude`

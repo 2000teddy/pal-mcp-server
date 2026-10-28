@@ -1,6 +1,6 @@
 # TODO — PAL MCP Server (ThinkHub-Fork)
 
-> **Status-Kurzzeile (Stand 2026-10-26, KW44):** Build 2 fertig; CO-01 core-gegated.
+> **Status-Kurzzeile (Stand 2026-10-28, KW44):** Build 2 fertig; CO-01 core-gegated; agy-Backend-Modellname gefixt.
 > **Scope:** Dieses File ist das **Bauplan-Backlog** der PALDEV-Lane, **nicht** die Freigaben-Liste.
 > Die vollständige Christian-Gate-Liste (mit Fristen und Belegen) steht in
 > `~/thinkhub-administrator/FREIGABEN-OFFEN-CHRISTIAN.md`; hier stehen nur die bauplan-relevanten Punkte.
@@ -151,6 +151,15 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   `mcp/server/runner.py`) — frühere Notiz hier war unpräzise. Also Umbau, keine Umbenennung:
   gehört in ein ADR, nicht in einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es
   nicht auf.
+
+## ✅ CLI-Backend `agy` (Modellname)
+
+- [x] **CLI-Modellname `Gemini 3.1 Pro (Low)` → `Gemini 4 Argon (Low)`** (2026-10-28): der
+  hartcodierte Name existiert in der agy-CLI (Antigravity CLI 1.4.9) nicht mehr — der Backend
+  `cli-agy-gemini-pro` war dadurch tot (`error: model … is not recognized as a known model`).
+  Umgestellt in `conf/cli_models.json`, `clink/consensus_backends.py` und der Test-Assertion;
+  Unit-Gate 47/47 grün, Live-Probe liefert wieder content. Belege:
+  `changes/2026-10-28_agy-cli-model-name.md`.
 
 ## ⏸️ Blockiert (extern)
 

@@ -64,7 +64,7 @@ class TestCommandBuilding:
         spec = provider._invocation_spec("cli-agy-gemini-pro")
         cmd = spec.build_command("PROMPT")
         # agy is arg-mode: model flag must come before -p, prompt is the last argv entry
-        assert cmd == ["agy", "--model", "Gemini 3.1 Pro (Low)", "-p", "PROMPT"]
+        assert cmd == ["agy", "--model", "Gemini 4 Argon (Low)", "-p", "PROMPT"]
 
 
 class TestAliasResolution:

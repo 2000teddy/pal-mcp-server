@@ -195,7 +195,7 @@
         "prompt_mode": "arg",
         "pre_model_args": [],
         "post_model_args": ["-p"],
-        "cli_model": "Gemini 3.1 Pro (Low)",
+        "cli_model": "Gemini 4 Argon (Low)",
         "model_flag": "--model"
       }
     }

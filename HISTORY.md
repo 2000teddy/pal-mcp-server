@@ -3,6 +3,42 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-10-28 — Der `agy`-Backend war tot, und niemand hat es gemerkt (Modellname)
+
+Seit dem agy-Modellwechsel beim Anbieter war der PAL-CLI-Backend `cli-agy-gemini-pro`
+**komplett tot** — mit einer Fehlermeldung, die man als „kaputtes Modell" abtun könnte:
+`error: model Gemini 3.1 Pro (Low) is not recognized as a known model or custom model in settings`.
+Der Name stand **hartcodiert** an zwei Stellen (`conf/cli_models.json` → `cli_model`,
+`clink/consensus_backends.py` → `model=`) plus in einer Test-Assertion. Fix: auf den live
+getesteten Namen `Gemini 4 Argon (Low)` umgestellt — 3 Ein-Zeilen-Änderungen, sonst nichts.
+
+Der interessante Teil ist nicht der Fix, sondern **wie er gefunden wurde**. Der übliche
+Health-Check wäre grün gewesen: `mcporter list` meldet alle 9 Server als „healthy", PAL
+mit 19 Tools. Nur ein **echter Aufruf** deckt den Totalausfall auf. Dasselbe Muster hat
+Christian am selben Tag in den anderen beiden CLI-Backends erwischt — `cli-claude-sonnet`
+und `cli-claude-opus` scheitern mit „OAuth session expired", `cli-codex-gpt` mit 401, und
+**beide** maskieren den Fehler als `continuation_available`. Zusammen mit dem am selben
+Tag abgelaufenen Claude-OAuth (10:34 UTC) und dem nicht angemeldeten `codex` bleibt als
+einziger **funktionierender** PAL-Backend `agy` übrig — genau der, der den Fix gebaut hat.
+**Merksatz: ein Health-Signal, das den Fehlerpfad nicht abbildet, ist kein Health-Signal.**
+
+Der Fix sitzt bewusst auf einem **eigenen Branch direkt auf `origin/main`** (`5d41a7c`),
+nicht auf dem PR-#20-Branch: der ursprüngliche Fix-Commit hatte dessen 12 Commits
+geerbt, und ein PR von dort hätte PR #20 dupliziert. Der 3-Zeilen-Diff wurde gegen die
+Originalfassung byte-identisch verifiziert.
+
+Zur Testlage: die Gesamtsuite meldet `5 failed, 966 passed` — **das ist nicht dieser
+Fix**, sondern das bereits in PR #19 belegte `.env`-Artefakt. Gegenprobe auf unverändertem
+`origin/main` mit identischer Dateikombination ergibt dieselben 5 Failures; im Einzelruf
+sind die Tests grün (Reihenfolge-/Pollution-Effekt der Suite). Der relevante Beleg ist der
+Zieldatei-Lauf (`tests/test_cli_provider.py` → 47/47 grün) plus die Live-Probe:
+`mcporter call pal chat model="cli-agy-gemini-pro"` liefert wieder content (`CLEAN_BASE_OK`),
+vorher lieferte derselbe Aufruf `error`.
+
+**Nicht getan:** kein Merge. Ein Push auf `main` löst `semantic-release` aus
+(9.9.0 → 9.9.1, `ghcr.io`-Image, Repo `PUBLIC`) — das ist ein Christian-Gate, keine
+Lautionsentscheidung.
+
 ## 2026-10-26 — 13 Wochen Stillstand als Stillstand benannt (TODO-Kopfzeile KW44)
 
 Zwischen dem 15.07. und heute ist in diesem Repo **nichts** passiert — `main` stand die ganze Zeit

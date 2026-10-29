@@ -91,3 +91,53 @@ funktionierende Consensus-Backend.
 Kein Merge (Merge auf `main` löst `semantic-release` → öffentliche Publikation
 `ghcr.io` + Version 9.9.1 aus → **Christian-Gate**). Kein Deploy, kein
 Secret, keine Policy-Änderung.
+
+---
+
+## Nachtrag Do 2026-10-29 — Review-Runde (`pal codereview`), LOW-Befund (`conf/cli_models.json:181`) & Compliance-Nachzug (#22)
+
+### 1. Review-Runde über `pal codereview` (Verfügbarkeit & Selbstreview-Vermerk)
+
+Nach Wiederherstellung des `cli-agy-gemini-pro`-Backends wurde PR #22 am 2026-10-29 via
+`mcporter call pal codereview` (`model=cli-agy-gemini-pro`, `relevant_files`:
+`clink/consensus_backends.py`, `conf/cli_models.json`, `tests/test_cli_provider.py`)
+geprüft:
+
+- **Backend-Status (live geprüft via `pal chat`):** `cli-agy-gemini-pro` funktioniert
+  (`PAL_BACKEND_OK`), während `cli-claude-sonnet` (OAuth abgelaufen) und `cli-codex-gpt`
+  (`401 Unauthorized`) weiterhin ausfallen.
+- **Explizite Einschränkung (Selbstreview):** Da `agy` sowohl den Fix implementiert hat als
+  auch der einzige derzeit funktionierende Review-Backend ist, handelt es sich um ein
+  **Selbstreview**. Dies ist in `COMPLIANCE-TABLE.md` (Zeile 22) ausdrücklich offengelegt.
+- **Review-Urteil:** **APPROVE** (keine funktionalen oder sicherheitsrelevanten Mängel) mit
+  **einem LOW-Befund**:
+  - `conf/cli_models.json:181`: Nach dem Update von `cli_model` in Zeile 198 auf
+    `"Gemini 4 Argon (Low)"` verwies das `description`-Feld in Zeile 181 weiterhin auf
+    `"Gemini 3.1 Pro over the agy CLI..."`.
+
+### 2. Unabhängige Gegenprüfung & Behebung des LOW-Befunds
+
+- Auf der Basis `origin/fix/mcp-pin-upper-bound` (`4bf303d`) waren `description` (Zeile 181)
+  und `cli_model` (Zeile 198) konsistent auf `"Gemini 3.1 Pro"` gesetzt; die Inkonsistenz
+  wurde durch PR #22 neu eingeführt.
+- Passend zum `friendly_name` in Zeile 166 (`"CLI (Gemini Pro via Google One)"`) und zur
+  versionsneutralen Formulierung der übrigen Einträge in `conf/cli_models.json`
+  (`"Claude Sonnet over the claude CLI..."`, `"Claude Opus over the claude CLI..."`,
+  `"OpenAI models over the codex CLI..."`) wurde Zeile 181 generisch gefasst, damit sie
+  beim nächsten Anbieter-Renaming nicht erneut veraltet:
+  ```json
+  "description": "Gemini Pro over the `agy` CLI (Google One subscription, no API cost). Serves the gemini/pro alias family in subscription mode.",
+  ```
+- `cli_model` (`"Gemini 4 Argon (Low)"`, Zeile 198) bleibt unverändert.
+
+### 3. Schließung der zwei Buchhaltungs-Lücken in `COMPLIANCE-TABLE.md`
+
+- **Lücke A (fehlende Zeile für PR #22):** PR #21 (auf ungepinntem `main`) wurde am
+  2026-10-28 17:36:02 UTC zugunsten des gestapelten PR #22 (Basis `fix/mcp-pin-upper-bound`)
+  geschlossen, `COMPLIANCE-TABLE.md` enthielt aber bislang nur Zeile `#21`.
+- **Lücke B (`CR`-Spalte):** Zeile `#21` stand auf `CR = ~~` („Review-Runde offen").
+- **Auflösung nach Hausregel:** Zeile `#21` bleibt als datierter Befund des geschlossenen
+  PR #21 unverändert stehen; für den aktiven PR **#22** wurde eine eigene Zeile `| 22 | #22 |`
+  mit `CR = ok`, explizitem Selbstreview-Vermerk, dokumentierter Behebung des LOW-Befunds und
+  der sauberen CI-Checkout-Testevidenz (`971 passed, 4 skipped, 16 deselected, 0 failed` ohne
+  `.env`-Artefakt; `pytest tests/test_cli_provider.py -q` → `47 passed`) ergänzt.

@@ -246,7 +246,7 @@ def default_backends(timeout: int = DEFAULT_TIMEOUT_SECONDS) -> list[CliBackend]
             parser_name="agy_text",
             prompt_mode="arg",
             post_model_args=["-p"],
-            model="Gemini 3.1 Pro (Low)",
+            model="Gemini 4 Argon (Low)",
             model_flag="--model",
             timeout=timeout,
         ),

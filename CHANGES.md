@@ -16,6 +16,12 @@
 - **`agy` als vollwertiger clink-Client** (#4, prompt-as-arg) — AgyAgent fürs `clink`-Tool.
 
 ### Changed
+- **CLI-Modellname `agy` angeglichen** (dieser PR): der in `conf/cli_models.json` und
+  `clink/consensus_backends.py` hartcodierte Modellname `Gemini 3.1 Pro (Low)` existiert in der
+  agy-CLI (Antigravity CLI 1.4.9) nicht mehr — der Backend `cli-agy-gemini-pro` war dadurch tot
+  (`error: model … is not recognized as a known model`). Umgestellt auf den live getesteten Namen
+  `Gemini 4 Argon (Low)` (3 Ein-Zeilen-Änderungen inkl. Test-Assertion). Unit-Gate 47/47 grün,
+  Live-Probe liefert wieder content. Siehe `changes/2026-10-28_agy-cli-model-name.md`.
 - **Hermetischer Unit-Gate** (#3): `conftest` unterbindet echte CLI-Subprozesse in Unit-Tests.
 - **Lizenz: Apache 2.0 → Elastic License 2.0 (ELv2)** (#10, #11): source-available; NOTICE +
   LICENSE-APACHE-2.0 erhalten die Beehive-Innovations-Ursprungsattribution (Apache-2.0 §4);

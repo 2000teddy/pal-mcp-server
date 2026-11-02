@@ -178,7 +178,7 @@
         "gemini-pro-2.5"
       ],
       "intelligence_score": 15,
-      "description": "Gemini 3.1 Pro over the `agy` CLI (Google One subscription, no API cost). Serves the gemini/pro alias family in subscription mode.",
+      "description": "Gemini Pro over the `agy` CLI (Google One subscription, no API cost). Serves the gemini/pro alias family in subscription mode.",
       "context_window": 1048576,
       "max_output_tokens": 65536,
       "supports_extended_thinking": false,
@@ -195,7 +195,7 @@
         "prompt_mode": "arg",
         "pre_model_args": [],
         "post_model_args": ["-p"],
-        "cli_model": "Gemini 3.1 Pro (Low)",
+        "cli_model": "Gemini 4 Argon (Low)",
         "model_flag": "--model"
       }
     }

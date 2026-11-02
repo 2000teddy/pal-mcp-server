@@ -2,6 +2,114 @@
 
 <!-- version list -->
 
+## v9.9.1 (2026-11-02)
+
+### Bug Fixes
+
+- **deps**: Mcp nach oben begrenzen (mcp>=1.0.0,<2)
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- **deps**: Pyproject.toml-Deklaration mitziehen (Review-High-Befund)
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+### Chores
+
+- BUILD_NUMBER 3 -> 4 + Merge-Reihenfolge und Version-Nebenbefund dokumentieren
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Sync version to config.py [skip ci]
+  ([`f5173d5`](https://github.com/2000teddy/pal-mcp-server/commit/f5173d5c7ee8a44f927798179bf4ac99f275b0a0))
+
+- Sync version to config.py [skip ci]
+  ([`3fdb27d`](https://github.com/2000teddy/pal-mcp-server/commit/3fdb27de8d725476755dcbade2ab92839e1702a0))
+
+- Sync version to config.py [skip ci]
+  ([`c9e3526`](https://github.com/2000teddy/pal-mcp-server/commit/c9e35261a9d187bc52977b1692927d7384e12694))
+
+- Sync version to config.py [skip ci]
+  ([`dd659e7`](https://github.com/2000teddy/pal-mcp-server/commit/dd659e790db8b797ac2ae35fa1dff66ef007af95))
+
+### Continuous Integration
+
+- Add warning MD-Compliance gate (changes/ + COMPLIANCE per PR)
+  ([`d6c8e29`](https://github.com/2000teddy/pal-mcp-server/commit/d6c8e295561912fe88f66f88fb3802b2611200ec))
+
+### Documentation
+
+- ADR-003 mirror — Quellen-Hierarchie in changes/ + TODO nachziehen (codex re-review)
+  ([`f21b9d3`](https://github.com/2000teddy/pal-mcp-server/commit/f21b9d32f9c98ade590b21e504b8ee842ce5b6da))
+
+- ADR-003 mirror — Quellen-Hierarchie schärfen (codex CHANGES-NEEDED)
+  ([`3686576`](https://github.com/2000teddy/pal-mcp-server/commit/3686576a4001528a66ab7a7b18409d0bd9ddfe1f))
+
+- ADR-003 PAL-Repo-Referenzspiegel + CO-01-Rebuild-Konformität
+  ([`f88cfef`](https://github.com/2000teddy/pal-mcp-server/commit/f88cfef3fef4b8001838fec5407f71b8a69fd73e))
+
+- Changes/-Eintrag praezisieren + pyproject-Auflösung belegen
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- CI-Befund am Bookkeeping-PR festhalten (mcp>=1.0.0 unpinned, vorbestehend rot)
+  ([`23dfe19`](https://github.com/2000teddy/pal-mcp-server/commit/23dfe19fde013c0eb38b62e7973afe91cf22c3d2))
+
+- CI-Gate-Luecken als benannte offene Backlog-Punkte aufnehmen
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- CO-01-Blocker auf Realität umschreiben (TL-07 erbracht → Core-Fenster + ADR-003)
+  ([#17](https://github.com/2000teddy/pal-mcp-server/pull/17),
+  [`ad96581`](https://github.com/2000teddy/pal-mcp-server/commit/ad965810ae7342a768097ff44deabf293df39171))
+
+- Dritte Review-Runde — pyproject-Zeilen, Uhrzeiten, Befund-Zaehlung
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Lokale Testlage praezisieren - 5 Failures sind .env-Artefakt, nicht Code
+  ([`7b9970d`](https://github.com/2000teddy/pal-mcp-server/commit/7b9970d5234f5cfe887e6cd905d26c9384402ea8))
+
+- MD-Nachtrag zu PR #14 (CHANGES + COMPLIANCE-Zeile)
+  ([`e5e38ba`](https://github.com/2000teddy/pal-mcp-server/commit/e5e38ba0f3b2c804cb81ff6a303cec7ea0792d6f))
+
+- Praeexistenz des CI-Fehlers am unveraenderten main belegen
+  ([`67f5c3e`](https://github.com/2000teddy/pal-mcp-server/commit/67f5c3eb17c4b27ff6d8c82a609c347133e74b0b))
+
+- Review-Befunde zum TODO-Nachtrag abarbeiten (Restflaeche, mcp-2.x-API, BUILD_NUMBER)
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Review-Nachbesserungen aus claude/codereviewer-Review einarbeiten
+  ([`6886322`](https://github.com/2000teddy/pal-mcp-server/commit/688632213710df1d79cb5e3fc0038e784a92ccd7))
+
+- Review-of-Record schliessen (Runde 4: APPROVE)
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Review-of-Record zum CI-Gate-Eintrag schliessen (Runde 7: APPROVE)
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Review-Runde 5 — Rulesets, push!=schedule, 60-Tage-Auto-Disable
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- Review-Runde 6 — Kopfzeilen-Beleg und Stillstandsdauer korrigiert
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- TODO-Reconcile — Ebene-1 CI-Gate (gelandet in #14) als erledigt abgehakt
+  ([`96b59d9`](https://github.com/2000teddy/pal-mcp-server/commit/96b59d9ebb32a528be108f43fda6c4d00303000e))
+
+- TODO.md-Checkbox fuer den mcp-Pin abhaken, Restfaelle herausloesen
+  ([#20](https://github.com/2000teddy/pal-mcp-server/pull/20),
+  [`9c13546`](https://github.com/2000teddy/pal-mcp-server/commit/9c13546b0a8fd8db81ebb8108528f2177aca1c1a))
+
+- TODO.md-Status-Kopfzeile auf KW44-Stand (Build 2 fertig; CO-01 core-gegated)
+  ([`a89ba81`](https://github.com/2000teddy/pal-mcp-server/commit/a89ba816322164223223613876a930b7ec7b1d1e))
+
+
 ## v9.9.0 (2026-07-08)
 
 ### Bug Fixes

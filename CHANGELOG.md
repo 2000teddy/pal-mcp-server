@@ -2,6 +2,26 @@
 
 <!-- version list -->
 
+## v9.9.2 (2026-11-02)
+
+### Bug Fixes
+
+- **agy**: CLI-Modellname auf Gemini 4 Argon (Low) angleichen
+  ([#23](https://github.com/2000teddy/pal-mcp-server/pull/23),
+  [`0a02716`](https://github.com/2000teddy/pal-mcp-server/commit/0a02716b94995a84c02359919bcfa767144c6206))
+
+### Chores
+
+- Sync version to config.py [skip ci]
+  ([`eb6c369`](https://github.com/2000teddy/pal-mcp-server/commit/eb6c369da2d4766807a0d2dc84307927d58f0ca8))
+
+### Documentation
+
+- **pal**: PR-22-Review-Nachtrag + cli_models-description angleichen
+  ([#23](https://github.com/2000teddy/pal-mcp-server/pull/23),
+  [`0a02716`](https://github.com/2000teddy/pal-mcp-server/commit/0a02716b94995a84c02359919bcfa767144c6206))
+
+
 ## v9.9.1 (2026-11-02)
 
 ### Bug Fixes

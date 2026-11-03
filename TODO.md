@@ -14,7 +14,9 @@
 > CO-01 (pal-Rebuild) hängt am Core-/Hub-Fenster. In dieser Lane offen sind damit **sechs Punkte,
 > alle unter „🟡 Offen"**: zwei Kleinigkeiten, die beiden Dependency-Punkte aus der mcp-Drift und
 > die beiden CI-Gate-Punkte (Branch-Protection, Test-Trigger auf `main`) — letztere beide
-> **Repo-Admin + Christian-Freigabe**, keine Lane-Arbeit. Stand 2026-10-26.
+> **Repo-Admin + Christian-Freigabe**, keine Lane-Arbeit. Stand 2026-10-26. **Nachtrag 2026-11-03:** der
+> Dependency-Punkt „Restfläche“ ist erledigt (#25, je Zeile begrenzt bzw. begründet offen) — offen
+> bleibt davon die mcp-2.x-Migration. Damit sind es **fünf** offene Punkte statt sechs.
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -126,7 +128,7 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   unten (der Text hier bleibt wörtlich stehen, die Punkte sind kopiert, nicht entfernt), damit das
   Häkchen sie nicht mit zudeckt.
 
-- [ ] 🟡 **Dependency-Drift, Restfläche — noch ungeprüft.** Ohne Obergrenze sind **alle übrigen**
+- [x] 🟡 **Dependency-Drift, Restfläche — geprüft 2026-11-03 (PR #25), je Zeile entschieden.** Ohne Obergrenze sind **alle übrigen**
   Laufzeit-Deklarationen: `requirements.txt:2-6` (`google-genai`, `openai`, `pydantic`,
   `python-dotenv`, `importlib-resources`) und `pyproject.toml:8-11` (dieselben vier ohne
   `importlib-resources`, das dort nicht deklariert ist) — plus **alle
@@ -137,6 +139,19 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   braucht. **Zu entscheiden:** ob und wie gepinnt wird (je Zeile eine frische venv + Testlauf).
   Gleiche Mechanik wie bei `mcp`: offene Versionsbereiche plus ein CI, das nur auf `pull_request`
   läuft, bleiben unbemerkt bis zum nächsten PR.
+  **Ergebnis je Zeile** (Nachweis: frische venv je Zeile, nur diese Zeile begrenzt, Suite
+  `971 passed, 0 failed`; Kombination auf 3.10/3.11/3.12 grün; Tabelle in
+  `changes/2026-11-03_deps-upper-bounds.md`):
+  - begrenzt, `requirements.txt` **und** `pyproject.toml` gleich: `google-genai<3` (2.34.0),
+    `openai<4` (3.42.1 — war unbemerkt schon 2→3 gesprungen), `pydantic<3` (2.14.2),
+    `python-dotenv<2` (1.2.4).
+  - begrenzt, `requirements-dev.txt`: `pytest<10` (9.2.0), `pytest-asyncio<2` (1.4.1.post1),
+    `pytest-mock<4` (3.17.0), `black<27` (26.10.1), `ruff<0.18` (0.17.3), `isort<10` (9.0.2),
+    `python-semantic-release<11` (10.7.0), `build<2` (1.6.1); black/ruff/isort-Checks grün.
+  - **offen, mit Grund:** `importlib-resources` (`requirements.txt:6`) — Marker `<3.9` bei
+    `requires-python >=3.9`, in keiner unterstützten Umgebung installiert, kein Testlauf möglich.
+  - Bleibt bestehen: der nächste Major je Paket braucht einen eigenen Test-PR (die Grenzen machen
+    ihn sichtbar statt still). Untergrenzen unverändert (`openai>=1.55.2` überspannt damit drei Majors).
 
 - [ ] 🟡 **Migration auf die mcp-2.x-API (ADR-Frage).** `server.py` nutzt die in 2.x entfallenen
   lowlevel-Dekoratoren an vier Stellen: `server.py:731` (`@server.list_tools()`), `:793`

@@ -3,6 +3,28 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-11-03 — Die Restfläche der Dependency-Drift: Grenzen nur mit Nachweis
+
+Nach #20 (`mcp<2`) stand der Rest der Versionsdeklarationen weiter offen — mit Absicht, weil jede
+Obergrenze ihren eigenen Verträglichkeits-Nachweis braucht. Diesmal wurde das Verfahren aus dem TODO
+wörtlich durchgezogen: je Zeile eine frische venv, **nur diese Zeile** begrenzt, Suite laufen lassen;
+danach alle Grenzen zusammen auf der CI-Matrix 3.10–3.12 mit echtem `pip`. Ergebnis: alle zwölf
+prüfbaren Zeilen sind grün begrenzbar (nächstes Major über dem heute Aufgelösten; `ruff` `<0.18`,
+weil dort jede 0.x-Minor Regeln scharf schaltet; `black` `<27`, CalVer). Offen bleibt nur
+`importlib-resources`, dessen Marker (`<3.9`) bei `requires-python >=3.9` nie greift — für eine Zeile,
+die in keiner unterstützten Umgebung installiert wird, gibt es keinen Testlauf und damit keine Grenze.
+
+Der lehrreiche Fund: **`openai` war schon unbemerkt einen Major gesprungen.** Ein ungepinnter Install
+löst heute 3.42.1 auf, die Lane-venv hatte noch 2.38.0 — genau die Mechanik, die `mcp` gebrochen
+hat, nur dass es diesmal zufällig gut ging. Deshalb wurde die naheliegende Gegenposition („breite
+SDKs offen lassen") verworfen: `<4` sperrt den nächsten Sprung, bis ihn ein eigener PR prüft.
+Zweiter Fund: die lokale `.pal_venv` hängt CI hinterher (black/ruff/isort/openai/google-genai/mcp
+älter, `pytest-mock` fehlt) — `code_quality_checks.sh` prüft lokal also nicht dasselbe wie CI.
+
+Kein Merge durch die Lane: `main` ist ungeschützt und `semantic-release` läuft auf `push: main`.
+Der PR-Titel `build(deps):` löst kein Release aus (heute ändert sich keine installierte Version);
+wer die Grenzen im veröffentlichten Artefakt haben will, setzt den Squash-Titel auf `fix(deps):`.
+
 ## 2026-10-28 — Der `agy`-Backend war tot, und niemand hat es gemerkt (Modellname)
 
 Seit dem agy-Modellwechsel beim Anbieter war der PAL-CLI-Backend `cli-agy-gemini-pro`

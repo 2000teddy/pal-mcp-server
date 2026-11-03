@@ -16,7 +16,7 @@
 - **`agy` als vollwertiger clink-Client** (#4, prompt-as-arg) — AgyAgent fürs `clink`-Tool.
 
 ### Changed
-- **CLI-Modellname `agy` angeglichen** (dieser PR): der in `conf/cli_models.json` und
+- **CLI-Modellname `agy` angeglichen** (#23; gemergt 2026-11-02, Release v9.9.2): der in `conf/cli_models.json` und
   `clink/consensus_backends.py` hartcodierte Modellname `Gemini 3.1 Pro (Low)` existiert in der
   agy-CLI (Antigravity CLI 1.4.9) nicht mehr — der Backend `cli-agy-gemini-pro` war dadurch tot
   (`error: model … is not recognized as a known model`). Umgestellt auf den live getesteten Namen

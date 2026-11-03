@@ -17,6 +17,8 @@
 > **Repo-Admin + Christian-Freigabe**, keine Lane-Arbeit. Stand 2026-10-26. **Nachtrag 2026-11-03:** der
 > Dependency-Punkt „Restfläche“ ist erledigt (#25, je Zeile begrenzt bzw. begründet offen) — offen
 > bleibt davon die mcp-2.x-Migration. Damit sind es **fünf** offene Punkte statt sechs.
+> **Nachtrag 2026-11-03 (#26):** neu offen der 🟢-Punkt „Release-Build übergeht `build<2`“
+> (Nebenbefund aus #25) — damit wieder **sechs** offene Punkte.
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -166,6 +168,14 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   `mcp/server/runner.py`) — frühere Notiz hier war unpräzise. Also Umbau, keine Umbenennung:
   gehört in ein ADR, nicht in einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es
   nicht auf.
+
+- [ ] 🟢 **Release-Build übergeht `build<2`** (Nebenbefund aus #25, eingetragen 2026-11-03 mit #26).
+  `pyproject.toml:105` (`[tool.semantic_release] build_command`) führt
+  `python -m pip install --upgrade build && python -m build` aus — das Upgrade ignoriert
+  `requirements-dev.txt:8` (`build>=1.0.0,<2`). Erscheint `build` 2.x, baut der Release-Pfad damit,
+  obwohl `<2` deklariert ist; die Grenze aus #25 wirkt nur im CI-Testpfad. **Zu tun:** dort
+  `python -m pip install "build>=1.0.0,<2"` installieren (Release-Konfiguration → eigener PR,
+  Titel ohne Release-Wirkung, z. B. `build:`). Nicht dringend: heute löst `--upgrade` 1.6.1 auf.
 
 ## ✅ CLI-Backend `agy` (Modellname)
 

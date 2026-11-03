@@ -16,7 +16,7 @@
 - **`agy` als vollwertiger clink-Client** (#4, prompt-as-arg) — AgyAgent fürs `clink`-Tool.
 
 ### Changed
-- **Obergrenzen für die übrige Dependency-Fläche** (#25): je Zeile mit frischer venv + Testlauf
+- **Obergrenzen für die übrige Dependency-Fläche** (#25; gemergt 2026-11-03 als `ea267af`, kein Release): je Zeile mit frischer venv + Testlauf
   belegt (Suite `971 passed`, 0 failed; Kombination auf 3.10/3.11/3.12 grün, `pip check` sauber).
   Laufzeit — `requirements.txt` **und** `pyproject.toml` gleich: `google-genai<3`, `openai<4`,
   `pydantic<3`, `python-dotenv<2`. Dev — `requirements-dev.txt`: `pytest<10`, `pytest-asyncio<2`,

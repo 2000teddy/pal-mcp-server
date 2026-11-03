@@ -16,7 +16,7 @@
 > die beiden CI-Gate-Punkte (Branch-Protection, Test-Trigger auf `main`) — letztere beide
 > **Repo-Admin + Christian-Freigabe**, keine Lane-Arbeit. Stand 2026-10-26. **Nachtrag 2026-11-03:** der
 > Dependency-Punkt „Restfläche“ ist erledigt (#25, je Zeile begrenzt bzw. begründet offen) — offen
-> bleibt davon die mcp-2.x-Migration.
+> bleibt davon die mcp-2.x-Migration. Damit sind es **fünf** offene Punkte statt sechs.
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.

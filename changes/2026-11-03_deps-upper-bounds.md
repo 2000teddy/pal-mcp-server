@@ -55,7 +55,10 @@ mit allen Grenzen → **971 passed, 0 failed**. Die aufgelösten Versionen sind 
 ## Bewusst offen
 - **`importlib-resources` (`requirements.txt:6`)**: Marker `python_version<"3.9"`, das Projekt verlangt
   `requires-python >=3.9`, die CI-Matrix ist 3.10–3.12. Die Zeile wird nie installiert, also gibt es
-  keinen Testlauf, der eine Obergrenze belegen könnte → keine Grenze ohne Nachweis. (Die Zeile ist
+  keinen Testlauf, der eine Obergrenze belegen könnte → keine Grenze ohne Nachweis. Präzise: tot auf
+  Python ≥3.9. `requirements.txt` selbst trägt kein `requires-python` — auf 3.8 würde pip die Zeile
+  installieren, aber 3.8 ist laut `pyproject.toml` nicht unterstützt und in keiner Umgebung (CI 3.10–3.12,
+  `Dockerfile` 3.11) vorhanden. (Die Zeile ist
   faktisch tot; ob sie entfernt wird, ist eine eigene Aufräumfrage, nicht Teil dieses PRs.)
 
 ## Begründung, warum auch `openai` und `google-genai` begrenzt sind
@@ -74,7 +77,13 @@ Import- und Schnittstellen-Verträglichkeit, nicht jeden Live-Pfad.
   `code_quality_checks.sh` bevorzugt `.pal_venv`-Binaries → lokaler Check ≠ CI-Check. Lokale
   Umgebung, kein Repo-Inhalt.
 - `semantic-release.yml:34` installiert `python-semantic-release` ohne Grenze; Zeile 39 installiert
-  danach `requirements-dev.txt`, damit greift `<11` dort ebenfalls. Workflow unverändert.
+  danach `requirements-dev.txt`. Erscheint ein PSR 11, wird es dort durch `<11` also **still auf 10.x
+  zurückgesetzt** (Downgrade, gewollt: Release-Werkzeug bleibt auf der geprüften Major). Workflow unverändert.
+- **`.pre-commit-config.yaml` ist eine dritte, abweichende Versionsquelle** (Review-Befund, nachgeprüft):
+  exakte `rev:`-Pins `black 25.1.0` (`:5`), `isort 6.0.1` (`:10`), `ruff v0.12.8` (`:16`) — deutlich
+  älter als CI (26.10.1 / 9.0.2 / 0.17.3). Driftet nicht (exakt gepinnt), ist aber weder in CI noch in
+  `code_quality_checks.sh` verdrahtet; wer die Hooks lokal nutzt, formatiert/lintet gegen andere
+  Versionen als CI. Angleichen wäre ein eigener PR mit eigenem Format-Lauf.
 - `run-server.sh:1028` (Hinweistext für manuelle Installation) und `:1037` (Rückfall-Install von
   `python-dotenv`) nennen Pakete ohne Version — Rückfallpfade, nicht angefasst.
 
@@ -82,10 +91,25 @@ Import- und Schnittstellen-Verträglichkeit, nicht jeden Live-Pfad.
 `main` ist ungeschützt (CI-Gate-1), ein Merge landet direkt und `semantic-release.yml` läuft auf
 `push: main`. Ob ein Release entsteht, entscheidet der **Commit-Typ** des Squash-Titels
 (`pyproject.toml`: `patch_tags = ["fix","perf"]`, `minor_tags = ["feat"]`):
+- Der Workflow **läuft** bei jedem Merge (`push: main`) — auch ohne Release: Tests, `semantic-release
+  version` ohne Bump, und der Bot-Commit `chore: sync version to config.py [skip ci]` (aktualisiert
+  `__updated__`, so beobachtet nach #24).
 - PR-Titel **`build(deps): …`** → `build` ist erlaubter Typ, aber kein Release-Trigger → **kein Release**.
   Gewählt, weil heute keine installierte Version wechselt.
 - Falls ein Release gewünscht ist (damit `pyproject.toml`-Metadaten/Docker-Image die Grenzen tragen):
-  Squash-Titel auf `fix(deps): …` ändern → Patch-Release **v9.9.3**.
+  Squash-Titel auf `fix(deps): …` ändern → Patch-Release, ausgehend vom aktuellen Tag `v9.9.2`
+  (Stand 2026-11-03) also **v9.9.3** — vorausgesetzt, der Squash übernimmt den Titel als Commit-Subject
+  (so bei #20 → v9.9.1 und #23 → v9.9.2 beobachtet).
+
+## Review
+Runde 1: `pal clink` claude/codereviewer (`claude-sonnet-5-5`) → **CHANGES-NEEDED**, nur Doku: (1) MEDIUM
+`.pre-commit-config.yaml` als Versionsquelle fehlte — nachgeprüft (`:5/:10/:16`), zutreffend, ergänzt;
+(2) MEDIUM Release-Absatz unvollständig (Workflow läuft auch ohne Release; PSR-Downgrade; v9.9.3 nur
+bei Tag v9.9.2) — präzisiert; (3) LOW COMPLIANCE-Platzhalter „Review: siehe PR“ — ersetzt; (4) LOW
+`TODO.md`-Kopfzählung „sechs Punkte“ — im datierten Nachtrag auf fünf gestellt; (5) LOW
+`importlib-resources` „nie installiert“ nur auf ≥3.9 — präzisiert. Code-Diff vom Reviewer als korrekt
+und konservativ bestätigt; Testzahlen und Paket-Semantik vom Reviewer **nicht** selbst nachgeprüft
+(stammen aus den Läufen der Lane).
 
 ## Was dieser PR ausdrücklich NICHT tut
 Keine mcp-2.x-Migration, `mcp`-Pin unverändert, keine Untergrenzen geändert, kein Workflow-,

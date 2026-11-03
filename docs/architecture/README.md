@@ -30,3 +30,4 @@ Positiv, negativ, Risiken.
 | 001 | cli_consensus — Multi-Modell-Konsens über Abo-CLIs | Implemented |
 | 002 | Globaler CLI-Backend-Schalter (`PAL_BACKEND`) | Implemented |
 | 003 | Keyfree Host-CLI-Runner — Draht-Vertrag & CO-01-Rebuild-Konformität (Referenz-Spiegel; Eigentum Core) | Reference |
+| 004 | Migration auf die mcp-2.x-API (Pin `<2` halten vs. migrieren vs. Kompat-Schicht) | Proposed |

@@ -169,6 +169,10 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   `mcp/server/runner.py`) — frühere Notiz hier war unpräzise. Also Umbau, keine Umbenennung:
   gehört in ein ADR, nicht in einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es
   nicht auf.
+  **ADR-Entwurf liegt vor (2026-11-03, #28):** `docs/architecture/ADR-004-mcp-2x-migration.md`,
+  Status **Proposed** — Optionen A (Pin halten) / B (migrieren) / C (Kompat-Schicht), Testplan,
+  Abbruchkriterien. Neu belegt: mcp 2.3.0 verlangt **Python >=3.10** (Projekt deklariert `>=3.9`).
+  Offen bleibt die **Annahme** des ADR (Christians Entscheidung); der Punkt bleibt bis dahin offen.
 
 - [x] 🟢 **Release-Build übergeht `build<2`** — **erledigt 2026-11-03 mit #27** (`build_command` installiert jetzt
   `"build>=1.0.0,<2"`, kein `--upgrade`; Nachweis in `changes/2026-11-03_release-build-pin.md`). (Nebenbefund aus #25, eingetragen 2026-11-03 mit #26).

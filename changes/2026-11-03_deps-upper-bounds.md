@@ -83,6 +83,12 @@ Import- und Schnittstellen-Verträglichkeit, nicht jeden Live-Pfad.
   älter als CI (26.10.1 / 9.0.2 / 0.17.3). Driftet nicht (exakt gepinnt), ist aber weder in CI noch in
   `code_quality_checks.sh` verdrahtet; wer die Hooks lokal nutzt, formatiert/lintet gegen andere
   Versionen als CI. Angleichen wäre ein eigener PR mit eigenem Format-Lauf.
+- **Release-Build übergeht `build<2`** (Review-Runde 3, nachgeprüft): `pyproject.toml:105`
+  (`[tool.semantic_release] build_command`) führt `python -m pip install --upgrade build && python -m build`
+  aus — dieses Upgrade ignoriert `requirements-dev.txt:8`. Erscheint `build` 2.x, baut der Release-Pfad
+  damit, obwohl `<2` deklariert ist; die Beweistabelle belegt `build<2` nur für die Requirements-Installation
+  (CI-Testpfad). Nicht angefasst (Release-Konfiguration); Angleichen hieße dort `"build>=1.0.0,<2"` —
+  eigener PR.
 - `run-server.sh:1028` (Hinweistext für manuelle Installation) und `:1037` (Rückfall-Install von
   `python-dotenv`) nennen Pakete ohne Version — Rückfallpfade, nicht angefasst.
 
@@ -115,6 +121,12 @@ Fehler; Fakten zu `.pre-commit-config.yaml:5/:10/:16`, Tags, Bot-Commit und PSR-
 (`semantic-release.yml:34/39/48`) selbst nachgeprüft. Zwei nicht blockierende LOW-Hinweise umgesetzt:
 offener Verweis „Runde 2: siehe changes/“ in COMPLIANCE durch das Ergebnis ersetzt; „wird nie
 installiert“ bei `importlib-resources` überall zu „in keiner unterstützten Umgebung“ präzisiert.
+
+Runde 3 (unabhängiges Review, Implementierer ≠ Reviewer): `pal:codereview` mit `model=cli-codex-gpt`
+auf HEAD `0b30091` → Freigabe mit **1 LOW-Doku-Befund**: `build`-Grenze gilt nicht für den Release-Build
+(`pyproject.toml:105`) — nachgeprüft, zutreffend, oben unter „Nebenbefunde“ ergänzt (nur Doku). Verworfen:
+„nie greift“ in `HISTORY.md` (Satz ist bereits auf `requires-python >=3.9` eingeschränkt) und fehlendes
+Python 3.9 in der CI-Matrix (bestand vorher, nicht durch diesen PR eingeführt).
 
 ## Was dieser PR ausdrücklich NICHT tut
 Keine mcp-2.x-Migration, `mcp`-Pin unverändert, keine Untergrenzen geändert, kein Workflow-,

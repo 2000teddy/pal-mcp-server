@@ -18,7 +18,8 @@
 > Dependency-Punkt „Restfläche“ ist erledigt (#25, je Zeile begrenzt bzw. begründet offen) — offen
 > bleibt davon die mcp-2.x-Migration. Damit sind es **fünf** offene Punkte statt sechs.
 > **Nachtrag 2026-11-03 (#26):** neu offen der 🟢-Punkt „Release-Build übergeht `build<2`“
-> (Nebenbefund aus #25) — damit wieder **sechs** offene Punkte.
+> (Nebenbefund aus #25) — damit wieder **sechs** offene Punkte. **Nachtrag (#27):** dieser 🟢-Punkt ist
+> erledigt, es bleiben **fünf** offene Punkte.
 >
 > **Rolle:** Backlog **und** Fortschritt — die einzige „was kommt / was ist erledigt"-Quelle.
 > Erledigtes wird abgehakt (nicht gelöscht, solange es Kontext trägt), Neues kommt rein.
@@ -169,7 +170,8 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
   gehört in ein ADR, nicht in einen `fix`-PR. Der Pin `mcp<2` hält das Fenster offen, löst es
   nicht auf.
 
-- [ ] 🟢 **Release-Build übergeht `build<2`** (Nebenbefund aus #25, eingetragen 2026-11-03 mit #26).
+- [x] 🟢 **Release-Build übergeht `build<2`** — **erledigt 2026-11-03 mit #27** (`build_command` installiert jetzt
+  `"build>=1.0.0,<2"`, kein `--upgrade`; Nachweis in `changes/2026-11-03_release-build-pin.md`). (Nebenbefund aus #25, eingetragen 2026-11-03 mit #26).
   `pyproject.toml:105` (`[tool.semantic_release] build_command`) führt
   `python -m pip install --upgrade build && python -m build` aus — das Upgrade ignoriert
   `requirements-dev.txt:8` (`build>=1.0.0,<2`). Erscheint `build` 2.x, baut der Release-Pfad damit,

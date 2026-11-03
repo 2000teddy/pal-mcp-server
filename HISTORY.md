@@ -3,6 +3,17 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-11-03 — Die Grenze, die im Release nicht galt
+
+#25 hatte `build<2` in `requirements-dev.txt` gesetzt. Das unabhängige Review fand eine Lücke: der
+Release-Build in `pyproject.toml` installierte `build` per `--upgrade` noch einmal, an der Grenze
+vorbei. Die Grenze galt also nur im Testpfad, nicht in dem Schritt, der das veröffentlichte Artefakt
+baut. #27 ersetzt das `--upgrade` durch denselben Bereich. Belegt wurde das am Release-Pfad selbst:
+`semantic-release version --patch` ohne Commit, Tag und Push in einem Wegwerf-Klon, einmal mit der
+neuen und einmal mit der alten Zeile. Ehrlich bleibt: `build` 2.x gibt es noch nicht. Heute bauen
+beide Varianten mit 1.6.1, und die Wirkung der Grenze ist nur über einen engeren Probe-Specifier
+gezeigt, nicht an einem echten 2.x.
+
 ## 2026-11-03 — Die Restfläche der Dependency-Drift: Grenzen nur mit Nachweis
 
 Nach #20 (`mcp<2`) stand der Rest der Versionsdeklarationen weiter offen — mit Absicht, weil jede

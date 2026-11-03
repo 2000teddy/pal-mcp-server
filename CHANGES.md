@@ -21,7 +21,7 @@
   Laufzeit — `requirements.txt` **und** `pyproject.toml` gleich: `google-genai<3`, `openai<4`,
   `pydantic<3`, `python-dotenv<2`. Dev — `requirements-dev.txt`: `pytest<10`, `pytest-asyncio<2`,
   `pytest-mock<4`, `black<27`, `ruff<0.18`, `isort<10`, `python-semantic-release<11`, `build<2`.
-  Bewusst offen: `importlib-resources` (Marker `<3.9`, wird nie installiert). Aufgelöste Versionen
+  Bewusst offen: `importlib-resources` (Marker `<3.9`, in keiner unterstützten Umgebung installiert). Aufgelöste Versionen
   heute unverändert; `openai` war ungepinnt bereits unbemerkt auf 3.x gesprungen. Untergrenzen
   unverändert. Siehe `changes/2026-11-03_deps-upper-bounds.md`.
 - **CLI-Modellname `agy` angeglichen** (#23; gemergt 2026-11-02, Release v9.9.2): der in `conf/cli_models.json` und

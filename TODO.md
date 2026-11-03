@@ -149,7 +149,7 @@ Details: `docs/architecture/ADR-001-cli-consensus.md`, `ADR-002-global-cli-backe
     `pytest-mock<4` (3.17.0), `black<27` (26.10.1), `ruff<0.18` (0.17.3), `isort<10` (9.0.2),
     `python-semantic-release<11` (10.7.0), `build<2` (1.6.1); black/ruff/isort-Checks grün.
   - **offen, mit Grund:** `importlib-resources` (`requirements.txt:6`) — Marker `<3.9` bei
-    `requires-python >=3.9`, wird nie installiert, kein Testlauf möglich.
+    `requires-python >=3.9`, in keiner unterstützten Umgebung installiert, kein Testlauf möglich.
   - Bleibt bestehen: der nächste Major je Paket braucht einen eigenen Test-PR (die Grenzen machen
     ihn sichtbar statt still). Untergrenzen unverändert (`openai>=1.55.2` überspannt damit drei Majors).
 

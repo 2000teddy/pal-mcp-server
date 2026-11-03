@@ -12,7 +12,7 @@ danach alle Grenzen zusammen auf der CI-Matrix 3.10–3.12 mit echtem `pip`. Erg
 prüfbaren Zeilen sind grün begrenzbar (nächstes Major über dem heute Aufgelösten; `ruff` `<0.18`,
 weil dort jede 0.x-Minor Regeln scharf schaltet; `black` `<27`, CalVer). Offen bleibt nur
 `importlib-resources`, dessen Marker (`<3.9`) bei `requires-python >=3.9` nie greift — für eine Zeile,
-die nie installiert wird, gibt es keinen Testlauf und damit keine Grenze.
+die in keiner unterstützten Umgebung installiert wird, gibt es keinen Testlauf und damit keine Grenze.
 
 Der lehrreiche Fund: **`openai` war schon unbemerkt einen Major gesprungen.** Ein ungepinnter Install
 löst heute 3.42.1 auf, die Lane-venv hatte noch 2.38.0 — genau die Mechanik, die `mcp` gebrochen

@@ -54,12 +54,11 @@ mit allen Grenzen → **971 passed, 0 failed**. Die aufgelösten Versionen sind 
 
 ## Bewusst offen
 - **`importlib-resources` (`requirements.txt:6`)**: Marker `python_version<"3.9"`, das Projekt verlangt
-  `requires-python >=3.9`, die CI-Matrix ist 3.10–3.12. Die Zeile wird nie installiert, also gibt es
-  keinen Testlauf, der eine Obergrenze belegen könnte → keine Grenze ohne Nachweis. Präzise: tot auf
-  Python ≥3.9. `requirements.txt` selbst trägt kein `requires-python` — auf 3.8 würde pip die Zeile
-  installieren, aber 3.8 ist laut `pyproject.toml` nicht unterstützt und in keiner Umgebung (CI 3.10–3.12,
-  `Dockerfile` 3.11) vorhanden. (Die Zeile ist
-  faktisch tot; ob sie entfernt wird, ist eine eigene Aufräumfrage, nicht Teil dieses PRs.)
+  `requires-python >=3.9`, die CI-Matrix ist 3.10–3.12. Die Zeile wird in **keiner unterstützten
+  Umgebung** installiert (CI 3.10–3.12, `Dockerfile` 3.11), also gibt es keinen Testlauf, der eine
+  Obergrenze belegen könnte → keine Grenze ohne Nachweis. `requirements.txt` selbst trägt kein
+  `requires-python` — auf 3.8 würde pip die Zeile installieren, aber 3.8 ist laut `pyproject.toml` nicht
+  unterstützt. Ob die Zeile entfernt wird, ist eine eigene Aufräumfrage, nicht Teil dieses PRs.
 
 ## Begründung, warum auch `openai` und `google-genai` begrenzt sind
 Die naheliegende Gegenposition („breite SDK-Familien offen lassen, eine Grenze kastet den
@@ -110,6 +109,12 @@ bei Tag v9.9.2) — präzisiert; (3) LOW COMPLIANCE-Platzhalter „Review: siehe
 `importlib-resources` „nie installiert“ nur auf ≥3.9 — präzisiert. Code-Diff vom Reviewer als korrekt
 und konservativ bestätigt; Testzahlen und Paket-Semantik vom Reviewer **nicht** selbst nachgeprüft
 (stammen aus den Läufen der Lane).
+
+Runde 2 (Gegenprüfung, gleicher Reviewer) → **APPROVE**: alle 5 Befunde korrekt behoben, kein neuer
+Fehler; Fakten zu `.pre-commit-config.yaml:5/:10/:16`, Tags, Bot-Commit und PSR-Downgrade
+(`semantic-release.yml:34/39/48`) selbst nachgeprüft. Zwei nicht blockierende LOW-Hinweise umgesetzt:
+offener Verweis „Runde 2: siehe changes/“ in COMPLIANCE durch das Ergebnis ersetzt; „wird nie
+installiert“ bei `importlib-resources` überall zu „in keiner unterstützten Umgebung“ präzisiert.
 
 ## Was dieser PR ausdrücklich NICHT tut
 Keine mcp-2.x-Migration, `mcp`-Pin unverändert, keine Untergrenzen geändert, kein Workflow-,

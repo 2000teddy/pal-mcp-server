@@ -16,6 +16,11 @@
 - **`agy` als vollwertiger clink-Client** (#4, prompt-as-arg) — AgyAgent fürs `clink`-Tool.
 
 ### Changed
+- **Release-Build installiert `build` innerhalb der Grenze** (#27): `pyproject.toml:105`
+  `build_command` von `pip install --upgrade build` auf `pip install "build>=1.0.0,<2"` umgestellt, damit
+  `requirements-dev.txt:8` auch im semantic-release-Build gilt. Release-Pfad per `semantic-release version
+  --patch --no-commit --no-tag --no-push` im Wegwerf-Klon belegt (neu und alt: Exit 0, build 1.6.1;
+  build 2.x existiert heute nicht). Siehe `changes/2026-11-03_release-build-pin.md`.
 - **Obergrenzen für die übrige Dependency-Fläche** (#25; gemergt 2026-11-03 als `ea267af`, kein Release): je Zeile mit frischer venv + Testlauf
   belegt (Suite `971 passed`, 0 failed; Kombination auf 3.10/3.11/3.12 grün, `pip check` sauber).
   Laufzeit — `requirements.txt` **und** `pyproject.toml` gleich: `google-genai<3`, `openai<4`,

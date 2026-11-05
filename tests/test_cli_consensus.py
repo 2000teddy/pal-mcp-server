@@ -4,12 +4,18 @@ import json
 
 import pytest
 
-from clink.consensus_backends import BackendResult, CliBackend
+from clink.consensus_backends import BackendResult, CliBackend, MiniMaxBackend
 from tools.cli_consensus import CliConsensusTool
 
 
 def _tool() -> CliConsensusTool:
     return CliConsensusTool()
+
+
+def _patch_run(monkeypatch, fake_run) -> None:
+    """Replace run() on both backend classes of the panel."""
+    monkeypatch.setattr(CliBackend, "run", fake_run)
+    monkeypatch.setattr(MiniMaxBackend, "run", fake_run)
 
 
 def _payload(text_content_list) -> dict:
@@ -24,7 +30,7 @@ def test_schema_exposes_prompt_and_backends():
     props = schema["properties"]
     assert "prompt" in props and "backends" in props
     enum = props["backends"]["items"]["properties"]["backend"]["enum"]
-    assert set(enum) == {"claude", "codex", "agy"}
+    assert set(enum) == {"claude", "codex", "agy", "minimax"}
 
 
 def test_blinded_prompt_varies_by_stance():
@@ -42,14 +48,19 @@ async def test_execute_runs_default_backends(monkeypatch):
     async def fake_run(self, prompt):  # noqa: ARG001
         return BackendResult(self.name, self.model, "success", content=f"verdict-{self.name}", duration_seconds=1.0)
 
-    monkeypatch.setattr(CliBackend, "run", fake_run)
+    _patch_run(monkeypatch, fake_run)
 
     payload = _payload(await _tool().execute({"prompt": "Evaluate option A vs B"}))
 
     assert payload["status"] == "consensus_complete"
-    assert payload["backends_consulted"] == 3
-    assert payload["successful"] == 3
-    assert {r["backend"] for r in payload["responses"]} == {"claude", "codex", "agy"}
+    assert payload["backends_consulted"] == 4
+    assert payload["successful"] == 4
+    assert {r["backend"]: r["model"] for r in payload["responses"]} == {
+        "claude": "opus",
+        "codex": "gpt-6.1-sol",
+        "agy": "Gemini 4 Argon (High)",
+        "minimax": "MiniMax-M3.1-Flash",
+    }
     assert all(r["verdict"].startswith("verdict-") for r in payload["responses"])
 
 
@@ -60,10 +71,10 @@ async def test_execute_partial_failure(monkeypatch):
             return BackendResult(self.name, self.model, "rate_limited", error="quota")
         return BackendResult(self.name, self.model, "success", content="ok")
 
-    monkeypatch.setattr(CliBackend, "run", fake_run)
+    _patch_run(monkeypatch, fake_run)
 
     payload = _payload(await _tool().execute({"prompt": "Q?"}))
-    assert payload["successful"] == 2
+    assert payload["successful"] == 3
     assert "agy" in payload["skipped_or_failed"]
 
 
@@ -75,7 +86,7 @@ async def test_execute_honours_custom_stance_and_model(monkeypatch):
         captured[self.name] = {"model": self.model, "prompt": prompt}
         return BackendResult(self.name, self.model, "success", content="ok")
 
-    monkeypatch.setattr(CliBackend, "run", fake_run)
+    _patch_run(monkeypatch, fake_run)
 
     await _tool().execute(
         {"prompt": "Evaluate X", "backends": [{"backend": "claude", "stance": "for", "model": "opus"}]}
@@ -120,3 +131,57 @@ async def test_execute_rejects_too_many_backends():
     tool_output = json.loads(out[0].text)
     assert tool_output["status"] == "error"
     assert "too many" in tool_output["content"].lower()
+
+
+@pytest.mark.asyncio
+async def test_minimax_without_key_is_skipped_and_reported(monkeypatch):
+    # Real MiniMaxBackend.run, no key: reported as skipped, while the CLI backends carry on.
+    async def fake_cli_run(self, prompt):  # noqa: ARG001
+        return BackendResult(self.name, self.model, "success", content="ok")
+
+    monkeypatch.setattr(CliBackend, "run", fake_cli_run)
+    monkeypatch.setattr("clink.consensus_backends.get_env", lambda _name: None)
+
+    payload = _payload(await _tool().execute({"prompt": "Q?"}))
+
+    assert payload["successful"] == 3
+    assert payload["skipped_or_failed"] == ["minimax"]
+    minimax = next(r for r in payload["responses"] if r["backend"] == "minimax")
+    assert minimax["status"] == "skipped"
+    assert "MINIMAX_API_KEY" in minimax["error"]
+    assert minimax["verdict"] is None
+
+
+@pytest.mark.asyncio
+async def test_minimax_sees_the_same_blinded_prompt_as_cli_backends(monkeypatch):
+    prompts: dict[str, str] = {}
+
+    async def fake_run(self, prompt):
+        prompts[self.name] = prompt
+        return BackendResult(self.name, self.model, "success", content=f"secret-{self.name}")
+
+    _patch_run(monkeypatch, fake_run)
+
+    await _tool().execute({"prompt": "Evaluate X"})
+
+    assert set(prompts) == {"claude", "codex", "agy", "minimax"}
+    assert len(set(prompts.values())) == 1
+    assert "secret-" not in prompts["minimax"]
+
+
+@pytest.mark.asyncio
+async def test_broken_panel_config_is_a_clear_tool_error(monkeypatch, tmp_path):
+    bad = tmp_path / "panel.json"
+    bad.write_text('{"models": {"claude": "opus"}}', encoding="utf-8")
+    monkeypatch.setenv("CLI_CONSENSUS_PANEL_CONFIG_PATH", str(bad))
+
+    tool_output = json.loads((await _tool().execute({"prompt": "Q?"}))[0].text)
+
+    assert tool_output["status"] == "error"
+    assert "panel config" in tool_output["content"]
+
+
+def test_schema_does_not_depend_on_panel_config(monkeypatch, tmp_path):
+    # A broken config must not take the tool listing (and with it the server) down.
+    monkeypatch.setenv("CLI_CONSENSUS_PANEL_CONFIG_PATH", str(tmp_path / "missing.json"))
+    assert "backends" in _tool().get_input_schema()["properties"]

@@ -53,7 +53,9 @@ Kernstücke:
    Rate-Limits → `CliRateLimitError`, **nicht** retryt; transiente Fehler → 1 Retry.
    Kill bei Timeout trifft die ganze Prozessgruppe. Timestamp-Prefix-Cleaning und
    Rate-Limit-Heuristik werden aus `clink/consensus_backends.py` **importiert** (eine Quelle).
-7. **`cli_consensus` bleibt unverändert** (eigener Partial-Failure-Vertrag); das klassische
+7. **`cli_consensus` bleibt von diesem Schalter unabhängig** (eigener Partial-Failure-Vertrag; seit
+   2026-11-05 mit MiniMax als viertem Backend, siehe Nachtrag in ADR-001). `conf/cli_models.json` und der
+   `CLIModelProvider` sind davon nicht berührt. Das klassische
    `consensus`-Tool folgt `PAL_BACKEND` und konsultiert im Subscription-Modus CLI-Backends.
 
 ## Modellkatalog (Default)

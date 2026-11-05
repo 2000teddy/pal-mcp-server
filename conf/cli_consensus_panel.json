@@ -1,0 +1,14 @@
+{
+  "_README": {
+    "description": "Default panel of the cli_consensus tool: the ONE place that names each backend's default model.",
+    "override": "Point CLI_CONSENSUS_PANEL_CONFIG_PATH at another file with the same shape.",
+    "pinned_versions": "codex, agy and minimax carry a fixed model version here and need updating when a model is retired. claude uses the CLI's floating alias 'opus'.",
+    "per_call_override": "The 'model' field of a backend spec in a cli_consensus call wins over this file for that call."
+  },
+  "models": {
+    "claude": "opus",
+    "codex": "gpt-6.1-sol",
+    "agy": "Gemini 4 Argon (High)",
+    "minimax": "MiniMax-M3.1-Flash"
+  }
+}

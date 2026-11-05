@@ -93,9 +93,8 @@ Vier-Backend-Lauf oben. Die Zwei-Peer-DoD (macOS + Linux) ist hier nicht belegt:
   (`COPY . .`), eine Wheel-Installation im Subscription-Modus schon.
 
 ## Release und Deploy
-Titel `chore:`, kein Release beim Merge. Inhaltlich ist es eine Erweiterung: Soll sie als Release erscheinen,
-muss der Titel vor dem Merge auf `feat:` wechseln, das entscheidet Christian. Die ThinkHub-Container sind nicht
-angefasst. Dort wirkt die Änderung erst mit einem Rebuild, im Container ohne die CLIs und ohne Key entsprechend
+Titel `feat:`, weil es inhaltlich eine Erweiterung ist (Christian, 05.11.2026, über den Administrator). Beim Merge
+löst das über `minor_tags` ein Minor-Release aus. Die ThinkHub-Container sind nicht angefasst. Dort wirkt die Änderung erst mit einem Rebuild, im Container ohne die CLIs und ohne Key entsprechend
 eingeschränkt. Der Deploy ist separat und braucht Christians Freigabe.
 
 ## Review

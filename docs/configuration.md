@@ -36,8 +36,11 @@ PAL_BACKEND=subscription
 In `subscription` mode the API keys below are ignored (exception:
 `MINIMAX_API_KEY`), and at least one of the CLIs `claude`/`codex`/`agy`
 must be installed and logged in — otherwise the server fails loudly at
-startup. The `cli_consensus` tool always uses subscription CLIs,
-regardless of this switch.
+startup. Regardless of this switch, the `cli_consensus` tool uses the
+subscription CLIs plus MiniMax, which it skips and reports when
+`MINIMAX_API_KEY` is not set. Its default models are configured in
+`conf/cli_consensus_panel.json` (override path via
+`CLI_CONSENSUS_PANEL_CONFIG_PATH`).
 
 ### Required Configuration
 

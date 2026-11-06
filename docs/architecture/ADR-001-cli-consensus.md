@@ -68,6 +68,30 @@ Töpfe; isolierter Blast-Radius (CLI-Bruch trifft nur `cli_consensus`, nicht cha
 4. Dienst-/Bridge-Neustart (supergateway) → mcporter exponiert pal wieder im Mesh.
 5. Smoke: ein `cli_consensus`-Lauf.
 
+## Nachtrag 2026-11-05: MiniMax als viertes Backend, Standard-Modelle an einer Stelle
+
+Punkt 3 und 5 der Entscheidung gelten erweitert. Der Standard-Rat hat jetzt vier Backends:
+
+| Backend | Standard-Modell | Weg |
+|---------|-----------------|-----|
+| `claude` | `opus` | Abo-CLI |
+| `codex` | `gpt-6.1-sol` | Abo-CLI |
+| `agy` | `Gemini 4 Argon (High)` | Abo-CLI |
+| `minimax` | `MiniMax-M3.1-Flash` | API über `providers/minimax.py`, es gibt keine CLI |
+
+- **Geblendet wie die anderen:** `minimax` bekommt denselben Prompt und sieht keine andere Antwort.
+- **Kostenregel:** MiniMax bleibt die bewusste API-Ausnahme (gedeckelt/prepaid). „Keine API-Kosten" gilt
+  damit nur noch für die drei CLI-Backends. Offene Per-Token-Provider nutzt das Tool weiterhin nicht.
+- **Ohne Key:** `status="skipped"`, Eintrag in `skipped_or_failed`, kein Ersatzmodell.
+- **Konfiguration:** Die Modelle stehen nur in `conf/cli_consensus_panel.json`, überschreibbar über
+  `CLI_CONSENSUS_PANEL_CONFIG_PATH`. Fehlt die Datei oder ist sie ungültig, meldet das Tool einen Fehler.
+  Eine eingebaute Ersatzliste gibt es bewusst nicht: Sie wäre eine zweite Stelle und würde bei kaputter
+  Konfiguration still andere Modelle befragen.
+- **Abgrenzung:** Die Hausregel „Code-Review nie über MiniMax" bleibt. Der Rat ist für Entscheidungsfragen
+  da, ein MiniMax-Votum ersetzt kein Review über claude/codex/agy.
+
+Beleg: `changes/2026-11-05_cli-consensus-minimax-panel.md`.
+
 ## Referenzen
 - Architektur-Konsens (PoC, 3 Modelle, 2026-06-17): einstimmig Option 1.5.
 - Verwandte Module: `tools/consensus.py`, `clink/` (Runner/Parser), `providers/registry.py`.

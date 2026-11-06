@@ -3,6 +3,14 @@
 > Chronologischer Fließtext-Verlauf der Fork-Arbeit, **neuestes oben**. Kontext für Agenten.
 > Upstream-Changelog: `CHANGELOG.md` (auto, semantic-release). Fork-Changelog: `CHANGES.md`.
 
+## 2026-11-05 — Der Rat bekommt eine vierte Stimme
+
+MiniMax war bisher nur als Provider da, nicht im Rat. #29 ändert das: `cli_consensus` fragt jetzt vier Modelle,
+und ihre Namen stehen in einer einzigen Datei. MiniMax hat keine CLI und läuft über die API, deshalb stimmte der
+Satz „keine API-Kosten“ im Tool nicht mehr und wurde korrigiert. Die Specs von `MiniMax-M3.1-Flash` stammen aus Doku
+und Messung, das Output-Limit etwa aus der Fehlermeldung der API bei 524.289 Tokens. Beim Prüfen fiel auf, dass
+der Reviewer-Guard aus #2 im Code gar nicht mehr existiert; das ist notiert, aber nicht Teil dieses PR.
+
 ## 2026-11-03 — Die Grenze, die im Release nicht galt
 
 #25 hatte `build<2` in `requirements-dev.txt` gesetzt. Das unabhängige Review fand eine Lücke: der

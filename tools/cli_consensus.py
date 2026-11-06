@@ -1,8 +1,9 @@
-"""cli_consensus tool — blinded multi-model consensus over subscription CLIs.
+"""cli_consensus tool — blinded multi-model consensus over subscription CLIs plus MiniMax.
 
-Like the built-in ``consensus`` tool, but each "model" is a local CLI authenticated
-via an existing subscription (Claude Max / ChatGPT / Google One) instead of a paid
-API key — so it incurs no provider API cost. Backends run in parallel (one-shot),
+Like the built-in ``consensus`` tool, but three "models" are local CLIs authenticated
+via an existing subscription (Claude Max / ChatGPT / Google One). The fourth, MiniMax,
+has no CLI and runs over its capped/prepaid API; without a key it is skipped and
+reported. Open per-token providers are never used. Backends run in parallel (one-shot),
 **blinded** (each sees only the question plus its stance, never the others'
 answers), and the calling agent synthesises the final recommendation.
 
@@ -20,7 +21,12 @@ from typing import Any
 from mcp.types import TextContent
 from pydantic import BaseModel, Field
 
-from clink.consensus_backends import BackendResult, CliBackend, default_backends
+from clink.consensus_backends import (
+    PANEL_BACKEND_NAMES,
+    BackendResult,
+    ConsensusBackend,
+    default_backends,
+)
 from config import TEMPERATURE_ANALYTICAL
 from tools.consensus import ConsensusTool
 from tools.models import ToolModelCategory, ToolOutput
@@ -38,12 +44,12 @@ class CliConsensusRequest(BaseModel):
     prompt: str = Field(..., description="Exact proposal/question every backend sees (blinded).")
     backends: list[dict] | None = Field(
         default=None,
-        description="Optional [{backend, stance, model, stance_prompt}]. Default: claude+codex+agy, neutral.",
+        description="Optional [{backend, stance, model, stance_prompt}]. Default: claude+codex+agy+minimax, neutral.",
     )
 
 
 class CliConsensusTool(SimpleTool):
-    """Blinded multi-model consensus over subscription CLIs (claude / codex / agy)."""
+    """Blinded multi-model consensus over subscription CLIs (claude / codex / agy) plus MiniMax."""
 
     def __init__(self) -> None:
         # Reuse the consensus tool's stance-enhanced system prompts (for/against/neutral).
@@ -55,9 +61,10 @@ class CliConsensusTool(SimpleTool):
 
     def get_description(self) -> str:
         return (
-            "Multi-model consensus over local subscription CLIs (claude/codex/agy) instead of paid "
-            "provider APIs — no API cost. Each backend answers the same question blinded, with an "
-            "optional stance (for/against/neutral). Returns each verdict; you synthesise the consensus. "
+            "Multi-model consensus over local subscription CLIs (claude/codex/agy) plus MiniMax "
+            "(capped/prepaid API, skipped and reported when no key is set). Each backend answers the "
+            "same question blinded, with an optional stance (for/against/neutral). Returns each "
+            "verdict; you synthesise the consensus. "
             "Use for architecture choices, design trade-offs, and proposal evaluation."
         )
 
@@ -83,7 +90,7 @@ class CliConsensusTool(SimpleTool):
         return {}
 
     def get_input_schema(self) -> dict[str, Any]:
-        available = sorted(b.name for b in default_backends())
+        available = sorted(PANEL_BACKEND_NAMES)
         return {
             "type": "object",
             "properties": {
@@ -104,7 +111,7 @@ class CliConsensusTool(SimpleTool):
                         "required": ["backend"],
                         "additionalProperties": False,
                     },
-                    "description": f"Backends to consult (available: {', '.join(available)}). Default: all three, neutral.",
+                    "description": f"Backends to consult (available: {', '.join(available)}). Default: all four, neutral.",
                 },
             },
             "required": ["prompt"],
@@ -129,13 +136,16 @@ class CliConsensusTool(SimpleTool):
         except Exception as exc:  # noqa: BLE001 - surface validation errors as tool errors
             return self._error(f"Invalid arguments: {exc}")
 
-        defaults = {b.name: b for b in default_backends()}
+        try:
+            defaults = {b.name: b for b in default_backends()}
+        except ValueError as exc:
+            return self._error(str(exc))
         specs = request.backends or [{"backend": name, "stance": "neutral"} for name in defaults]
 
         if len(specs) > _MAX_BACKENDS:
             return self._error(f"Too many backends ({len(specs)}); maximum is {_MAX_BACKENDS}.")
 
-        jobs: list[tuple[str, CliBackend, str]] = []
+        jobs: list[tuple[str, ConsensusBackend, str]] = []
         seen: set[tuple[str, str]] = set()
         for spec in specs:
             name = (spec.get("backend") or "").strip()
@@ -193,7 +203,10 @@ class CliConsensusTool(SimpleTool):
                 "DISAGREEMENT and why, (3) your consolidated recommendation, (4) key risks. "
                 "Explicitly note any backend that was skipped, errored, or rate-limited."
             ),
-            "note": "Ran over subscription CLIs (claude/codex/agy) — no provider API cost.",
+            "note": (
+                "claude/codex/agy ran over subscription CLIs. minimax, when consulted, ran over its "
+                "capped/prepaid API. No open per-token provider was used."
+            ),
         }
 
         tool_output = ToolOutput(

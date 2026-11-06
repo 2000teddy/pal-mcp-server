@@ -33,6 +33,8 @@ py-modules = ["server", "config"]
     "conf/gemini_models.json",
     "conf/xai_models.json",
     "conf/dial_models.json",
+    "conf/minimax_models.json",
+    "conf/cli_consensus_panel.json",
 ]
 
 [project.scripts]

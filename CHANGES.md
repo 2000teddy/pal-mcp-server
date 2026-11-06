@@ -6,6 +6,11 @@
 ## [Unreleased]
 
 ### Added
+- **PAL-Rat aktualisiert** (#29): `cli_consensus` hat MiniMax als viertes Backend (geblendet, über den
+  vorhandenen Provider; ohne Key `skipped` und gemeldet, kein Ersatzmodell). Standard-Rat claude=`opus`,
+  codex=`gpt-6.1-sol`, agy=`Gemini 4 Argon (High)`, minimax=`MiniMax-M3.1-Flash`, konfiguriert nur in
+  `conf/cli_consensus_panel.json`. Bestehende MiniMax-Aliase unverändert. Echter Lauf mit allen vier Backends
+  belegt. Siehe `changes/2026-11-05_cli-consensus-minimax-panel.md`.
 - **`PAL_BACKEND` globaler Backend-Schalter** (ADR-002, #1): alle modellrufenden Tools laufen
   standardmäßig über den neuen `CLIModelProvider` (Abo-CLIs claude/codex/agy); `api` bleibt als
   Notfall-Rückfall. Offene Per-Token-Provider werden im Subscription-Modus nicht registriert

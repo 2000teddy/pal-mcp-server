@@ -30,6 +30,28 @@
       "allow_code_generation": true
     },
     {
+      "model_name": "MiniMax-M3.1-Flash",
+      "friendly_name": "MiniMax (M3.1 Flash)",
+      "aliases": [
+        "minimax-m3.1-flash",
+        "m3.1-flash",
+        "minimax3.1-flash"
+      ],
+      "intelligence_score": 18,
+      "description": "MiniMax-M3.1-Flash (1M context, 524K output) - Frontier multimodal coding model with tunable thinking depth (GET /v1/models: created 2026-09-16). Thinking cannot be disabled and counts toward the output limit; temperature has no effect. Measured 2026-11-05, see changes/2026-11-05_cli-consensus-minimax-panel.md.",
+      "context_window": 1000000,
+      "max_output_tokens": 524288,
+      "supports_extended_thinking": true,
+      "supports_system_prompts": true,
+      "supports_streaming": true,
+      "supports_function_calling": true,
+      "supports_json_mode": false,
+      "supports_images": true,
+      "supports_temperature": false,
+      "max_image_size_mb": 10.0,
+      "allow_code_generation": true
+    },
+    {
       "model_name": "MiniMax-M2.7",
       "friendly_name": "MiniMax (M2.7)",
       "aliases": [
